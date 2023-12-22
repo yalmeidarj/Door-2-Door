@@ -146,7 +146,7 @@ export const getShifts = async () => {
   }
 };
 
-export const getShift = async (id: number) => {
+export const getShift = async (id: string) => {
   try {
     const shift = await db.shiftLogger.findUnique({
       where: {id: id}
