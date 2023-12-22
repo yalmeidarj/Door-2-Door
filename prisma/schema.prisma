@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model House {
+  id            Int      @id @default(autoincrement())
+  streetNumber  String
+  lastName      String?
+  name          String?
+  type          String?
+  streetId      Int
+  locationId    Int
+  lastUpdated   DateTime @default(now())
+  lastUpdatedBy String?
+  statusAttempt String?
+  consent       String?
+  email         String?
+  externalNotes String?
+  internalNotes String?
+  phone         String?
+  Location      Location @relation(fields: [locationId], references: [id])
+  Street        Street   @relation(fields: [streetId], references: [id])
+}
+
+model Location {
+  id             Int           @id @default(autoincrement())
+  name           String
+  neighborhood   String        @default("to be verified")
+  priorityStatus Int           @default(1)
+  House          House[]
+  ShiftLogger    ShiftLogger[]
+  Street         Street[]
+
+  @@unique([name, id])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ShiftLogger {
+  id                 String       @id @default(cuid())
+  agentId            String 
+  locationId         Int
+  startingDate       DateTime  @default(now())
+  finishedDate       DateTime? @default(now())
+  isFinished         Boolean   @default(false)
+  updatedHouses      Int?
+  updatedHousesFinal Int?
+  pace               Int?
+  paceFinal          Int?
+  User               User      @relation(fields: [agentId], references: [id])
+  Location           Location  @relation(fields: [locationId], references: [id])
+
+  @@unique([id, locationId])
+}
+
+model Street {
+  id            Int       @id @default(autoincrement())
+  name          String
+  locationId    Int
+  lastVisited   DateTime? @default(now())
+  lastVisitedby String?
+  House         House[]
+  Location      Location  @relation(fields: [locationId], references: [id])
+}
+
+model User {
+  id            String        @id @default(cuid())
+  name          String?
+  email         String?       @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime?
+  currentShiftId  String?
+  role          Role          @default(USER)
+  isClockedIn   ClockIn       @default(FALSE)
+  Account       Account[]
+  Session       Session[]
+  ShiftLogger   ShiftLogger[]
+
+  @@unique([id, isClockedIn])
+
+}
+
+enum ClockIn {
+  TRUE
+  FALSE
+}
+
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
