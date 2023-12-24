@@ -102,7 +102,7 @@ model User {
   updatedAt     DateTime?
   currentShiftId  String?
   role          Role          @default(USER)
-  isClockedIn   ClockIn       @default(FALSE)
+  isClockedIn   Boolean       @default(false)
   Account       Account[]
   Session       Session[]
   ShiftLogger   ShiftLogger[]
@@ -111,10 +111,6 @@ model User {
 
 }
 
-enum ClockIn {
-  TRUE
-  FALSE
-}
 
 
 model VerificationToken {

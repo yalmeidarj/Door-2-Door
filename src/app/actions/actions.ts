@@ -77,64 +77,99 @@ export const ClockOut = async (formData: FormData) => {
   }
 };
 
-export const  ClockIn = async (formData: FormData) => {
+type ClockInFormData = {
+  id: string;
+  agentId: string;
+  locationId: number;
+};
 
-  const datas =  formData as object as shiftData;
-  const userId = formData.get("agentId") as string;
-  console.log(`Cuurent userId: ${userId}`);
-  const locationId = formData.get("locationId") as unknown as number;
+export const ClockIn = async (formData: FormData) => {
+  const data: ClockInFormData = {
+    id: formData.get("id") as string,
+    agentId: formData.get("agentId") as string,
+    locationId: parseInt(formData.get("locationId") as string),
+  };
 
-
-  if (!userId || !locationId ) throw new Error("No id found in form data");
-
-
+  if (!data.agentId || isNaN(data.locationId)) {
+    throw new Error("Invalid form data");
+  }
 
   try {
     const newShift = await db.shiftLogger.create({
       data: {
-        // startingDate: new Date(),
-        // isFinished: false,
-        // updatedHouses: 0,
-        // updatedHousesFinal: 0,
-        // pace: 0,
-        // paceFinal: 0,
-        // agentId: datas.agentId ?? "ff",
-        // locationId: datas.locationId ?? 1,
-
         User: {
-          connect: { id: userId as string},
+          connect: { id: data.agentId },
         },
         Location: {
-          connect: { id: Number(locationId) },
+          connect: { id: data.locationId },
         },
-
-        // Set other fields as necessary
       },
     });
+
+    await db.user.update({
+      where: { id: data.agentId },
+      data: { isClockedIn: true },
+    });
+
     revalidatePath(`/`);
-    return { success: "Successfully Clocked in" };
+    return { status: "success", message: "Successfully clocked in" };
   } catch (error) {
     console.error(error);
-    return { error: "Error clocking in" };
+    return { status: "error", message: "Error clocking in" };
   }
-}
+};
 
-// export const ClockOut = async ({data}: ShiftProps) => {
+// export const  ClockIn = async (formData: FormData) => {
+
+//   const datas =  formData as object as shiftData;
+//   const userId = formData.get("agentId") as string;
+//   console.log(`Cuurent userId: ${userId}`);
+//   const locationId = formData.get("locationId") as unknown as number;
+
+
+//   if (!userId || !locationId ) throw new Error("No id found in form data");
+
+
+
 //   try {
+//     const newShift = await db.shiftLogger.create({
+//       data: {
+//         // startingDate: new Date(),
+//         // isFinished: false,
+//         // updatedHouses: 0,
+//         // updatedHousesFinal: 0,
+//         // pace: 0,
+//         // paceFinal: 0,
+//         // agentId: datas.agentId ?? "ff",
+//         // locationId: datas.locationId ?? 1,
 
-//     const shift = await db.shiftLogger.update({
-//       where: {id: data.id},
-//       data: data
+//         User: {
+//           connect: { id: userId as string},
+//         },
+//         Location: {
+//           connect: { id: Number(locationId) },
+//         },
+
+//         // Set other fields as necessary
+//       },
 //     });
 
+    
+//   const userClockIn = await db.user.update({
+//     where: { id: userId },
+//     data: { isClockedIn: true },
+//   });
 
-//     return { success: "Successfully Clocked out" };
-//   }
-//   catch (error) {
+
+//     revalidatePath(`/`);
+//     return { success: "Successfully Clocked in" };
+//   } catch (error) {
 //     console.error(error);
-//     return { error: "Error clocking out" };
+//     return { error: "Error clocking in" };
 //   }
 // }
+
+
 
 export const getShifts = async () => {
   try {

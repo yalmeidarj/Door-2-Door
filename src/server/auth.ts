@@ -43,9 +43,6 @@ export const authOptions: NextAuthOptions = {
       ...session,
       user: {
         ...session.user,
-        isClockedIn: session.user.isClockedIn,
-
-        // id: user.id,
         id: token.sub,
         // userId: ,
       },

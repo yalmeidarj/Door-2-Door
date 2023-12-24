@@ -7,7 +7,7 @@ export default withAuth(
 
     // Check if the user is not an ADMIN
     if (req.nextauth.token?.role !== "ADMIN") {
-      // Redirect to '/' if not ADMIN
+      // Redirect to '/forbiddenUser' if not ADMIN
       return NextResponse.redirect("http://localhost:3000/forbiddenUser");
     }
 
