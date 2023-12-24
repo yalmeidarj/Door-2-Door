@@ -72,10 +72,10 @@ model ShiftLogger {
   startingDate       DateTime  @default(now())
   finishedDate       DateTime? @default(now())
   isFinished         Boolean   @default(false)
-  updatedHouses      Int?
-  updatedHousesFinal Int?
-  pace               Int?
-  paceFinal          Int?
+  updatedHouses      Int? @default(0)
+  updatedHousesFinal Int? @default(0)
+  pace               Int? @default(0)
+  paceFinal          Int? @default(0)
   User               User      @relation(fields: [agentId], references: [id])
   Location           Location  @relation(fields: [locationId], references: [id])
 

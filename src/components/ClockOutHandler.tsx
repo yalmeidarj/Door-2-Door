@@ -11,7 +11,7 @@ export default function ClockOutHandler({ props }: ClockInProps) {
 
     async function clientAction(formData: FormData) {
             
-            console.log(`clientAction: ${formData.getAll('id')}`);
+            console.log(`clientAction: ${formData.get('id')}`);
             const result = await ClockOut(formData);
             if (result?.error) {
                 toast.error(`${result.error?.toLocaleUpperCase()} `);

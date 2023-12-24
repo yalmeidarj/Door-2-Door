@@ -15,36 +15,91 @@ export const updateProperty = async (formData: FormData) => {
     }),
   );
 
-  // const updatedData = {
-  //   // id: Number(formData.get("id")),
-  //   lastName: formData.get("lastName") ?? "",
-  //   name: formData.get("name") ?? "",
-  //   notes: formData.get("notes") ?? "",
-  //   phoneOrEmail: formData.get("phoneOrEmail") ?? "",
-  //   type: formData.get("type") ?? "",
-  //   statusAttempt: formData.get("statusAttempt") ?? "",
-  //   consent: formData.get("statusAttempt") ?? "",
-  //   lastUpdated: new Date(),
-  //   lastUpdatedBy: formData.get("lastUpdatedBy"),
-  // };
-
   const id = Number(formData.get("id"));
   if (!id) throw new Error("No id found in form data");
 
   try {
     const updatedHouse = await db.house.update({
       where: { id: id },
-      data: updatedData as object,
-    });
-    revalidatePath(`/`);
-    return { success: "Property updated" };
+      data: {...updatedData},
 
+    });
+
+
+    revalidatePath(`/`);
+
+    console.log(updatedHouse);
+    return { status: "success", message: "Property updated" };
     // return updatedHouse;
   } catch (error) {
     console.error(error);
-    return { error: "Error updating property" };
+    return { status: "error", message: "Error updating property" };
   }
 };
+
+type UpdatePropertyFormData = {
+  id: number;
+  lastName: string;
+  name: string;
+  internalNotes: string;
+  externalNotes: string;
+  email: string;
+  phone: string;
+  type: string;
+  statusAttempt: string;
+  consent: string;
+  lastUpdatedBy: string;
+  // shiftLoggerId: string; // Added field for ShiftLogger id
+};
+
+// export const updateProperty = async (formData: FormData) => {
+//   const data: UpdatePropertyFormData = {
+//     id: parseInt(formData.get("id") as string),
+//     lastName: formData.get("lastName") as string,
+//     name: formData.get("name") as string,
+//     internalNotes: formData.get("internalNotes") as string,
+//     externalNotes: formData.get("externalNotes") as string,
+//     email: formData.get("email") as string,
+//     phone: formData.get("phone") as string,
+//     type: formData.get("type") as string,
+//     statusAttempt: formData.get("statusAttempt") as string,
+//     consent: formData.get("consent") as string,
+//     lastUpdatedBy: formData.get("lastUpdatedBy") as string,
+//     // shiftLoggerId: formData.get("shiftLoggerId") as string,
+
+//   };
+
+    
+
+
+//   if (isNaN(data.id)) {
+//     throw new Error("Invalid property ID");
+//   }
+
+//   const updatedData = {
+//     ...data,
+//     lastUpdated: new Date(),
+//   };
+
+//   try {
+//     await db.house.update({
+//       where: { id: data.id },
+//       data: updatedData,
+//     });
+
+//     // await db.shiftLogger.update({
+//     //   where: { id: data.id as unknown as string },
+//     //   data: { updatedHouses: { increment: 1 } },
+//     // });
+
+//     revalidatePath(`/`);
+//     return { status: "success", message: "Property updated" };
+//   } catch (error) {
+//     console.error(error);
+//     return { status: "error", message: "Error updating property" };
+//   }
+// };
+
 
 type shiftData = {
   id: number;
@@ -62,6 +117,8 @@ type shiftData = {
 
 export const ClockOut = async (formData: FormData) => {
   const shiftId = formData.get("id") as string;
+
+  console.log(`Cuurent shiftId: ${shiftId}`);
   const data = formData as object;
   try {
     const shift = await db.shiftLogger.update({
@@ -70,7 +127,7 @@ export const ClockOut = async (formData: FormData) => {
       data: {isFinished: true},
     });
     revalidatePath(`/`);
-    return { success: "Successfully Clocked out" };
+    return { success: "Successfully Clocked out", shift: shift };
   } catch (error) {
     console.error(error);
     return { error: "Error clocking out" };
@@ -112,6 +169,7 @@ export const ClockIn = async (formData: FormData) => {
     });
 
     revalidatePath(`/`);
+    
     return { status: "success", message: "Successfully clocked in" };
   } catch (error) {
     console.error(error);
@@ -230,8 +288,24 @@ export const getShiftByLocationId = async (locationId: number) => {
   }
 };
 
+export const isAgentClockedIn = async (agentId: string) => {
+  try {
+    const shift = await db.shiftLogger.findFirst({
+      where: {agentId: agentId, isFinished: false}
+    });
+    if (shift) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting shift" };
+  }
+}
+
 // get shift by agentId and not finished
-export const getShiftByAgentId = async (agentId: string) => {
+export const getActiveShiftByAgentId = async (agentId: string) => {
   try {
     const shift = await db.shiftLogger.findFirst({
       where: { agentId: agentId, isFinished: false },
@@ -248,10 +322,54 @@ export const getShiftByAgentId = async (agentId: string) => {
         paceFinal: true,
       },
     });
-    return shift;
+    return { status: "success", message: "Property updated", shift: shift };
   } catch (error) {
     console.error(error);
-    return { error: "Error getting shift" };
+    return { status: "error", message: "Error updating property" };
+  }
+};
+
+type UpdateShiftFormData = {
+  id: string;
+  agentId: string;
+  locationId: number;
+  startingDate: Date;
+  finishedDate: Date;
+  isFinished: boolean;
+  updatedHouses: number;
+  updatedHousesFinal: number;
+  pace: number;
+  paceFinal: number;
+};
+
+export const updateActiveShiftByShiftId = async (shiftId: string, statusAttempt: string) => {
+
+  if (statusAttempt === "Consent Final Yes" || statusAttempt === "Consent Final No") {
+    try {
+      const updatedShift = await db.shiftLogger.update({
+        where: { id: shiftId },
+        data: { updatedHouses: { increment: 1 } },
+      });
+
+      revalidatePath(`/`);
+      return { status: "success", message: "Shift updated", shift: updatedShift };
+    } catch (error) {
+      console.error(error);
+      return { status: "error", message: "Error updating shift" }; // Ensure a return statement here
+    }
+  } else {
+    try {
+      const updatedShift = await db.shiftLogger.update({
+        where: { id: shiftId },
+        data: { updatedHousesFinal: { increment: 1 } },
+      });
+
+      revalidatePath(`/`);
+      return { status: "success", message: "Shift updated", shift: updatedShift };
+    } catch (error) {
+      console.error(error);
+      return { status: "error", message: "Error updating shift" }; // Ensure a return statement here
+    }
   }
 };
 

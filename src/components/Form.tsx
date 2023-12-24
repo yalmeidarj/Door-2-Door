@@ -1,10 +1,11 @@
 "use client";
 import { db } from "@/server/db";
-import { revalidatePath } from "next/cache";
-import { updateProperty } from "../app/actions/actions";
+
+import { getActiveShiftByAgentId, updateActiveShiftByShiftId, updateProperty } from "../app/actions/actions";
 import toast, { Toaster } from "react-hot-toast";
-import { useRef } from "react";
+import {  useRef } from "react";
 import SubmitFormButton from "./SubmitFormButton";
+import { useSession } from "next-auth/react";
 // import { useFormStatus } from "react-dom";
 
 export default function Form({ houseId }: { houseId: number }) {
@@ -24,14 +25,53 @@ export default function Form({ houseId }: { houseId: number }) {
         'Home Does Not Exist'
     ];
 
+    const session = useSession();
+
+    if (!session || !session.data ) {
+        return <div>loading...</div>
+    }
+
+    const agentId = session.data.user.id
+
+
+    
 
     async function clientAction(formData: FormData) {
         const result = await updateProperty(formData);
-        if (result?.error) {
-            toast.error(`${result.error?.toLocaleUpperCase()} `);
+
+        const currentShift = await getActiveShiftByAgentId(agentId);
+
+        const statusAttempt = formData.get("statusAttempt");
+
+        
+
+        // Make sure currentShift is not null before proceeding
+        if (currentShift.status === "error" || !currentShift.shift) {
+            console.error("No current shift found.");
+            return;
         }
-        else {
-            toast.success(`${result.success?.toLocaleUpperCase()} `);
+
+        if (result.status === "success") {
+            toast.success(result.message);
+
+            const shiftId =  currentShift.shift.id;
+
+            if (statusAttempt === null) {
+                toast.error("No status attempt selected.");
+                return;
+            } else {
+                
+                const shiftUpdate = await updateActiveShiftByShiftId(shiftId, statusAttempt as string);
+            
+                if (shiftUpdate.status === "success") {
+                    toast.success(shiftUpdate.message);
+                }
+                else {
+                    toast.error(shiftUpdate.message);
+                }
+            }
+        } else {
+            toast.error(result.message);
         }
     }
 

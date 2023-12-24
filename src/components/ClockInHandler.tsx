@@ -15,11 +15,10 @@ export default function ClockInHandler({ agentId, locations }: ClockInProps) {
 
         console.log(`clientAction: ${formData.getAll('id')}`);
         const result = await ClockIn(formData );
-        if (result?.error) {
-            toast.error(`${result.error?.toLocaleUpperCase()} `);
-        }
-        else {
-            toast.success(`${result.success?.toLocaleUpperCase()} `);
+        if (result.status === "success") {
+            toast.success(result.message);
+        } else {
+            toast.error(result.message);
         }
     }
 

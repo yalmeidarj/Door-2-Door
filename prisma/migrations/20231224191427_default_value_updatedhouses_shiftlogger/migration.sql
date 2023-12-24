@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "ShiftLogger" ALTER COLUMN "updatedHouses" SET DEFAULT 0,
+ALTER COLUMN "updatedHousesFinal" SET DEFAULT 0,
+ALTER COLUMN "pace" SET DEFAULT 0,
+ALTER COLUMN "paceFinal" SET DEFAULT 0;

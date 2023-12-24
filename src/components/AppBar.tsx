@@ -14,7 +14,7 @@ import {
     NavigationMenuTrigger,
     navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-import { getShiftByAgentId } from "@/app/actions/actions"
+import { getActiveShiftByAgentId } from "@/app/actions/actions"
 import UserMenu from "./UserMenu"
 import ListItem from "./ListItem"
 

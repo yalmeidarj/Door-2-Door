@@ -1,6 +1,13 @@
 // "use client"
 
-import { AllLocations, ClockIn, getLocations, getShiftByAgentId } from "@/app/actions/actions";
+import {
+    AllLocations,
+    ClockIn,
+    getLocations,
+    getActiveShiftByAgentId,
+    isAgentClockedIn
+} from "@/app/actions/actions";
+
 import ClockInHandler from "./ClockInHandler";
 import ClockOutHandler from "./ClockOutHandler";
 import { db } from "@/server/db";
@@ -33,31 +40,21 @@ export default async function ShiftManager() {
         return <div>Error: {availableLocationsData.error}</div>;
     }
 
-    const isAgentClockedInData = await getShiftByAgentId(agentId)
+    const isAgentClockedInData = await isAgentClockedIn(agentId)
 
-    const [isAgentClockedIn, availableLocations ] = await Promise.all([isAgentClockedInData, availableLocationsData])
+    const [isClockedIn, availableLocations ] = await Promise.all([isAgentClockedInData, availableLocationsData])
 
-    if (!isAgentClockedIn || isAgentClockedIn === null) {
-        return (
-            <div className="flex flex-col items-center justify-center max-w-md self-end py-2 px-4 m-0 border-solid border-gray-300 border-x-2 border-b-2 rounded-bl-md">
-                <div className='flex flex-row items-center justify-center gap-1'>
-                    <h1 className="text-sm font-light">Clocked out
-                    </h1>
-                    <div className="bg-red-500 animate-blink rounded-full w-2 h-2"></div>
-                </div>
-                <ClockInHandler agentId={agentId} locations={availableLocations} />
-            </div>
-        )
-    } else {
-        const shiftId =  isAgentClockedIn && 'id' in isAgentClockedIn && isAgentClockedIn.id
-        const pace = isAgentClockedIn && 'pace' in isAgentClockedIn && isAgentClockedIn.pace 
-        const updateHouses = isAgentClockedIn && 'updatedHouses' in isAgentClockedIn && isAgentClockedIn.updatedHouses 
-        const updateHousesFinal = isAgentClockedIn && 'updatedHousesFinal' in isAgentClockedIn && isAgentClockedIn.updatedHousesFinal 
-        const paceFinal = isAgentClockedIn && 'paceFinal' in isAgentClockedIn && isAgentClockedIn.paceFinal
-        const startingDate = isAgentClockedIn && 'startingDate' in isAgentClockedIn && isAgentClockedIn.startingDate
+    if (isClockedIn){
+
+        const shiftId = await getActiveShiftByAgentId(agentId)
+        const pace = shiftId && 'pace' in shiftId && shiftId.pace
+        const updateHouses = shiftId && 'updatedHouses' in shiftId && shiftId.updatedHouses
+        const updateHousesFinal = shiftId && 'updatedHousesFinal' in shiftId && shiftId.updatedHousesFinal
+        const paceFinal = shiftId && 'paceFinal' in shiftId && shiftId.paceFinal
+        const startingDate = shiftId && 'startingDate' in shiftId && shiftId.startingDate
 
 
-        const updatedHouses = updateHouses  as number;
+        const updatedHouses = updateHouses as number;
         const updatedHousesFinal = updateHousesFinal as number;
         const startTime = DateTime.fromJSDate(new Date(startingDate as Date));
 
@@ -78,23 +75,38 @@ export default async function ShiftManager() {
         if (isNaN(userPace)) {
             userPace = 0;
         }
-        
-        
+
+        if (!shiftId || !shiftId.shift) {
+            return <div>loading...</div>
+        }
+
         return (
             // {updateHouses}
             <>
                 {/* {`Pace: ${userPace} = ${shiftDurationAdjusted} /${updatedHousesFinal}`} */}
+                {shiftId.shift?.id as string}
+                <ClockOutCard
 
-            <ClockOutCard
-                
                     paceFinal={userPace as number}
-                formattedStartTime={formattedStartTime}
-                shiftDurationInMinutes={shiftDurationInMinutes as number}
-                shiftId={shiftId.toString()}
-            />
+                    formattedStartTime={formattedStartTime}
+                    shiftDurationInMinutes={shiftDurationInMinutes as number}
+                    shiftId={shiftId.shift?.id as string}
+                />
             </>
-            
+
         )
+    } else {
+        return (
+            <div className="flex flex-col items-center justify-center max-w-md self-end py-2 px-4 m-0 border-solid border-gray-300 border-x-2 border-b-2 rounded-bl-md">
+                <div className='flex flex-row items-center justify-center gap-1'>
+                    <h1 className="text-sm font-light">Clocked out
+                    </h1>
+                    <div className="bg-red-500 animate-blink rounded-full w-2 h-2"></div>
+                </div>
+                <ClockInHandler agentId={agentId} locations={availableLocations} />
+            </div>
+        )
+
     }
 }
 
