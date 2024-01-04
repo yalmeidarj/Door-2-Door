@@ -459,9 +459,11 @@ export const getLocationsStats = async (locationId: number) => {
     // Percentage of houses visited
     const percentageHousesVisited =
       Math.ceil((totalHousesVisited / totalHouses) * 100);
+    
+    const name = location?.name ?? "" ;
 
     const data = {
-      name: location?.name,
+      name: name,
       totalHouses: totalHouses,
       totalHousesWithConsent: totalHousesWithConsent,
       totalHousesWithConsentYes: totalHousesWithConsentYes,
@@ -471,7 +473,6 @@ export const getLocationsStats = async (locationId: number) => {
       percentageHousesWithConsentYes: percentageHousesWithConsentYes,
       percentageHousesWithConsentNo: percentageHousesWithConsentNo,
       percentageHousesVisited: percentageHousesVisited,
-
     };
 
     return data;
