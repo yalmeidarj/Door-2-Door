@@ -124,7 +124,10 @@ export const ClockOut = async (formData: FormData) => {
     const shift = await db.shiftLogger.update({
       where: {id: shiftId
       },
-      data: {isFinished: true},
+      data: {
+        isFinished: true,
+        finishedDate: new Date(),
+      },
     });
     revalidatePath(`/`);
     return { success: "Successfully Clocked out", shift: shift };
@@ -177,56 +180,6 @@ export const ClockIn = async (formData: FormData) => {
   }
 };
 
-// export const  ClockIn = async (formData: FormData) => {
-
-//   const datas =  formData as object as shiftData;
-//   const userId = formData.get("agentId") as string;
-//   console.log(`Cuurent userId: ${userId}`);
-//   const locationId = formData.get("locationId") as unknown as number;
-
-
-//   if (!userId || !locationId ) throw new Error("No id found in form data");
-
-
-
-//   try {
-//     const newShift = await db.shiftLogger.create({
-//       data: {
-//         // startingDate: new Date(),
-//         // isFinished: false,
-//         // updatedHouses: 0,
-//         // updatedHousesFinal: 0,
-//         // pace: 0,
-//         // paceFinal: 0,
-//         // agentId: datas.agentId ?? "ff",
-//         // locationId: datas.locationId ?? 1,
-
-//         User: {
-//           connect: { id: userId as string},
-//         },
-//         Location: {
-//           connect: { id: Number(locationId) },
-//         },
-
-//         // Set other fields as necessary
-//       },
-//     });
-
-    
-//   const userClockIn = await db.user.update({
-//     where: { id: userId },
-//     data: { isClockedIn: true },
-//   });
-
-
-//     revalidatePath(`/`);
-//     return { success: "Successfully Clocked in" };
-//   } catch (error) {
-//     console.error(error);
-//     return { error: "Error clocking in" };
-//   }
-// }
-
 
 
 export const getShifts = async () => {
@@ -254,9 +207,32 @@ export const getShift = async (id: string) => {
 export const getShiftsByAgentId = async (agentId: string) => {
   try {
     const shifts = await db.shiftLogger.findMany({
-      where: {agentId: agentId}
+      where: { agentId: agentId },
+      select: {
+        Location: true,
+        id: true,
+        agentId: true,
+        locationId: true,
+        startingDate: true,
+        finishedDate: true,
+        isFinished: true,
+        updatedHouses: true,
+        updatedHousesFinal: true,
+        pace: true,
+        paceFinal: true,
+      }, orderBy: {
+        startingDate: "desc"
+      }
     });
-    return shifts;
+
+    const activeShifts = shifts.filter((shift) => shift.isFinished === false);
+    const finishedShifts = shifts.filter((shift) => shift.isFinished === true);
+
+    const data = {
+      activeShifts: activeShifts,
+      finishedShifts: finishedShifts,
+    };
+    return data;
   } catch (error) {
     console.error(error);
     return { error: "Error getting shifts" };
@@ -388,9 +364,130 @@ export const getShiftsByAgentIdFinished = async (agentId: string) => {
 
 
 
-export const getLocations = async () => {
+export const getLocations = async (skip: number, take: number) => {
   try {
-    const locations = await db.location.findMany();
+    const locations = await db.location.findMany({
+      skip: skip,
+      take: take,
+    });
+
+    const total = await db.location.count();
+
+    const metadata = {
+      totalRecords: total,
+      hasNextPage: skip + take < total,
+      totalPages: Math.ceil(total / take),
+    };
+
+
+    return {
+      data: locations,
+      metadata: metadata,
+    };
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting locations" };
+  }
+
+};
+
+
+export const getLocationsStats = async (locationId: number) => {
+  try {
+    // Location name
+    const location = await db.location.findUnique({
+      where: { id: locationId },
+      select: {
+        name: true,
+      },
+    });
+
+    // Total number of houses in the location
+    const totalHouses = await db.house.count({
+      where: { locationId: locationId },
+    });
+
+    // Total number of houses with consent Yes
+    const totalHousesWithConsentYes = await db.house.count({
+      where: { locationId: locationId, statusAttempt: "Consent Final Yes" },
+    });
+
+    // Total number of houses with consent No
+    const totalHousesWithConsentNo = await db.house.count({
+      where: { locationId: locationId, statusAttempt: "Consent Final No" },
+    });
+
+    // total houses visited, by statusAttempt (Door Knock Attempt 1, Door Knock Attempt 2, Door Knock Attempt 3)
+    const totalHousesVisited = await db.house.count({
+      where: {
+        locationId: locationId,
+        statusAttempt: {
+          in: [
+            "Door Knock Attempt 1",
+            "Door Knock Attempt 2",
+            "Door Knock Attempt 3",
+            "Door Knock Attempt 4",
+            "Door Knock Attempt 5",
+            "Door Knock Attempt 6",
+            "Consent Final Yes",
+            "Consent Final No",
+          ],
+        },
+      },
+    }
+    );
+
+    // Total number of houses non existent
+    const totalHousesNonExistent = await db.house.count({
+      where: { locationId: locationId, statusAttempt: "Non Existent" },
+    });
+
+    
+    // Total number of houses with consent
+    const totalHousesWithConsent =
+      totalHousesWithConsentYes + totalHousesWithConsentNo;
+
+    
+    // Percentage of houses with consent Yes
+    const percentageHousesWithConsentYes =
+      Math.ceil((totalHousesWithConsentYes / totalHouses) * 100);
+    
+    // Percentage of houses with consent No
+    const percentageHousesWithConsentNo =
+      Math.ceil((totalHousesWithConsentNo / totalHouses) * 100);
+    
+    // Percentage of houses visited
+    const percentageHousesVisited =
+      Math.ceil((totalHousesVisited / totalHouses) * 100);
+
+    const data = {
+      name: location?.name,
+      totalHouses: totalHouses,
+      totalHousesWithConsent: totalHousesWithConsent,
+      totalHousesWithConsentYes: totalHousesWithConsentYes,
+      totalHousesWithConsentNo: totalHousesWithConsentNo,
+      totalHousesVisited: totalHousesVisited,
+      totalHousesNonExistent: totalHousesNonExistent,
+      percentageHousesWithConsentYes: percentageHousesWithConsentYes,
+      percentageHousesWithConsentNo: percentageHousesWithConsentNo,
+      percentageHousesVisited: percentageHousesVisited,
+
+    };
+
+    return data;
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting locations" };
+  }
+};
+
+export const getAllLocationIds = async () => {
+  try {
+    const locations = await db.location.findMany({
+      select: {
+        id: true,
+      },
+    });
     return locations;
   } catch (error) {
     console.error(error);
@@ -412,3 +509,62 @@ export const AllLocations = async () => {
     return { error: "Error getting locations" };
   }
 };
+
+
+export const getStreetsInLocation = async (location: string | string[] | undefined, skip: number, take: number) => {
+  try {
+    const streets = await db.street.findMany({
+      where: { locationId: Number(location) },
+      skip: skip,
+      take: take,
+    });
+
+    const total = await db.street.count({ where: { locationId: Number(location) } });
+    return {
+      data: streets,
+      metadata: {
+        totalRecords: total,
+        hasNextPage: skip + take < total,
+        totalPages: Math.ceil(total / take),
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting streets" };
+  }
+};
+
+export const getHousesInStreet = async (
+  street: string | string[] | undefined,
+  skip: number,
+  take: number
+) => {
+  try {
+    // Fetch the houses on a specific street with pagination
+    const houses = await db.house.findMany({
+      where: { streetId: Number(street) },
+      skip: skip,
+      take: take,
+    });
+
+    // Count the total number of houses on the street
+    const total = await db.house.count({
+      where: { streetId: Number(street) },
+    });
+
+    return {
+      data: houses,
+      metadata: {
+        totalRecords: total,
+        hasNextPage: skip + take < total,
+        totalPages: Math.ceil(total / take),
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting houses" };
+  }
+};
+
+
+

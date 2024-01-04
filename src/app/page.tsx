@@ -1,18 +1,54 @@
 import Link from "next/link";
-import UserObject from "../components/UserObject";
 import { getLocations } from "@/app/actions/actions"
-import Form from "../components/Form";
-import { error } from "console";
+import { defaultValues } from "@/lib/utils";
+import { skip } from "node:test";
+import PaginationControls from "@/components/PaginationControls";
+import { SiteCard } from "@/components/SiteCard";
+import GoBackButton from "@/components/GoBackButton";
 
 
-export default async function HomePage() {
-  const data = await getLocations();
-  if (Array.isArray(data) && data.length > 0) {
+
+export default async function HomePage({
+  params,
+  searchParams,
+}: {
+  params: { id: string }
+  searchParams: { [id: string]: string | string[] | undefined }
+  }) {
+  
+  const { defaultPage, defaultPerPage } = defaultValues
+  const start = (Number(defaultPage) - 1) * Number(defaultPerPage)
+
+
+  const data = await getLocations(start, defaultPerPage)
+  
+  if (data.metadata === undefined) {
+    console.log(data)
+    console.log(data.metadata)
+    return <div>loading...</div>;
+  }
+
+  if (Array.isArray(data.data) && data.data.length > 0) {
+
+    const paginationControls = {
+      state: {
+        perPage: defaultPerPage,
+        currentPage: defaultPage,
+      },
+      data: 
+        data.metadata      
+    }
+    
     return (
       <div>
-        {data.map((location: location) => (
+        {/* <GoBackButton /> */}
+        <PaginationControls
+          metadata={paginationControls}
+        />
+        {data.data.map((location: location) => (
       <SiteCard key={location.id} props={location} />
-    ))}
+        ))}
+        
       </div>
     );
   } else {
@@ -33,37 +69,6 @@ export default async function HomePage() {
   }
 }
 
-type location = {
-  id: number;
-  name: string | null;
-  neighborhood: string;
-  priorityStatus: number;
-  // error: string;
-}; 
 
-type SiteCardProps = {
-  props: location;
-};  
-
-
-async function SiteCard({ props }: SiteCardProps) {
-
-  return (
-    <>
-      <h1 className="text-2xl font-bold">Locations</h1>
-      <div className="flex flex-col flex-wrap justify-center text-gray-600">
-        <div className="bg-white rounded-lg shadow-xl p-4 m-4 w-80">
-          <h2 className="text-xl font-bold">{props.name}</h2>
-          <p className="text-gray-600">{props.neighborhood}</p>
-          <p className="text-gray-600">{props.priorityStatus}</p>
-          <Link href={`/streets/${props.name}?id=${props.id}`}>
-            View
-          </Link>
-        </div>
-
-      </div>
-    </>
-  );
-}
 
 

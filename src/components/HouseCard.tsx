@@ -30,12 +30,12 @@ export default function HouseCard(house: HouseData) {
 
     return (
         <>
-            <div key={property.id} className={`min-w-md w-full bg-gray-200  shadow-lg ${getConditionalClass(
+            <div key={property.id} className={` bg-blue-200 w-full shadow-lg ${getConditionalClass(
                 property.statusAttempt ?? " ",
                 property.consent ?? " "
             )
                 }`}>
-                <div className="flex flex-row w-full justify-between border-b border-white shadow:lg py-2 mb-2">
+                <div className="flex flex-row  justify-between border-b border-white shadow:lg py-2 mb-2">
                     <div className="flex flex-col justify-center items-center p-2">
                         <h1 className="text-xl font-bold leading-tight mb-2 text-center">
                             {property.streetNumber}

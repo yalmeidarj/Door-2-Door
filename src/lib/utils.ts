@@ -41,3 +41,8 @@ export function getConditionalClass(statusAttempt: string, consent: string) {
       return "border-2 border-black text-blue-900";
   }
 }
+
+export const defaultValues = {
+  defaultPerPage: 2,
+  defaultPage: 1,
+}

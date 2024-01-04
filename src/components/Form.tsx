@@ -86,7 +86,7 @@ export default function Form({ houseId }: { houseId: number }) {
                     await clientAction(formData);
                 }
                 }
-                className="p-4 mx-auto w-full"
+                className="p-4 mx-auto w-full bg-gray-200 "
             >
 
                 <div className="mb-4">
@@ -104,7 +104,7 @@ export default function Form({ houseId }: { houseId: number }) {
                         id="externalNotes"
                         name="externalNotes"
                         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        required
+                        // required
                     // value={}
                     // value={salesForceNotes}
                     // onChange={(e) => setSalesForceNotes(e.target.value)}
@@ -222,8 +222,9 @@ export default function Form({ houseId }: { houseId: number }) {
                     // onChange={(e) => setInternalNotes(e.target.value)}
                     />
                 </div>
-
-                <SubmitFormButton title="Update property" />
+                <div className="flex items-end justify-end">
+                    <SubmitFormButton title="Update property" />
+                </div>
 
             </form>
         </>

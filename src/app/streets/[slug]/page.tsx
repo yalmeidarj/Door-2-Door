@@ -1,12 +1,8 @@
-import Form from "@/components/Form"
-import HouseCard from "@/components/HouseCard"
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/components/ui/accordion"
-import { db } from "@/server/db"
+import Link from "next/link"
+import PaginationControls from "@/components/PaginationControls"
+import { getHousesInStreet, getStreetsInLocation } from "@/app/actions/actions"
+import { defaultValues } from "@/lib/utils"
+import GoBackButton from "@/components/GoBackButton"
 
 export default async function Page({
     params,
@@ -14,50 +10,59 @@ export default async function Page({
 }: {
     params: { id: string }
     searchParams: { [id: string]: string | string[] | undefined }
-}) {
+    }) {
+    
+
+    const {defaultPage, defaultPerPage} = defaultValues
+
+
+    const page = Number(searchParams['page']) ?? defaultPage
+    const perPage = Number(searchParams['per_page']) ?? defaultPerPage
+    const start = (Number(page) - 1) * Number(perPage)
+    const end = start + Number(perPage)
 
     const streetId = searchParams.id
-    const housesInStreet = await db.house.findMany({
-        where: { locationId: Number(streetId) },
-    })
 
-    if (!housesInStreet ) {
+    const streetsInLocations = await getStreetsInLocation(streetId, start, perPage)
+
+    if (!streetsInLocations || !streetsInLocations.data) {
         return <div>loading...</div>
     }
 
+    const paginationControls = {
+        state: {
+            perPage: perPage,
+            currentPage: Number(page),
+        },
+        data:
+        streetsInLocations.metadata
+    }
+
+    
 
 
     return (
         <main className="flex flex-col items-center ">
-            <Accordion type="single" collapsible >
-                {housesInStreet.map((house) => (
-                    <div key={house.id}
-                        className={`flex justify-center max-w-sm `}
-                    >
-                        <AccordionItem  value={`${house.id}`}>
-                            <AccordionTrigger className="">
-                                <HouseCard house={house} />
-                            </AccordionTrigger>
-                            <AccordionContent>
-                                <div className='p-4 mx-auto max-w-md '>
-                                <div className=' '>
-                                
-                                    <p className="text-lg text-right"><span className="font-bold">{house.lastName ?? "No last name"}, {house.name ?? "No name"}</span></p>
-                                    <p className="text-sm text-right font-light">{house.phone ?? "No phone"} | {house.email ?? "No email"}</p>
-                                    {/* <p className="text-lg text-right"></p> */}
-                                
-                                </div>
-                                <h2 className="font-bold">SalesForce Notes: </h2>
-                                <p className="text-md font-normal">{house.externalNotes}</p>
-                                <h2 className="font-bold">Internal Notes: </h2>
-                                <p className="text-md font-thin">{house.internalNotes}</p>
-                                </div>
-                                <Form houseId={house.id} />
-                            </AccordionContent>                            
-                        </AccordionItem>
-                    </div>
-                ))}
-            </Accordion>
+            <GoBackButton />
+            <PaginationControls
+                metadata={paginationControls}
+            />
+            {streetsInLocations.data.map((street) => (
+            <div key={street.id}
+            className = {`flex justify-center`}
+                >
+                    <Link href={`/houses/${street.name}?id=${street.id}&per_page=${perPage}&page=${page}`}
+                         className="flex justify-center w-full">
+                            <div className="flex flex-col justify-center items-center p-2">
+                                <h1 className="text-xl font-bold leading-tight mb-2 text-center">
+                                    {street.name}
+                                </h1>
+                            </div>                       
+                    </Link>
+
+
+                </div>
+            ))}
         </main>
     )
 }
