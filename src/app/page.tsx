@@ -45,7 +45,7 @@ export default async function HomePage({
         <PaginationControls
           metadata={paginationControls}
         />
-        {data.data.map((location: location) => (
+        {data.data.map((location: any) => (
       <SiteCard key={location.id} props={location} />
         ))}
         
