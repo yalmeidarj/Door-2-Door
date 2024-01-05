@@ -1,6 +1,24 @@
 import { defaultValues } from "@/lib/utils";
 import { getAllLocationIds, getLocationsStats } from "../actions/actions"
 
+// Assuming this is the type of your successful response
+type LocationStats = {
+    name: string;
+    totalHouses: number;
+    totalHousesWithConsent: number;
+    totalHousesWithConsentYes: number;
+    totalHousesWithConsentNo: number;
+    totalHousesVisited: number;
+    totalHousesNonExistent: number;
+    percentageHousesWithConsentYes: number;
+    percentageHousesWithConsentNo: number;
+    percentageHousesVisited: number;
+};
+
+type ErrorResponse = {
+    error: string;
+};
+
 
 export default async function Page() {
 
@@ -13,7 +31,7 @@ export default async function Page() {
         return <div>Error: {allIds.error}</div>;
     }
 
-    const fetchStatsPromises = allIds.map(id =>
+    const fetchStatsPromises: Promise<LocationStats | ErrorResponse>[] = allIds.map(id =>
         getLocationsStats(id.id)
     );
 
@@ -32,26 +50,56 @@ export default async function Page() {
 
 
     return (
-        <div className="flex flex-col items-center p-4 bg-gray-100">
-            <h1 className="text-xl font-semibold mb-4">STATS:</h1>
-            {allStats.map((location, index) => (
-                <div key={index} className="p-4 mb-4 bg-white shadow rounded-lg">
-                    {/* <h2 className="text-lg font-semibold">{location.name}</h2> */}
-                    <p className="text-gray-600">Total Houses: {location.totalHouses}</p>
-                    <p className="text-gray-600">Houses with Consent: {location.totalHousesWithConsent}</p>
-                    <p className="text-gray-600">Consent Yes: {location.totalHousesWithConsentYes} | 
-                    <span className={`${getCardClassName(location.percentageHousesWithConsentYes)}`}>{location.percentageHousesWithConsentYes}%</span>
-                    </p>
-                    <p className="text-gray-600">Consent No: {location.totalHousesWithConsentNo} | 
-                        <span className="text-red-500">{location.percentageHousesWithConsentNo}%</span>
-                    </p>
-                    <p className="text-gray-600">Houses Visited: {location.totalHousesVisited} | 
-                        <span className={`${getCardClassName(location.percentageHousesVisited)}`}>{location.percentageHousesVisited}%</span>
-                    </p>
-                    <p className="text-gray-600">Non-existent Houses: {location.totalHousesNonExistent}</p>
-                </div>
-            ))}
-        </div>
+        // Inside your JSX
+        <>
+        {
+            allStats.map((location, index) => {
+                if ("totalHouses" in location) {
+                    return (
+                        <div key={index} className="p-4 mb-4 bg-white shadow rounded-lg">
+                            {/* JSX using location properties */}
+                                    //             {/* <h2 className="text-lg font-semibold">{location.name}</h2> */}
+                     <p className="text-gray-600">Total Houses: {location.totalHouses}</p>
+                     <p className="text-gray-600">Houses with Consent: {location.totalHousesWithConsent}</p>
+                     <p className="text-gray-600">Consent Yes: {location.totalHousesWithConsentYes} | 
+                     <span className={`${getCardClassName(location.percentageHousesWithConsentYes)}`}>{location.percentageHousesWithConsentYes}%</span>
+                     </p>
+                     <p className="text-gray-600">Consent No: {location.totalHousesWithConsentNo} | 
+                         <span className="text-red-500">{location.percentageHousesWithConsentNo}%</span>
+                     </p>
+                     <p className="text-gray-600">Houses Visited: {location.totalHousesVisited} | 
+                         <span className={`${getCardClassName(location.percentageHousesVisited)}`}>{location.percentageHousesVisited}%</span>
+                     </p>
+                     <p className="text-gray-600">Non-existent Houses: {location.totalHousesNonExistent}</p>
+                        </div>
+                    );
+                } else {
+                    // Handle error response
+                    return <div key={index}>Error: {location.error}</div>;
+                }
+            })
+        }        
+        </>
+        // <div className="flex flex-col items-center p-4 bg-gray-100">
+        //     <h1 className="text-xl font-semibold mb-4">STATS:</h1>
+        //     {allStats.map((location, index) => (
+        //         <div key={index} className="p-4 mb-4 bg-white shadow rounded-lg">
+        //             {/* <h2 className="text-lg font-semibold">{location.name}</h2> */}
+        //             <p className="text-gray-600">Total Houses: {location.totalHouses}</p>
+        //             <p className="text-gray-600">Houses with Consent: {location.totalHousesWithConsent}</p>
+        //             <p className="text-gray-600">Consent Yes: {location.totalHousesWithConsentYes} | 
+        //             <span className={`${getCardClassName(location.percentageHousesWithConsentYes)}`}>{location.percentageHousesWithConsentYes}%</span>
+        //             </p>
+        //             <p className="text-gray-600">Consent No: {location.totalHousesWithConsentNo} | 
+        //                 <span className="text-red-500">{location.percentageHousesWithConsentNo}%</span>
+        //             </p>
+        //             <p className="text-gray-600">Houses Visited: {location.totalHousesVisited} | 
+        //                 <span className={`${getCardClassName(location.percentageHousesVisited)}`}>{location.percentageHousesVisited}%</span>
+        //             </p>
+        //             <p className="text-gray-600">Non-existent Houses: {location.totalHousesNonExistent}</p>
+        //         </div>
+        //     ))}
+        // </div>
     );
 }
 
