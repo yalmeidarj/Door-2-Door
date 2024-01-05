@@ -41,7 +41,7 @@ const ProfilePage = async () => {
         );        
     }
 
-    const { activeShifts, finishedShifts } = shifts;
+    const { finishedShifts } = shifts as { finishedShifts: any[] };
 
 
 
