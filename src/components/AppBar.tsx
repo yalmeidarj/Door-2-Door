@@ -31,6 +31,12 @@ const components: { title: string; href: string; description: string }[] = [
         description:
             "View detailed info for each site",
     },
+    {
+        title: "Settings",
+        href: "/admin",
+        description:
+            "Create, update, and delete sites/ users",
+    }
 
 ]
 
@@ -38,6 +44,7 @@ export function AppBar() {
     return (
         <NavigationMenu>
             <NavigationMenuList>
+
                 <NavigationMenuItem>
                     <NavigationMenuTrigger>Operations</NavigationMenuTrigger>
                     <NavigationMenuContent>
@@ -53,7 +60,9 @@ export function AppBar() {
                         </ul>
                     </NavigationMenuContent>
                 </NavigationMenuItem>
+                
                 <UserMenu />
+
             </NavigationMenuList>
         </NavigationMenu>
     )

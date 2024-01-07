@@ -567,5 +567,64 @@ export const getHousesInStreet = async (
   }
 };
 
+interface SeedData {
+  name: string;
+  neighborhood: string;
+  priorityStatus: number;
+  houses: Array<{
+    streetNumber: string;
+    lastName: string;
+    name: string;
+    phone: string;
+    email: string;
+    notes: string;
+    statusAttempt: string;
+    consent: string;
+    type: string;
+    street: string;
+  }>;
+  streets: string[];
+}
 
+export async function seed(data: SeedData) {
+  // Create Location
+  const location = await db.location.create({
+    data: {
+      name: data.name,
+      neighborhood: data.neighborhood,
+      priorityStatus: data.priorityStatus,
+    },
+  });
+
+  // Create Streets and map their IDs
+  const streetIds = new Map<string, number>();
+  for (const streetName of data.streets) {
+    const street = await db.street.create({
+      data: {
+        name: streetName,
+        locationId: location.id,
+      },
+    });
+    streetIds.set(streetName, street.id);
+  }
+
+  // Create Houses
+  for (const house of data.houses) {
+    await db.house.create({
+      data: {
+        streetNumber: house.streetNumber,
+        lastName: house.lastName,
+        name: house.name,
+        phone: house.phone,
+        email: house.email,
+        externalNotes: house.notes,
+        statusAttempt: house.statusAttempt,
+        consent: house.consent,
+        type: house.type,
+        streetId: streetIds.get(house.street) || 0, // Assuming 0 is a valid default
+        locationId: location.id,
+      },
+    });
+  }
+}
 

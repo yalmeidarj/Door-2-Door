@@ -44,6 +44,7 @@ export const authOptions: NextAuthOptions = {
       user: {
         ...session.user,
         id: token.sub,
+        role: token.role,
         // userId: ,
       },
     }),
