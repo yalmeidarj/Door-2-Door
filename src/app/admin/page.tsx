@@ -214,15 +214,10 @@ export default function Page() {
 
     }
 
-
-
-    
-
-
     return (
         <main>
             <h1>React Server Component: Upload</h1>
-            <form action={test}>
+            <form action={upload}>
 
                 {/* Create credentials input fields */}
                 <label htmlFor="username">SALESFORCE Username:</label>
