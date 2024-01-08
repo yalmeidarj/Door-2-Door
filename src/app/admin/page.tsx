@@ -1,10 +1,7 @@
-
-
-
 import { SalesForce } from '@/lib/utils';
 import { seed } from '../actions/actions';
 import SubmitFormButton from '@/components/SubmitFormButton';
-// import puppeteerConfig from '@/lib/puppeteerConfig';
+
 
 export default function Page() {
     async function upload(data: FormData) {
