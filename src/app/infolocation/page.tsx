@@ -58,7 +58,7 @@ export default async function Page() {
                     return (
                         <div key={index} className="p-4 mb-4 bg-white shadow rounded-lg">
                             {/* JSX using location properties */}
-                                    //             {/* <h2 className="text-lg font-semibold">{location.name}</h2> */}
+                                    //             <h2 className="text-lg font-semibold">{location.name}</h2>
                      <p className="text-gray-600">Total Houses: {location.totalHouses}</p>
                      <p className="text-gray-600">Houses with Consent: {location.totalHousesWithConsent}</p>
                      <p className="text-gray-600">Consent Yes: {location.totalHousesWithConsentYes} | 
