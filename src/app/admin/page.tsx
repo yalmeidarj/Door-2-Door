@@ -58,26 +58,10 @@ export default function Page() {
         console.log(username);
         console.log(password);
         const URL = `${baseURL}/search?chosenSite=${chosenSite}&username=${username}&password=${password}`;
-        // send a get request to `${baseURL}/search?chosenSite=${chosenSite}&username=${username}&password=${password}`, expect a long time for the response
-        
-        const response: ProjectData = await new Promise((resolve, reject) => {
-            const timeoutId = setTimeout(() => {
-                // reject the promise with a timeout error
-                reject(new Error("Request timed out"));
-                // set timeout to 5 minutes.timeout is in milliseconds
-            }, 300000);
-            
 
-            fetch(URL)
-                .then((response) => {
-                    clearTimeout(timeoutId);
-                    resolve(response.json());
-                })
-                .catch((err) => {
-                    clearTimeout(timeoutId);
-                    reject(err);
-                });
-        });
+        const response: ProjectData = await fetch(URL)
+            .then((response) => response.json());
+        
 
         if (!response  ) {
             console.log('no response');
@@ -89,6 +73,7 @@ export default function Page() {
             console.log(response.data);
 
             await seed(response.data);
+                
         }
         catch (err) {
             console.log(err);
