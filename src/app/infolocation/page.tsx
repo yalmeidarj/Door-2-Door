@@ -3,6 +3,7 @@ import { getAllLocationIds, getLocationsStats } from "../actions/actions"
 
 // Assuming this is the type of your successful response
 type LocationStats = {
+    isDeleted: boolean;
     name: string;
     totalHouses: number;
     totalHousesWithConsent: number;
@@ -52,13 +53,18 @@ export default async function Page() {
     return (
         // Inside your JSX
         <>
+            <div className='flex flex-wrap flex-row gap-0 items-center '>
+            
         {
             allStats.map((location, index) => {
                 if ("totalHouses" in location) {
                     return (
-                        <div key={index} className="p-4 mb-4 bg-white shadow rounded-lg">
+                        <div key={index} className="p-4 mb-4 bg-white shadow rounded-lg text-sm">
                             {/* JSX using location properties */}
-                                    //             <h2 className="text-lg font-semibold">{location.name}</h2>
+                            {location.isDeleted ? <span className="text-red-500">Not Active</span> : null}
+
+
+                    <h2 className="text-md font-semibold">{location.name}</h2>
                      <p className="text-gray-600">Total Houses: {location.totalHouses}</p>
                      <p className="text-gray-600">Houses with Consent: {location.totalHousesWithConsent}</p>
                      <p className="text-gray-600">Consent Yes: {location.totalHousesWithConsentYes} | 
@@ -79,6 +85,7 @@ export default async function Page() {
                 }
             })
         }        
+        </div>
         </>
         // <div className="flex flex-col items-center p-4 bg-gray-100">
         //     <h1 className="text-xl font-semibold mb-4">STATS:</h1>

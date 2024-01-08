@@ -10,6 +10,11 @@ import { db } from "@/server/db"
 import PaginationControls from "@/components/PaginationControls"
 import { getHousesInStreet } from "@/app/actions/actions"
 import GoBackButton from "@/components/GoBackButton"
+import NotLoggedIn from "@/components/NotLoggedIn"
+import { getShiftsByAgentId } from "@/app/actions/actions"
+import { getServerSession } from "next-auth";
+import React from "react";
+import { authOptions } from "@/server/auth";
 
 export default async function Page({
     params,
@@ -19,6 +24,19 @@ export default async function Page({
     searchParams: { [id: string]: string | string[] | undefined }
 }) {
 
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user) {
+        return (
+            <div className="flex items-center justify-center">
+                <div className="bg-sky-700 text-slate-100 p-2 rounded shadow grid grid-cols-2 mt-9">
+                    <p>You are not logged in</p>
+                </div>
+            </div>
+        );
+    }
+
+    const shifts = await getShiftsByAgentId(session.user.id);
 
     const page = searchParams['page'] ?? 1
     const perPage = Number(searchParams['per_page']) ?? 2
@@ -41,7 +59,7 @@ export default async function Page({
         data:
             housesInStreet.metadata
     }
-
+    const { activeShifts } = shifts as { activeShifts: any[] };
     return (
         <main className="flex flex-col items-center ">
             <GoBackButton />
@@ -59,7 +77,9 @@ export default async function Page({
                             </AccordionTrigger>
                             <AccordionContent>
                                 <HouseDetails props={house} />
-                                <Form houseId={house.id} />
+                                {/* if activeShifts && activeShifts.length > 0 display form, else display <span>Please clock In</span>                                    */}
+                                {activeShifts && activeShifts.length > 0 ? <Form houseId={house.id} /> : <NotLoggedIn />}
+
                             </AccordionContent>
                         </AccordionItem>
                     </div>

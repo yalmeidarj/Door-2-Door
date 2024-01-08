@@ -102,6 +102,20 @@ export default function Page() {
 
     }
 
+    async function deleteSite(data: FormData) {
+        'use server'
+        // log the chosen site
+        const chosenSite = data.get('site');
+
+        console.log(chosenSite);
+
+
+
+
+        
+
+    }
+
     return (
         <main>
             <h1>React Server Component: Upload</h1>
@@ -137,6 +151,23 @@ export default function Page() {
 
                 <SubmitFormButton title="Initiate SF Fetching" />
             </form>
+            <form
+                action={deleteSite}
+            >
+            <label htmlFor="site">Choose a site:</label>
+            <select
+                required
+                name="site" id="site">
+                <option value="">
+
+                </option>
+                {Object.entries(SalesForce.siteOptions).map(([key, value]) => (
+                    <option key={value} value={value}>
+                        {key}
+                    </option>
+                ))}
+            </select>
+        </form>
         </main>
 )
 }

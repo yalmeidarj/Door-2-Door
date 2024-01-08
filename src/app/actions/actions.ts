@@ -367,6 +367,9 @@ export const getShiftsByAgentIdFinished = async (agentId: string) => {
 export const getLocations = async (skip: number, take: number) => {
   try {
     const locations = await db.location.findMany({
+        where: {
+    isDeleted: false
+  },
       skip: skip,
       take: take,
     });
@@ -391,6 +394,16 @@ export const getLocations = async (skip: number, take: number) => {
 
 };
 
+// Soft delete a location
+export const softDeleteLocation = async (locationId: string) => {
+  await db.location.update({
+  where: { id: Number(locationId) },
+  data: { isDeleted: true }
+  });
+  revalidatePath(`/`);
+  return { status: "success", message: "Location deleted" };
+}
+
 
 export const getLocationsStats = async (locationId: number) => {
   try {
@@ -399,6 +412,7 @@ export const getLocationsStats = async (locationId: number) => {
       where: { id: locationId },
       select: {
         name: true,
+        isDeleted: true,
       },
     });
 
@@ -460,9 +474,11 @@ export const getLocationsStats = async (locationId: number) => {
     const percentageHousesVisited =
       Math.ceil((totalHousesVisited / totalHouses) * 100);
     
-    const name = location?.name ?? "" ;
+    const name = location?.name ?? "";
+    const isDeleted = location?.isDeleted ?? false;
 
     const data = {
+      isDeleted: isDeleted,
       name: name,
       totalHouses: totalHouses,
       totalHousesWithConsent: totalHousesWithConsent,

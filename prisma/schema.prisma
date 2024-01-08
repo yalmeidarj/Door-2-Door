@@ -50,6 +50,7 @@ model Location {
   name           String
   neighborhood   String        @default("to be verified")
   priorityStatus Int           @default(1)
+  isDeleted      Boolean       @default(false)
   House          House[]
   ShiftLogger    ShiftLogger[]
   Street         Street[]
