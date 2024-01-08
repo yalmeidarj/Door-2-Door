@@ -17,14 +17,17 @@ export default async function HomePage({
   }) {
   
   const { defaultPage, defaultPerPage } = defaultValues
-  const start = (Number(defaultPage) - 1) * Number(defaultPerPage)
+  const page = Number(searchParams.page) || Number(defaultPage )
+  const perPage = Number(searchParams.per_page) || Number(defaultPerPage)
+  const start = (page - 1) * perPage
 
 
-  const data = await getLocations(start, defaultPerPage)
+  const data = await getLocations(start, perPage)
   
   if (data.metadata === undefined) {
     console.log(data)
-    console.log(data.metadata)
+    console.log(page)
+    console.log(perPage)
     return <div>loading...</div>;
   }
 

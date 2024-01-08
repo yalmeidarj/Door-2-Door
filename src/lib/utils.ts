@@ -271,4 +271,10 @@ export const SalesForce = {
     WTBYON94_3013B: "206",
     WTBYON94_3064A: "207",
   },
+
+  puppeterApi: {
+    url: "https://tdxpuppeteernodeweb.onrender.com",
+    endpoint: "/search",
+  },
 };
+

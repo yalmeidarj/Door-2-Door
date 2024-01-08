@@ -1,5 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    serverComponentsExternalPackages: ["puppeteer-core"],
+  },
+  output: {
+    filename: "my-first-webpack.bundle.js",
+  },
+  module: {
+    rules: [{ test: /\.txt$/, use: "raw-loader" }],
+  },
   images: {
     remotePatterns: [
       {
@@ -10,6 +19,7 @@ const nextConfig = {
       },
     ],
   },
+  // externals: ["chrome-aws-lambda"],
 };
 
 module.exports = nextConfig
