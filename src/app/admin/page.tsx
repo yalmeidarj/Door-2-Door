@@ -2,10 +2,43 @@ import { SalesForce } from '@/lib/utils';
 import { seed } from '../actions/actions';
 import SubmitFormButton from '@/components/SubmitFormButton';
 
+type ProjectData = {
+    success: boolean;
+    data: {
+        name: string;
+        neighborhood: string ;
+        priorityStatus: number;
+        houses: House[];
+        streets: string[];
+    };
+};
+
+type House = {
+    streetNumber: string;
+    lastName: string;
+    name: string;
+    phone: string;
+    email: string;
+    notes: string;
+    statusAttempt: string;
+    consent: string;
+    type: string;
+    street: string;
+};
 
 export default function Page() {
+    // Create a timeout promise
+    function timeout(ms: number) {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                reject(new Error("Request timed out"));
+            }, ms);
+        });
+    }
+
     async function upload(data: FormData) {
         'use server'
+        console.log('uploading, this may take a while...');
 
         const chosenSite = data.get('site') as string;
         const username = data.get('username') as string;
@@ -24,21 +57,38 @@ export default function Page() {
         console.log(chosenSite);
         console.log(username);
         console.log(password);
-        console.log(`${baseURL}/search?chosenSite=${chosenSite}&username=${username}&password=${password}`);
+        const URL = `${baseURL}/search?chosenSite=${chosenSite}&username=${username}&password=${password}`;
         // send a get request to `${baseURL}/search?chosenSite=${chosenSite}&username=${username}&password=${password}`, expect a long time for the response
-        const response = await fetch(`${baseURL}/search?chosenSite=${chosenSite}&username=${username}&password=${password}`, {
-            method: 'GET',
+        
+        const response: ProjectData = await new Promise((resolve, reject) => {
+            const timeoutId = setTimeout(() => {
+                // reject the promise with a timeout error
+                reject(new Error("Request timed out"));
+                // set timeout to 5 minutes.timeout is in milliseconds
+            }, 300000);
+            
+
+            fetch(URL)
+                .then((response) => {
+                    clearTimeout(timeoutId);
+                    resolve(response.json());
+                })
+                .catch((err) => {
+                    clearTimeout(timeoutId);
+                    reject(err);
+                });
         });
 
-        // convert the response to json
-        const json = await response.json();
-
+        if (!response  ) {
+            console.log('no response');
+            return;
+        }
 
 
         try {
-            console.log(json.data);
+            console.log(response.data);
 
-            await seed(json.data);
+            await seed(response.data);
         }
         catch (err) {
             console.log(err);

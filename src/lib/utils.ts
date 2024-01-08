@@ -43,7 +43,7 @@ export function getConditionalClass(statusAttempt: string, consent: string) {
 }
 
 export const defaultValues = {
-  defaultPerPage: 2,
+  defaultPerPage: 10,
   defaultPage: 1,
 }
 export const SalesForce = {
