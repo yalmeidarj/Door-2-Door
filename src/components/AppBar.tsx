@@ -36,6 +36,12 @@ const components: { title: string; href: string; description: string }[] = [
         href: "/admin",
         description:
             "Create, update, and delete sites/ users",
+    },
+    {
+        title: "Instructions",
+        href: "/instructions",
+        description:
+            "Instructions for using the website",
     }
 
 ]
