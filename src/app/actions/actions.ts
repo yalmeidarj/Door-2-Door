@@ -435,10 +435,13 @@ export const getLocations = async (skip: number, take: number) => {
           (house: HouseCount) => house.locationId === location.id
         )?.totalHouses || 0;
 
+      const leftToVisit =  Number(totalHouses) - Number(location._count.House);
+      console.log(leftToVisit);
       return {
         ...location,
         totalHousesVisited: location._count.House,
         totalHouses: totalHouses,
+        leftToVisit: leftToVisit,
       };
     });
 

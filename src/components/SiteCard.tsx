@@ -17,6 +17,7 @@ type location = {
   priorityStatus: number;
   totalHouses: number;
   totalHousesVisited: number;
+  leftToVisit: number;
   ShiftLogger: ShiftLogger[]; // Include ShiftLogger array
 };
 
@@ -56,8 +57,8 @@ export async function SiteCard({ props }: SiteCardProps) {
             </div>
             <div className="flex flex-col justify-center text-center items-center">
               <i className="fas fa-walking text-blue-500 text-lg"></i>
-              <span className="text-blue-500 text-md font-medium">{props.totalHousesVisited}</span>
-              <p className="text-gray-500 text-xs font-semibold mt-1">Visited</p>
+                <span className="text-blue-500 text-md font-medium">{props.leftToVisit}</span>
+                <p className="text-gray-500 text-xs font-semibold mt-1">To be visited</p>
             </div>
           </div>
             {/* Active Users Section */}

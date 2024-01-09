@@ -25,7 +25,7 @@ export default async function HomePage({
   const data = await getLocations(start, perPage)
   
   if (data.metadata === undefined) {
-    console.log(data)
+    // console.log(data.data?.leftToVisit)
     console.log(page)
     console.log(perPage)
     return <div>loading...</div>;
