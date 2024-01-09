@@ -3,7 +3,7 @@ import { getConditionalClass } from "@/lib/utils";
 
 type HouseCardProps = {
     id: number;
-    streetNumber: string;
+    streetNumber: number;
     lastName: string | null;
     name: string | null;
     type: string | null;

@@ -68,7 +68,8 @@ export default async function Page({
     return (
         <main className="flex flex-col items-center ">
             <GoBackButton />
-            <div className="flex flex-col  text-xm w-sm justify-center   ">
+
+            {/* <div className="flex flex-col  text-xm w-sm justify-center   ">
                 <h1>Street numbers in this street</h1>
                 <div className='flex flex-row flex-wrap '>
                 
@@ -76,11 +77,12 @@ export default async function Page({
                 <span
                 className="m-1 p-1 border border-white rounded hover:bg-white hover:text-black "
                 key={house.id} >
-                   {house.streetNumber} 
+                   {house.streetNumber}
                     </span>
                     ))}
                     </div>
-                    </div>
+            </div> */}
+            
             <PaginationControls
                 metadata={paginationControls}
             />
@@ -90,7 +92,7 @@ export default async function Page({
                 <Accordion
                     className="flex flex-col justify-center"
                     type="single" collapsible >
-                    {housesInStreet.data.houses.map((house) => (
+                    {orderedHouses.map((house) => (
                     <div key={house.id}
                         // className={`flex flex-row justify-center bg-black w-full`}
                     >
@@ -115,7 +117,7 @@ export default async function Page({
 
 type house = {
     id: number;
-    streetNumber: string;
+    streetNumber: number;
     lastName: string | null;
     name: string | null;
     type: string | null;
