@@ -27,7 +27,7 @@ model Account {
 
 model House {
   id            Int      @id @default(autoincrement())
-  streetNumber  String
+  streetNumber  Int
   lastName      String?
   name          String?
   type          String?
@@ -43,6 +43,8 @@ model House {
   phone         String?
   Location      Location @relation(fields: [locationId], references: [id])
   Street        Street   @relation(fields: [streetId], references: [id])
+
+
 }
 
 model Location {

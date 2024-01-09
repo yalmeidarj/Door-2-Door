@@ -51,8 +51,8 @@ export default async function Page({
         return <div>loading...</div>
     }
 
-    const orderedHouses = housesInStreet.data.houses.map(house => ({ ...house, streetNumber: parseInt(house.streetNumber) }))
-        .sort((a, b) => a.streetNumber - b.streetNumber);
+    // const orderedHouses = housesInStreet.data.houses.map(house => ({ ...house, streetNumber: house.streetNumber }))
+    //     .sort((a, b) => a.streetNumber - b.streetNumber);
     
     const paginationControls = {
         state: {
@@ -82,7 +82,7 @@ export default async function Page({
                     ))}
                     </div>
             </div> */}
-            
+
             <PaginationControls
                 metadata={paginationControls}
             />
@@ -92,7 +92,7 @@ export default async function Page({
                 <Accordion
                     className="flex flex-col justify-center"
                     type="single" collapsible >
-                    {orderedHouses.map((house) => (
+                    {housesInStreet.data.houses.map((house) => (
                     <div key={house.id}
                         // className={`flex flex-row justify-center bg-black w-full`}
                     >
