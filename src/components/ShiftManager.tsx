@@ -5,9 +5,10 @@ import {
     ClockIn,
     getLocations,
     getActiveShiftByAgentId,
-    isAgentClockedIn
+    isAgentClockedIn,
+    getActiveLocations
 } from "@/app/actions/actions";
-
+import { cn } from "@/lib/utils";
 import ClockInHandler from "./ClockInHandler";
 import ClockOutHandler from "./ClockOutHandler";
 import { db } from "@/server/db";
@@ -16,6 +17,8 @@ import toast from "react-hot-toast";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
 import { DateTime } from 'luxon';
+
+
 
 export default async function ShiftManager() {
     // const session = useSession();
@@ -30,7 +33,7 @@ export default async function ShiftManager() {
 
     const agentId = session.user.id
 
-    const availableLocationsData = await AllLocations()
+    const availableLocationsData = await getActiveLocations()
     // Check if availableLocationsData is an error object
     if ('error' in availableLocationsData) {
         // Handle the error appropriately
@@ -47,11 +50,16 @@ export default async function ShiftManager() {
     if (isClockedIn){
 
         const shiftId = await getActiveShiftByAgentId(agentId)
-        const pace = shiftId && 'pace' in shiftId && shiftId.pace
-        const updateHouses = shiftId && 'updatedHouses' in shiftId && shiftId.updatedHouses
-        const updateHousesFinal = shiftId && 'updatedHousesFinal' in shiftId && shiftId.updatedHousesFinal
-        const paceFinal = shiftId && 'paceFinal' in shiftId && shiftId.paceFinal
-        const startingDate = shiftId && 'startingDate' in shiftId && shiftId.startingDate
+
+        // Check if shiftId is an error object
+        if (!shiftId || !shiftId.shift) {
+            return <div>loading...</div>
+        }
+        const pace = shiftId.shift.pace
+        const updateHouses = shiftId.shift.updatedHouses
+        const updateHousesFinal = shiftId.shift.updatedHousesFinal
+        const paceFinal = shiftId.shift.paceFinal
+        const startingDate = shiftId.shift.startingDate
 
 
         const updatedHouses = updateHouses as number;
@@ -81,12 +89,9 @@ export default async function ShiftManager() {
         }
 
         return (
-            // {updateHouses}
             <>
-                {/* {`Pace: ${userPace} = ${shiftDurationAdjusted} /${updatedHousesFinal}`} */}
-                {shiftId.shift?.id as string}
                 <ClockOutCard
-
+                    className='bg-slate-300 mb-9 shadow-md'
                     paceFinal={userPace as number}
                     formattedStartTime={formattedStartTime}
                     shiftDurationInMinutes={shiftDurationInMinutes as number}
@@ -97,14 +102,11 @@ export default async function ShiftManager() {
         )
     } else {
         return (
-            <div className="flex flex-col items-center justify-center max-w-md self-end py-2 px-4 m-0 border-solid border-gray-300 border-x-2 border-b-2 rounded-bl-md">
-                <div className='flex flex-row items-center justify-center gap-1'>
-                    <h1 className="text-sm font-light">Clocked out
-                    </h1>
-                    <div className="bg-red-500 animate-blink rounded-full w-2 h-2"></div>
-                </div>
-                <ClockInHandler agentId={agentId} locations={availableLocations} />
-            </div>
+            <ClockInCard
+                className='bg-slate-300 mb-9 shadow-md'
+                agentId={agentId}
+                availableLocations={availableLocations}
+            />
         )
 
     }
@@ -112,29 +114,58 @@ export default async function ShiftManager() {
 
 
 type ClockOutCardProps = {
-    // pace: number;
+    className?: string;    
     paceFinal: number;
     formattedStartTime: string;
     shiftDurationInMinutes: number;
     shiftId: string;
 }
 
-function ClockOutCard({  paceFinal, shiftDurationInMinutes, formattedStartTime, shiftId }: ClockOutCardProps) {
+function ClockOutCard({ className, paceFinal, formattedStartTime, shiftDurationInMinutes, shiftId }: ClockOutCardProps) {
     return (
-        <div className="flex flex-row items-center gap-2 justify-center max-w-md self-end py-2 px-4 m-0 border-solid border-gray-300 border-x-2 border-b-2 rounded-bl-md">
-
-            <div className='flex  items-center gap-1'>    
-                <div className="bg-green-500 animate-blink rounded-full w-2 h-2"></div>    
-                {/* <p className="text-sm text font-bold">
-                {formattedStartTime}
-                </p>                 */}
+        <div className={cn("flex flex-col max-w-md self-end py-2 px-4 m-0 mb-2 border-solid border-gray-300 border-x-2 border-b-2 rounded-bl-md", className)}>
+            <div className='flex  items-center justify-start gap-2'>    
+                <h1 className="text-sm font-semibold">Clocked In
+                </h1><div className="bg-green-500 animate-blink rounded-full w-2 h-2"></div>    
                 <p className="text-sm text font-bold">
-                    {" "}pace: ~<span className="text-gray-400">
-                        {paceFinal.toFixed(2) }
+                {formattedStartTime}
+            </p>                
+                
+            </div>
+            <div className='flex flex-row gap-2 '>            
+            <p className="text-sm text font-bold">
+                {" "}Pace: <span className="text-gray-400">
+                        {paceFinal.toFixed(2)}
+                    {/* {paceFinal.toFixed(2)} */}
                 </span>
             </p>
-            </div>
             <ClockOutHandler props={shiftId} />
+            </div>
         </div>
     )
 }
+
+type ClockInCardProps = {
+    className?: string;
+    agentId: string;
+    availableLocations: { id: number; name: string }[];
+}
+
+
+function ClockInCard({ className, agentId, availableLocations }: ClockInCardProps) {
+    return (
+        
+        <div className={cn("flex flex-col max-w-md self-end py-2 px-4 m-0 mb-2 border-solid border-gray-300 border-x-2 border-b-2 rounded-bl-md", className)}>
+
+        <div className='flex  items-center justify-start gap-2'>
+            <h1 className="text-sm font-semibold">Clocked out
+            </h1>
+            <div className="bg-red-500 animate-blink rounded-full w-2 h-2"></div>
+        </div>
+
+        <ClockInHandler agentId={agentId} locations={availableLocations} />
+    </div>
+        )
+}
+
+

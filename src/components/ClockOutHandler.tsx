@@ -35,7 +35,7 @@ export default function ClockOutHandler({ props }: ClockInProps) {
                 value={props}
             />
             <SubmitFormButton
-                className="bg-red-500 text-white "
+                // className="bg-red-500 text-white "
                 title="Clock Out"
             />
         </form>

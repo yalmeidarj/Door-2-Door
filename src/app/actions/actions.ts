@@ -324,7 +324,7 @@ export const updateActiveShiftByShiftId = async (shiftId: string, statusAttempt:
     try {
       const updatedShift = await db.shiftLogger.update({
         where: { id: shiftId },
-        data: { updatedHouses: { increment: 1 } },
+        data: { updatedHousesFinal: { increment: 1 } },
       });
 
       revalidatePath(`/`);
@@ -337,7 +337,7 @@ export const updateActiveShiftByShiftId = async (shiftId: string, statusAttempt:
     try {
       const updatedShift = await db.shiftLogger.update({
         where: { id: shiftId },
-        data: { updatedHousesFinal: { increment: 1 } },
+        data: { updatedHouses: { increment: 1 } },
       });
 
       revalidatePath(`/`);
@@ -362,37 +362,98 @@ export const getShiftsByAgentIdFinished = async (agentId: string) => {
   }
 };
 
+// get all active locations
+export const getActiveLocations = async () => {
+  try {
+    const locations = await db.location.findMany({
+      where: {isDeleted: false}
+    });
+    return locations;
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting locations" };
+  }
+};
 
+type HouseCount = {
+  locationId: number;
+  totalHouses: number;
+};
 
 export const getLocations = async (skip: number, take: number) => {
   try {
-    const locations = await db.location.findMany({
-        where: {
-    isDeleted: false
-  },
+    const locationsWithStats = await db.location.findMany({
+      where: { isDeleted: false },
       skip: skip,
       take: take,
+      include: {
+        _count: {
+          select: {
+            House: {
+              where: {
+                statusAttempt: {
+                  in: [
+                    "Door Knock Attempt 1",
+                    "Door Knock Attempt 2",
+                    "Door Knock Attempt 3",
+                    "Door Knock Attempt 4",
+                    "Door Knock Attempt 5",
+                    "Door Knock Attempt 6",
+                    "Consent Final Yes",
+                    "Consent Final No",
+                  ],
+                },
+              },
+            },
+          },
+        },
+        ShiftLogger: {
+          where: {
+            isFinished: false,
+          },
+          include: {
+            User: true,
+          },
+        },
+      },
     });
 
-    const total = await db.location.count();
+    const totalHousesPerLocation: HouseCount[] = await db.$queryRaw`
+      SELECT "locationId", COUNT(DISTINCT id) as "totalHouses" FROM "House" GROUP BY "locationId"
+    `;
 
+    const total = await db.location.count();
     const metadata = {
       totalRecords: total,
       hasNextPage: skip + take < total,
       totalPages: Math.ceil(total / take),
     };
 
+    const data = locationsWithStats.map((location) => {
+      const totalHouses =
+        totalHousesPerLocation.find(
+          (house: HouseCount) => house.locationId === location.id
+        )?.totalHouses || 0;
+
+      return {
+        ...location,
+        totalHousesVisited: location._count.House,
+        totalHouses: totalHouses,
+      };
+    });
 
     return {
-      data: locations,
+      data: data,
       metadata: metadata,
     };
   } catch (error) {
     console.error(error);
     return { error: "Error getting locations" };
   }
-
 };
+
+
+
 
 // Soft delete a location
 export const softDeleteLocation = async (locationId: string) => {
@@ -502,6 +563,7 @@ export const getAllLocationIds = async () => {
   try {
     const locations = await db.location.findMany({
       select: {
+        name: true,
         id: true,
       },
     });
@@ -562,15 +624,41 @@ export const getHousesInStreet = async (
       where: { streetId: Number(street) },
       skip: skip,
       take: take,
+      // order by street number
+      orderBy: {
+        statusAttempt: "desc",
+      },
     });
 
+    // total houses visited, by statusAttempt (Door Knock Attempt 1, Door Knock Attempt 2, Door Knock Attempt 3)
+    const totalHousesVisited = await db.house.count({
+      where: {
+        streetId: Number(street),
+        statusAttempt: {
+          in: [
+            "Door Knock Attempt 1",
+            "Door Knock Attempt 2",
+            "Door Knock Attempt 3",
+            "Door Knock Attempt 4",
+            "Door Knock Attempt 5",
+            "Door Knock Attempt 6",
+            "Consent Final Yes",
+            "Consent Final No",
+          ],
+        },
+      },
+    });
+    
+    const response = { houses,  totalHousesVisited}
+    
+    
     // Count the total number of houses on the street
     const total = await db.house.count({
       where: { streetId: Number(street) },
     });
 
     return {
-      data: houses,
+      data: response,
       metadata: {
         totalRecords: total,
         hasNextPage: skip + take < total,

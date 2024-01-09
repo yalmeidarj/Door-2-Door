@@ -41,12 +41,15 @@ export default function ClockInHandler({ agentId, locations }: ClockInProps) {
                 className="hidden"
                 value={locationId}
             /> */}
+            <div className='flex flex-row gap-2 '>
+
             <select className="" name="locationId" id="locationId">
                 {locations.map((option) => (
                     <option className="" value={option.id}>{option.name}</option>
-                ))}
+                    ))}
             </select>
             <SubmitFormButton title="Clock In" />
+                    </div>
         </form>
 
     )

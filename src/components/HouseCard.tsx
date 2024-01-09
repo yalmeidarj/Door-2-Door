@@ -30,7 +30,7 @@ export default function HouseCard(house: HouseData) {
 
     return (
         <>
-            <div key={property.id} className={` bg-blue-200 w-full shadow-lg ${getConditionalClass(
+            <div key={property.id} className={`  w-[280px]  shadow-lg ${getConditionalClass(
                 property.statusAttempt ?? " ",
                 property.consent ?? " "
             )
@@ -45,7 +45,7 @@ export default function HouseCard(house: HouseData) {
                         <div className="flex flex-col justify-center items-center">
                             <h2 className="text-md font-semibold leading-snug mb-1">Att:</h2>
                             <span className="text-sm">
-                                {property.statusAttempt === "Consent Final" ? property.consent : property.statusAttempt}
+                                {property.statusAttempt ?? property.consent ?? property.consent}
                             </span>
                         </div>
                         <div className="flex flex-col justify-center items-center">

@@ -41,16 +41,22 @@ export default async function HomePage({
       data: 
         data.metadata      
     }
+
+    console.log(`Total Houses: ${data.data.map((location: any) => location.totalHouses)}`)
     
     return (
       <div>
-        {/* <GoBackButton /> */}
+        <h1 className="text-2xl font-bold">Locations</h1>
         <PaginationControls
           metadata={paginationControls}
         />
-        {data.data.map((location: any) => (
-      <SiteCard key={location.id} props={location} />
-        ))}
+        <div className="flex flex-row flex-wrap justify-center text-gray-600">
+        
+          {data.data.map((location: any) => (
+            
+          <SiteCard key={location.id} props={location} />
+          ))}
+          </div>
         
       </div>
     );

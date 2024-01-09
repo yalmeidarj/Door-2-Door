@@ -46,11 +46,14 @@ export default async function Page({
     const streetId = searchParams.id
 
     const housesInStreet = await getHousesInStreet(streetId, start, perPage)
-
+    
     if (!housesInStreet || !housesInStreet.data) {
         return <div>loading...</div>
     }
 
+    const orderedHouses = housesInStreet.data.houses.map(house => ({ ...house, streetNumber: parseInt(house.streetNumber) }))
+        .sort((a, b) => a.streetNumber - b.streetNumber);
+    
     const paginationControls = {
         state: {
             perPage: perPage,
@@ -59,17 +62,37 @@ export default async function Page({
         data:
             housesInStreet.metadata
     }
+    
     const { activeShifts } = shifts as { activeShifts: any[] };
+
     return (
         <main className="flex flex-col items-center ">
             <GoBackButton />
+            <div className="flex flex-col  text-xm w-sm justify-center   ">
+                <h1>Street numbers in this street</h1>
+                <div className='flex flex-row flex-wrap '>
+                
+            {orderedHouses.map((house) => (
+                <span
+                className="m-1 p-1 border border-white rounded hover:bg-white hover:text-black "
+                key={house.id} >
+                   {house.streetNumber} 
+                    </span>
+                    ))}
+                    </div>
+                    </div>
             <PaginationControls
                 metadata={paginationControls}
             />
-            <Accordion type="single" collapsible >
-                {housesInStreet.data.map((house) => (
+            <div className='flex flex-col   justify-center '>
+            
+            
+                <Accordion
+                    className="flex flex-col justify-center"
+                    type="single" collapsible >
+                    {housesInStreet.data.houses.map((house) => (
                     <div key={house.id}
-                        className={`flex justify-center`}
+                        // className={`flex flex-row justify-center bg-black w-full`}
                     >
                         <AccordionItem value={`${house.id}`} className="w-full">
                             <AccordionTrigger >
@@ -77,14 +100,15 @@ export default async function Page({
                             </AccordionTrigger>
                             <AccordionContent>
                                 <HouseDetails props={house} />
-                                {/* if activeShifts && activeShifts.length > 0 display form, else display <span>Please clock In</span>                                    */}
-                                {activeShifts && activeShifts.length > 0 ? <Form houseId={house.id} /> : <NotLoggedIn />}
-
+                                
+                                {activeShifts && activeShifts.length > 0
+                                    ? <Form houseId={house.id} /> : <NotLoggedIn />}
                             </AccordionContent>
                         </AccordionItem>
                     </div>
                 ))}
-            </Accordion>
+                </Accordion>
+            </div>
         </main>
     )
 }
@@ -105,11 +129,13 @@ type house = {
     externalNotes: string | null;
     phone: string | null;
     email: string | null;
+
 }
 
 
 type HouseDetailsProps = {
     props: house;
+    
 }
 
 async function HouseDetails({ props }: HouseDetailsProps) {
