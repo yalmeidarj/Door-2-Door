@@ -629,7 +629,7 @@ export const getHousesInStreet = async (
       take: take,
       // order by street number
       orderBy: {
-        statusAttempt: "desc",
+        streetNumber: "asc",
       },
     });
 
