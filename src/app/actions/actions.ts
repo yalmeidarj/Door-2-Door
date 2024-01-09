@@ -679,7 +679,7 @@ interface SeedData {
   neighborhood: string;
   priorityStatus: number;
   houses: Array<{
-    streetNumber: string;
+    streetNumber: number;
     lastName: string;
     name: string;
     phone: string;
