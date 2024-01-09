@@ -17,7 +17,7 @@ type ProjectData = {
 };
 
 type House = {
-    streetNumber: string;
+    streetNumber: number;
     lastName: string;
     name: string;
     phone: string;
