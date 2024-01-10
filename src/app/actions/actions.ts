@@ -52,54 +52,6 @@ type UpdatePropertyFormData = {
   // shiftLoggerId: string; // Added field for ShiftLogger id
 };
 
-// export const updateProperty = async (formData: FormData) => {
-//   const data: UpdatePropertyFormData = {
-//     id: parseInt(formData.get("id") as string),
-//     lastName: formData.get("lastName") as string,
-//     name: formData.get("name") as string,
-//     internalNotes: formData.get("internalNotes") as string,
-//     externalNotes: formData.get("externalNotes") as string,
-//     email: formData.get("email") as string,
-//     phone: formData.get("phone") as string,
-//     type: formData.get("type") as string,
-//     statusAttempt: formData.get("statusAttempt") as string,
-//     consent: formData.get("consent") as string,
-//     lastUpdatedBy: formData.get("lastUpdatedBy") as string,
-//     // shiftLoggerId: formData.get("shiftLoggerId") as string,
-
-//   };
-
-    
-
-
-//   if (isNaN(data.id)) {
-//     throw new Error("Invalid property ID");
-//   }
-
-//   const updatedData = {
-//     ...data,
-//     lastUpdated: new Date(),
-//   };
-
-//   try {
-//     await db.house.update({
-//       where: { id: data.id },
-//       data: updatedData,
-//     });
-
-//     // await db.shiftLogger.update({
-//     //   where: { id: data.id as unknown as string },
-//     //   data: { updatedHouses: { increment: 1 } },
-//     // });
-
-//     revalidatePath(`/`);
-//     return { status: "success", message: "Property updated" };
-//   } catch (error) {
-//     console.error(error);
-//     return { status: "error", message: "Error updating property" };
-//   }
-// };
-
 
 type shiftData = {
   id: number;
@@ -129,6 +81,12 @@ export const ClockOut = async (formData: FormData) => {
         finishedDate: new Date(),
       },
     });
+
+    await db.user.update({
+      where: { id: shift.agentId },
+      data: { isClockedIn: false },
+    });
+
     revalidatePath(`/`);
     return { success: "Successfully Clocked out", shift: shift };
   } catch (error) {
@@ -168,7 +126,7 @@ export const ClockIn = async (formData: FormData) => {
 
     await db.user.update({
       where: { id: data.agentId },
-      data: { isClockedIn: true },
+      data: { isClockedIn: true,  currentShiftId: newShift.id },
     });
 
     revalidatePath(`/`);
@@ -280,6 +238,58 @@ export const isAgentClockedIn = async (agentId: string) => {
   }
 }
 
+export const getAllClockedInAgents = async () => {
+  try {
+    const agents = await db.user.findMany({
+      where: {
+        isClockedIn: true
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+      // select: {
+      //   id: true,
+      //   name: true,
+      //   currentShiftId: true,
+      //   ShiftLogger: {
+      //     include: {
+      //       Location: true,
+      //     },
+      //     select: {
+      //       id: true,
+      //       startingDate: true,
+      //       finishedDate: true,
+      //       updatedHouses: true,
+      //       updatedHousesFinal: true,
+      //       pace: true,
+      //       paceFinal: true,
+      //     },
+      //   }
+      // }
+    });
+    return agents;
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting agents" };
+  }
+}
+
+export const getAllAgents = async () => {
+  try {
+    const agents = await db.user.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+    return agents;
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting agents" };
+  }
+}
+
 // get shift by agentId and not finished
 export const getActiveShiftByAgentId = async (agentId: string) => {
   try {
@@ -353,7 +363,10 @@ export const updateActiveShiftByShiftId = async (shiftId: string, statusAttempt:
 export const getShiftsByAgentIdFinished = async (agentId: string) => {
   try {
     const shifts = await db.shiftLogger.findMany({
-      where: {agentId: agentId, isFinished: true}
+      where: { agentId: agentId, isFinished: true },
+      orderBy: {
+        startingDate: "desc"
+      }
     });
     return shifts;
   } catch (error) {

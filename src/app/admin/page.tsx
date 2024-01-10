@@ -1,7 +1,9 @@
 import { SalesForce } from '@/lib/utils';
-import { getActiveLocations, seed, softDeleteLocation } from '../actions/actions';
+import { getActiveLocations, getAllAgents, getAllClockedInAgents, seed, softDeleteLocation } from '../actions/actions';
 import SubmitFormButton from '@/components/SubmitFormButton';
 import { FormWrapper } from '@/components/FormWrapper';
+import PastShifts from '@/components/PastShifts';
+import ClockedInAgents from '@/components/ClockedInAgents';
 
 
 
@@ -116,15 +118,17 @@ export default async function Page() {
         return res;
     }
 
+
+    const allClockedInAgents = await getAllClockedInAgents()
     const allLocations = await getActiveLocations();
+    const allAgents = await getAllAgents()
     if ('error' in allLocations) {
         return <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">Error: {allLocations.error}</div>;
     }
     return (
-        <main className="p-6">
+        <main className="p-6 flex flex-col">
             <h1 className="text-2xl font-semibold text-gray-900">React Server Component: Upload</h1>
             <div className="flex flex-row flex-wrap gap-3 justify-center">
-            
                 <FormWrapper
                     title="Fetch Salesforce"
                     description="Use this form to fetch a site from Salesforce"                
@@ -194,6 +198,14 @@ export default async function Page() {
                 </FormWrapper >
                 
             </div>
+                    <ClockedInAgents />
+            
+            <div className='max-w-[600px]'>
+            
+            <PastShifts
+                agents={allAgents}
+                />
+                </div> 
         </main>
     );
 
