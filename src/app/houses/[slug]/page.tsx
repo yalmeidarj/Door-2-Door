@@ -9,12 +9,13 @@ import {
 import { db } from "@/server/db"
 import PaginationControls from "@/components/PaginationControls"
 import { getHousesInStreet } from "@/app/actions/actions"
-import GoBackButton from "@/components/GoBackButton"
+
 import NotLoggedIn from "@/components/NotLoggedIn"
 import { getShiftsByAgentId } from "@/app/actions/actions"
 import { getServerSession } from "next-auth";
 import React from "react";
 import { authOptions } from "@/server/auth";
+import GoBack from "@/components/GoBack"
 
 export default async function Page({
     params,
@@ -65,24 +66,15 @@ export default async function Page({
     
     const { activeShifts } = shifts as { activeShifts: any[] };
 
+    const streetName = housesInStreet.data.houses[0].Location.name;
+    const id = housesInStreet.data.houses[0].Location.id;
+
     return (
         <main className="flex flex-col items-center ">
-            <GoBackButton />
-
-            {/* <div className="flex flex-col  text-xm w-sm justify-center   ">
-                <h1>Street numbers in this street</h1>
-                <div className='flex flex-row flex-wrap '>
-                
-            {orderedHouses.map((house) => (
-                <span
-                className="m-1 p-1 border border-white rounded hover:bg-white hover:text-black "
-                key={house.id} >
-                   {house.streetNumber}
-                    </span>
-                    ))}
-                    </div>
-            </div> */}
-
+            <GoBack
+                href={`/streets/${streetName}?id=${id}&per_page=${perPage}&page=${page}`}
+                title={`Back to streets - ${streetName}`}
+            />
             <PaginationControls
                 metadata={paginationControls}
             />

@@ -4,7 +4,7 @@ import { defaultValues } from "@/lib/utils";
 import { skip } from "node:test";
 import PaginationControls from "@/components/PaginationControls";
 import { SiteCard } from "@/components/SiteCard";
-import GoBackButton from "@/components/GoBackButton";
+import GoBackButton from "@/components/GoBack";
 
 
 

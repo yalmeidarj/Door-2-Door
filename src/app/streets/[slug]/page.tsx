@@ -2,7 +2,8 @@ import Link from "next/link"
 import PaginationControls from "@/components/PaginationControls"
 import { getHousesInStreet, getStreetsInLocation } from "@/app/actions/actions"
 import { defaultValues } from "@/lib/utils"
-import GoBackButton from "@/components/GoBackButton"
+import GoBackButton from "@/components/GoBack"
+import GoBack from "@/components/GoBack"
 
 export default async function Page({
     params,
@@ -43,7 +44,10 @@ export default async function Page({
 
     return (
         <main className="flex flex-col items-center ">
-            <GoBackButton />
+            <GoBack
+                href={`/`}
+                title="Back to Locations"
+            />
             <PaginationControls
                 metadata={paginationControls}
             />
@@ -66,3 +70,6 @@ export default async function Page({
         </main>
     )
 }
+
+ 
+

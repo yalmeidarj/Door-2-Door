@@ -118,7 +118,7 @@ type shiftData = {
 export const ClockOut = async (formData: FormData) => {
   const shiftId = formData.get("id") as string;
 
-  console.log(`Cuurent shiftId: ${shiftId}`);
+
   const data = formData as object;
   try {
     const shift = await db.shiftLogger.update({
@@ -627,6 +627,30 @@ export const getHousesInStreet = async (
       where: { streetId: Number(street) },
       skip: skip,
       take: take,
+      select: {
+        id: true,
+        streetNumber: true,
+        lastName: true,
+        name: true,
+        phone: true,
+        email: true,
+        internalNotes: true,
+        externalNotes: true,
+        type: true,
+        streetId: true,
+        locationId: true,
+        statusAttempt: true,
+        consent: true,
+        lastUpdated: true,
+        lastUpdatedBy: true,
+        Location: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+  
       // order by street number
       orderBy: {
         streetNumber: "asc",
