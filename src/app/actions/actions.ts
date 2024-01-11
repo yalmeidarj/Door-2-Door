@@ -605,18 +605,81 @@ export const AllLocations = async () => {
   }
 };
 
+type StreetHouseCount = {
+  streetId: number;
+  totalHouses: number;
+};
 
 export const getStreetsInLocation = async (location: string | string[] | undefined, skip: number, take: number) => {
   try {
     const streets = await db.street.findMany({
       where: { locationId: Number(location) },
       skip: skip,
-      take: take,
+      take: take,      
+    
+      include: {
+        _count: {
+          select: {
+            House: {
+              where: {
+                statusAttempt: {
+                  in: [
+                    "Door Knock Attempt 1",
+                    "Door Knock Attempt 2",
+                    "Door Knock Attempt 3",
+                    "Door Knock Attempt 4",
+                    "Door Knock Attempt 5",
+                    "Door Knock Attempt 6",
+                    "Consent Final Yes",
+                    "Consent Final No",
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+      // order by street number
+      orderBy: {
+        name: "asc",
+      },
     });
 
     const total = await db.street.count({ where: { locationId: Number(location) } });
+
+    const totalHousesPerStreet: StreetHouseCount[] = await db.$queryRaw` 
+      SELECT "streetId", COUNT(DISTINCT id) as "totalHouses" FROM "House" GROUP BY "streetId"
+    `;
+
+    
+    const totalHousesWithConsentYesPerStreet: StreetHouseCount[] = await db.$queryRaw`
+      SELECT "streetId", COUNT(DISTINCT id) as "totalHouses" FROM "House" WHERE "statusAttempt" = 'Consent Final Yes' GROUP BY "streetId"
+    `;
+
+    const data = streets.map((street) => {
+      const totalHouses =
+        totalHousesPerStreet.find(
+          (house: StreetHouseCount) => house.streetId === street.id
+        )?.totalHouses || 0;
+      
+      const totalHousesWithConsentYes =
+        totalHousesWithConsentYesPerStreet.find(
+          (house: StreetHouseCount) => house.streetId === street.id
+        )?.totalHouses || 0;
+
+      const leftToVisit = Number(totalHouses) - Number(street._count.House);
+      return {
+        ...street,
+        totalHousesVisited: street._count.House,
+        totalHouses: Number(totalHouses),
+        leftToVisit: leftToVisit,
+        totalHousesWithConsentYes: Number(totalHousesWithConsentYes),
+      };
+    });
+
+
     return {
-      data: streets,
+      data: data,
       metadata: {
         totalRecords: total,
         hasNextPage: skip + take < total,
