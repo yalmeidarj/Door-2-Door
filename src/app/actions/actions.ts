@@ -393,6 +393,21 @@ type HouseCount = {
   totalHouses: number;
 };
 
+export const getAllLocationsDropDown = async () => {
+  try {
+    const locations = await db.location.findMany({
+      select: {
+        name: true,
+        id: true,
+      },
+    });
+    return locations;
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting locations" };
+  }
+}
+
 export const getLocations = async (skip: number, take: number) => {
   try {
     const locationsWithStats = await db.location.findMany({
@@ -595,7 +610,7 @@ export const AllLocations = async () => {
     const locations = await db.location.findMany({
       select: {
         id: true,
-        name: true ?? "",
+        name: true,
       },
     });
     return locations;

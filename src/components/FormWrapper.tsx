@@ -11,7 +11,7 @@ export function FormWrapper({ children, title, description }: FormWrapperProps) 
     return (
         <>
 
-            <div className="mt-6 p-4 border-solid border-4 bg-slate-200 border-gray-200 rounded-lg shadow-md">
+            <div className=" max-w-lg mt-6 p-4 border-solid border-4 bg-slate-200 border-gray-200 rounded-lg shadow-md">
                 <header className='group w-full text-start border-b-2 bg-slate-400 rounded-lg p-4 mb-6'>
                     <section className='flex flex-row items-center gap-2'>
                         <h1 className="font-semibold text-xl text-slate-100">

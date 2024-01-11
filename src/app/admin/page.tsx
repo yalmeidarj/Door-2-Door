@@ -1,10 +1,11 @@
 import { SalesForce } from '@/lib/utils';
-import { getActiveLocations, getAllAgents, getAllClockedInAgents, seed, softDeleteLocation } from '../actions/actions';
+import { AllLocations, getActiveLocations, getAllAgents, getAllClockedInAgents, getAllLocationsDropDown, seed, softDeleteLocation } from '../actions/actions';
 import SubmitFormButton from '@/components/SubmitFormButton';
 import { FormWrapper } from '@/components/FormWrapper';
 import PastShifts from '@/components/PastShifts';
 import ClockedInAgents from '@/components/ClockedInAgents';
-
+import { massUpdateStatusAttemptByLocationId } from '@/lib/automations/updateFromAppToSF';
+import MassUpdateStatusByLocationForm from '@/components/MassUpdateStatusByLocationForm';
 
 
 type ProjectData = {
@@ -120,96 +121,101 @@ export default async function Page() {
 
 
     const allClockedInAgents = await getAllClockedInAgents()
-    const allLocations = await getActiveLocations();
+    const allActiveLocations = await getActiveLocations();
     const allAgents = await getAllAgents()
-    if ('error' in allLocations) {
-        return <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">Error: {allLocations.error}</div>;
+
+    if ('error' in allActiveLocations) {
+        return <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">Error: {allActiveLocations.error}</div>;
     }
     return (
-        <main className="p-6 flex flex-col">
-            <h1 className="text-2xl font-semibold text-gray-900">React Server Component: Upload</h1>
+        <main className="p-6 mx-auto max-w-5xl flex flex-col">
+            <h1 className="text-3xl md:text-4xl font-semibold text-gray-900">React Server Component: Upload</h1>
             <div className="flex flex-row flex-wrap gap-3 justify-center">
                 <FormWrapper
                     title="Fetch Salesforce"
-                    description="Use this form to fetch a site from Salesforce"                
+                    description="Use this form to fetch a site from Salesforce"
                 >
-                    <form className="mt-6 max-w-md flex flex-col justify-end " action={upload}>
+                    <form className="mt-6 max-w-md flex flex-col gap-4" action={upload}>
+                        {/* Create credentials input fields */}
+                        <div>
+                            <label htmlFor="username" className="block text-sm font-medium text-gray-700">SALESFORCE Username:</label>
+                            <input
+                                required
+                                type="text" id="username" name="username"
+                                className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md hover:border-indigo-300" />
+                        </div>
 
-                {/* Create credentials input fields */}
-                <div className="mb-4">
-                    <label htmlFor="username" className="block text-sm font-medium text-gray-700">SALESFORCE Username:</label>
-                    <input
-                        required
-                        type="text" id="username" name="username"
-                        className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
-                </div>
+                        <div>
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700">SALESFORCE Password:</label>
+                            <input
+                                required
+                                type="password" id="password" name="password"
+                                className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md hover:border-indigo-300" />
+                        </div>
 
-                <div className="mb-4">
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">SALESFORCE Password:</label>
-                    <input
-                        required
-                        type="password" id="password" name="password"
-                        className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
-                </div>
+                        {/* Create a dropdown menu with siteOptions */}
+                        <div>
+                            <label htmlFor="site" className="block text-sm font-medium text-gray-700">Choose a site:</label>
+                            <select
+                                required
+                                name="site" id="site"
+                                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value=""></option>
+                                {Object.entries(SalesForce.siteOptions).map(([key, value]) => (
+                                    <option key={value} value={key}>
+                                        {key}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
 
-                {/* Create a dropdown menu with siteOptions */}
-                <div className="mb-4 ">
-                    <label htmlFor="site" className="block text-sm font-medium text-gray-700">Choose a site:</label>
-                    <select
-                        required
-                        name="site" id="site"
-                        className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        <option value=""></option>
-                        {Object.entries(SalesForce.siteOptions).map(([key, value]) => (
-                            <option key={value} value={key}>
-                                {key}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                        
-                <SubmitFormButton title="Initiate SF Fetching" />
+                        <SubmitFormButton title="Initiate SF Fetching" />
                     </form>
                 </FormWrapper >
-                
+
                 <FormWrapper
                     title="Delete Site"
                     description="Use this form to delete a site"
                 >
-                <form action={deleteSite}>
+                    <form action={deleteSite}>
                         <div className='flex flex-col gap-4'>
-                        <label htmlFor="site" className="block text-sm font-medium text-gray-700">Choose a site:</label>
-                        <select
-                            required
-                            name="site" id="site"
-                            className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                            <option value=""></option>
-                            {allLocations.map((location) => (
-                                <option key={location.id} value={location.id}>
-                                    {location.name}
-                                </option>
-                            ))}
-                        </select>
-                        <SubmitFormButton title="Delete site" />
-                    </div>
-                
-                </form>
+                            <label htmlFor="site" className="block text-sm font-medium text-gray-700">Choose a site:</label>
+                            <select
+                                required
+                                name="site" id="site"
+                                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value=""></option>
+                                {allActiveLocations.map((location) => (
+                                    <option key={location.id} value={location.id}>
+                                        {location.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <SubmitFormButton title="Delete site" />
+                        </div>
+                    </form>
                 </FormWrapper >
-                
+
             </div>
-                    <ClockedInAgents />
-            
-            <div className='max-w-[600px]'>
-            
-            <PastShifts
-                agents={allAgents}
+            <div className='flex flex-row flex-wrap gap-3 max-w-full mx-auto px-6'>
+                <PastShifts
+                    agents={allAgents}
                 />
-                </div> 
+
+                <MassUpdateStatusByLocationForm
+                    data={allActiveLocations}
+                />
+            </div>
+            <div className='flex flex-row flex-wrap max-w-full mx-auto px-6'>
+            <ClockedInAgents />
+            </div>
+            
         </main>
+
     );
 
 }
+
 
 
 
