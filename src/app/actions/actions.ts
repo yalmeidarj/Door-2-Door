@@ -388,6 +388,19 @@ export const getActiveLocations = async () => {
   }
 };
 
+// get all inactive locations
+export const getInactiveLocations = async () => {
+  try {
+    const locations = await db.location.findMany({
+      where: {isDeleted: true}
+    });
+    return locations;
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting locations" };
+  }
+};  
+
 type HouseCount = {
   locationId: number;
   totalHouses: number;
@@ -486,6 +499,7 @@ export const getLocations = async (skip: number, take: number) => {
 
 
 
+
 // Soft delete a location
 export const softDeleteLocation = async (locationId: string) => {
   await db.location.update({
@@ -495,6 +509,33 @@ export const softDeleteLocation = async (locationId: string) => {
   revalidatePath(`/`);
   return { status: "success", message: "Location deleted" };
 }
+
+export const hardDeleteLocation = async (locationId: string) => {
+  try {
+      // to delete location, delete all houses, streets, and shiftLoggers associated with location
+  await db.shiftLogger.deleteMany({
+    where: { locationId: Number(locationId) }
+  });
+  await db.house.deleteMany({
+    where: { locationId: Number(locationId) }
+  });
+  await db.street.deleteMany({
+    where: { locationId: Number(locationId) }
+  });
+  await db.location.delete({
+    where: { id: Number(locationId) }
+  });
+    revalidatePath(`/`);
+    return { status: "success", message: "Location deleted" };
+  }
+  catch (error) {
+    console.error(error);
+    return { status: "error", message: "Error deleting location" };
+  }
+
+}
+
+
 
 
 export const getLocationsStats = async (locationId: number) => {
@@ -515,12 +556,20 @@ export const getLocationsStats = async (locationId: number) => {
 
     // Total number of houses with consent Yes
     const totalHousesWithConsentYes = await db.house.count({
-      where: { locationId: locationId, statusAttempt: "Consent Final Yes" },
+      where: {
+        locationId: locationId,
+        statusAttempt:  "Consent Final" ||"Consent Final Yes",
+        consent: "Yes",
+      },
     });
 
     // Total number of houses with consent No
     const totalHousesWithConsentNo = await db.house.count({
-      where: { locationId: locationId, statusAttempt: "Consent Final No" },
+      where: {
+        locationId: locationId,
+        statusAttempt: "Consent Final No" || "Consent Final",
+        consent: "No",
+      },
     });
 
     // total houses visited, by statusAttempt (Door Knock Attempt 1, Door Knock Attempt 2, Door Knock Attempt 3)
@@ -668,7 +717,7 @@ export const getStreetsInLocation = async (location: string | string[] | undefin
 
     
     const totalHousesWithConsentYesPerStreet: StreetHouseCount[] = await db.$queryRaw`
-      SELECT "streetId", COUNT(DISTINCT id) as "totalHouses" FROM "House" WHERE "statusAttempt" = 'Consent Final Yes' GROUP BY "streetId"
+      SELECT "streetId", COUNT(DISTINCT id) as "totalHouses" FROM "House" WHERE "statusAttempt" = 'Consent Final' AND "consent" = 'Yes' GROUP BY "streetId"
     `;
 
     const data = streets.map((street) => {
@@ -849,4 +898,113 @@ export async function seed(data: SeedData) {
     });
   }
 }
+
+export async function updateHouseRecords(jsonData: SeedData) {
+  try {
+    for (const house of jsonData.houses) {
+      const streetNumberInt = Number(house.streetNumber);
+
+      if (isNaN(streetNumberInt)) {
+        console.log(`Invalid street number for ${house.name}: ${house.streetNumber}`);
+        continue;
+      }
+
+      const existingHouse = await db.house.findFirst({
+        where: {
+          name: house.name,
+          streetNumber: streetNumberInt,
+          Street: { name: house.street },
+        },
+      });
+
+      if (existingHouse) {
+        await db.house.update({
+          where: { id: existingHouse.id },
+          data: {
+            statusAttempt: house.statusAttempt,
+            consent: house.consent,
+          },
+        });
+      } else {
+        console.log(`House not found for ${house.name}, ${house.streetNumber} ${house.street}`);
+
+        let street = await db.street.findFirst({
+          where: { name: house.street },
+        });
+
+        // find locationId by location name
+        const location = await db.location.findFirst({
+          where: { name: jsonData.name },
+        });
+
+        if (!street) {
+          street = await db.street.create({
+            data: { name: house.street, locationId: location?.id as number },
+          });
+        }
+
+        await db.house.create({
+          data: {
+            name: house.name,
+            streetNumber: streetNumberInt,
+            lastName: house.lastName,
+            type: house.type,
+            streetId: street.id,
+            locationId: street.locationId, // Assuming locationId is the same as the street's
+            // Set other necessary fields here
+          },
+        });
+      }
+    }
+
+    return {
+      status: "success",
+      message: `Successfully updated ${jsonData.houses.length} houses`,
+    };
+  } catch (error) {
+    console.error(error);
+    return { status: "error", message: "Error updating property" };
+  }
+}
+
+
+// temporary function to delete all records from location 10, for testing purposes
+export async function deleteRecords() {
+  const today = new Date(2024, 0, 13); // JavaScript months are 0-indexed, so 0 represents January
+  const tomorrow = new Date(2024, 0, 14);
+
+  try {
+    
+  
+    const result = await db.house.deleteMany({
+      where: {
+        AND: [
+          {
+            lastUpdated: {
+              gte: today,
+              lt: tomorrow, // Use 'lt' (less than) to exclude records from the next day
+            },
+          },
+          {
+            locationId: 8,
+          },
+          {
+            statusAttempt: {
+              not: "Door knock Attempt 1",
+            },
+          },
+        ],
+      },
+    });
+    console.log(`Deleted ${result.count} records.`);
+    return { status: "success", message: `Deleted ${result.count} records.` };
+  } catch (error) {
+    console.error(error);
+    return { status: "error", message: "Error deleting property" };
+  }
+}
+
+
+
+
 
