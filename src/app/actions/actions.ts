@@ -6,8 +6,8 @@ import { revalidatePath } from "next/cache";
 export const updateProperty = async (formData: FormData) => {
   const updatedData = Object.fromEntries(
     Array.from(formData.entries()).filter(([key, value]) => {
-      // Exclude 'id' field
-      if (key === "id") {
+      // Exclude 'id', agentName, and agentId
+      if (key === "id" || key === "agentName" || key === "agentId") {
         return false;
       }
       // Check if the value is a string and not empty after trimming
