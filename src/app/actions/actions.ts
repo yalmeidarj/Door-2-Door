@@ -18,13 +18,29 @@ export const updateProperty = async (formData: FormData) => {
   const id = Number(formData.get("id"));
   if (!id) throw new Error("No id found in form data");
 
+  const agentId = formData.get("agentId") as string;
+  const agentName = formData.get("agentName") as string;
   try {
     const updatedHouse = await db.house.update({
       where: { id: id },
-      data: {...updatedData},
-
+      data: {
+        ...updatedData,
+        lastUpdated: new Date(),
+        lastUpdatedBy: agentName,
+      },
     });
 
+    // Fetch the streetId from the updated House
+    const streetId = updatedHouse.streetId;
+
+    // Update Street
+    const updatedStreet = await db.street.update({
+      where: { id: streetId },
+      data: {
+        lastVisited: new Date(),
+        lastVisitedby: agentName,
+      },
+    });
 
     revalidatePath(`/`);
 

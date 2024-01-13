@@ -31,6 +31,7 @@ export default function Form({ houseId }: { houseId: number }) {
     }
 
     const agentId = session.data.user.id
+    const agentName = session.data.user.name
 
 
     
@@ -95,6 +96,18 @@ export default function Form({ houseId }: { houseId: number }) {
                         name="id"
                         className="hidden"
                         value={houseId}
+                    />
+                    <textarea
+                        id="agentName"
+                        name="agentName"
+                        className="hidden"
+                        value={agentName ?? "No Agent Name"}
+                    />
+                    <textarea
+                        id="agentId"
+                        name="agentId"
+                        className="hidden"
+                        value={agentId}
                     />
                     <label htmlFor="externalNotes" className="block text-gray-700 text-sm font-bold mb-2">
                         SalesForce Notes
