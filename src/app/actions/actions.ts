@@ -194,18 +194,33 @@ export const getShiftsByAgentId = async (agentId: string) => {
         updatedHousesFinal: true,
         pace: true,
         paceFinal: true,
-      }, orderBy: {
-        startingDate: "desc"
-      }
+      },
+      orderBy: {
+        startingDate: "desc",
+      },
     });
 
     const activeShifts = shifts.filter((shift) => shift.isFinished === false);
-    const finishedShifts = shifts.filter((shift) => shift.isFinished === true);
+    const finishedShifts = shifts
+      .filter((shift) => shift.isFinished === true)
+      .map((shift) => {
+        const start = shift.startingDate?.getTime();
+        const end = shift.finishedDate?.getTime();
+        if (start && end && end > start) {
+          const shiftLength = end - start;
+          const hours = Math.floor(shiftLength / 3600000); // Convert milliseconds to hours and floor it
+          const minutes = Math.floor((shiftLength % 3600000) / 60000); // Convert remainder to minutes
+          const formattedShiftLength = `${hours}h ${minutes}m`;
+          return { ...shift, formattedShiftLength };
+        }
+        return shift;
+      });
 
     const data = {
       activeShifts: activeShifts,
       finishedShifts: finishedShifts,
     };
+
     return data;
   } catch (error) {
     console.error(error);
@@ -258,33 +273,73 @@ export const getAllClockedInAgents = async () => {
   try {
     const agents = await db.user.findMany({
       where: {
-        isClockedIn: true
+        isClockedIn: true,
       },
       select: {
         id: true,
         name: true,
+        ShiftLogger: {
+          where: {
+            isFinished: false, 
+          },
+          select: {
+            id: true,
+            startingDate: true,
+            finishedDate: true,
+            updatedHouses: true,
+            updatedHousesFinal: true,
+            Location: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
       },
-      // select: {
-      //   id: true,
-      //   name: true,
-      //   currentShiftId: true,
-      //   ShiftLogger: {
-      //     include: {
-      //       Location: true,
-      //     },
-      //     select: {
-      //       id: true,
-      //       startingDate: true,
-      //       finishedDate: true,
-      //       updatedHouses: true,
-      //       updatedHousesFinal: true,
-      //       pace: true,
-      //       paceFinal: true,
-      //     },
-      //   }
-      // }
     });
-    return agents;
+
+    const data = agents.map((agent) => {
+      // ...existing code for totalHouses...
+      const totalHouses = agent.ShiftLogger.reduce((acc, shift) => {
+        return acc + (shift.updatedHouses ?? 0);
+      }, 0);
+
+      const shiftLength:number = agent.ShiftLogger.reduce((acc, shift) => {
+        const start = shift.startingDate?.getTime();
+        // const end should be current time
+        const end = new Date().getTime();
+        if (start && end && end > start) {
+          return acc + (end - start);
+        }
+        return acc;
+      }, 0);
+
+      const totalShiftLength = agent.ShiftLogger.reduce((acc, shift) => {
+        const start = shift.startingDate?.getTime();
+        // Assuming end should be current time
+        const end = new Date().getTime();
+        if (start && end && end > start) {
+          return acc + (end - start); // accumulate total shift length in milliseconds
+        }
+        return acc;
+      }, 0);
+
+      // Now format the totalShiftLength outside the reduce function
+      const hours = Math.floor(totalShiftLength / 3600000); // Convert milliseconds to hours and floor it
+      const minutes = Math.floor((totalShiftLength % 3600000) / 60000); // Convert remainder to minutes
+      const formattedShiftLength = `${hours}h ${minutes}m`;
+
+      const pace = totalHouses / (shiftLength / 3600000); // Convert milliseconds to hours
+      return {
+        ...agent,
+        pace: pace,
+        shiftLength: shiftLength,
+        formatedShiftLength: formattedShiftLength,
+      };
+    });
+
+    return data;
   } catch (error) {
     console.error(error);
     return { error: "Error getting agents" };
@@ -479,6 +534,20 @@ export const getLocations = async (skip: number, take: number) => {
       SELECT "locationId", COUNT(DISTINCT id) as "totalHouses" FROM "House" GROUP BY "locationId"
     `;
 
+    const totalHousesWithConsentYesPerLocation: HouseCount[] = await db.$queryRaw`
+      SELECT "locationId", COUNT(DISTINCT id) as "totalHouses" FROM "House" WHERE "statusAttempt" = 'Consent Final' AND "consent" = 'Yes' GROUP BY "locationId"
+    `;
+
+    const totalHousesWithConsentNoPerLocation: HouseCount[] = await db.$queryRaw`
+      SELECT "locationId", COUNT(DISTINCT id) as "totalHouses" FROM "House" WHERE "statusAttempt" = 'Consent Final' AND "consent" = 'No' GROUP BY "locationId"
+    `;
+
+    const totalHousesWithToBeVisitedPerLocation: HouseCount[] = await db.$queryRaw`
+      SELECT "locationId", COUNT(DISTINCT id) as "totalHouses" FROM "House" WHERE "statusAttempt" = 'Site Visit Required' GROUP BY "locationId"
+    `;
+
+
+    
     const total = await db.location.count();
     const metadata = {
       totalRecords: total,
@@ -493,12 +562,30 @@ export const getLocations = async (skip: number, take: number) => {
         )?.totalHouses || 0;
 
       const leftToVisit =  Number(totalHouses) - Number(location._count.House);
-      console.log(leftToVisit);
+      const totalHousesWithConsentYes =
+        totalHousesWithConsentYesPerLocation.find(
+          (house: HouseCount) => house.locationId === location.id
+        )?.totalHouses || 0;
+
+      const totalHousesWithConsentNo =
+        totalHousesWithConsentNoPerLocation.find(
+          (house: HouseCount) => house.locationId === location.id
+        )?.totalHouses || 0;
+      
+      const totalHousesWithToBeVisited =
+        totalHousesWithToBeVisitedPerLocation.find(
+          (house: HouseCount) => house.locationId === location.id
+        )?.totalHouses || 0;
+      
+      
       return {
         ...location,
         totalHousesVisited: location._count.House,
         totalHouses: totalHouses,
         leftToVisit: leftToVisit,
+        totalHousesWithConsentYes: Number(totalHousesWithConsentYes),
+        totalHousesWithConsentNo: Number(totalHousesWithConsentNo),
+        totalHousesWithToBeVisited: Number(totalHousesWithToBeVisited),
       };
     });
 
@@ -608,6 +695,18 @@ export const getLocationsStats = async (locationId: number) => {
     }
     );
 
+    const totalHousesVisitRequired =  await db.house.count({
+      where: {
+        locationId: locationId,
+        statusAttempt: {
+          in: [
+            "Site Visit Required"
+          ],
+        },
+      },
+    }
+    );
+
     // Total number of houses non existent
     const totalHousesNonExistent = await db.house.count({
       where: { locationId: locationId, statusAttempt: "Non Existent" },
@@ -646,6 +745,7 @@ export const getLocationsStats = async (locationId: number) => {
       percentageHousesWithConsentYes: percentageHousesWithConsentYes,
       percentageHousesWithConsentNo: percentageHousesWithConsentNo,
       percentageHousesVisited: percentageHousesVisited,
+      totalHousesVisitRequired: totalHousesVisitRequired,
     };
 
     return data;
@@ -736,6 +836,15 @@ export const getStreetsInLocation = async (location: string | string[] | undefin
       SELECT "streetId", COUNT(DISTINCT id) as "totalHouses" FROM "House" WHERE "statusAttempt" = 'Consent Final' AND "consent" = 'Yes' GROUP BY "streetId"
     `;
 
+    const totalHousesWithConsentNoPerStreet: StreetHouseCount[] = await db.$queryRaw`
+      SELECT "streetId", COUNT(DISTINCT id) as "totalHouses" FROM "House" WHERE "statusAttempt" = 'Consent Final' AND "consent" = 'No' GROUP BY "streetId"
+    `;
+
+    const totalHousesWithVisitRequiredPerStreet: StreetHouseCount[] = await db.$queryRaw`
+      SELECT "streetId", COUNT(DISTINCT id) as "totalHouses" FROM "House" WHERE "statusAttempt" = 'Site Visit Required' GROUP BY "streetId"
+    `;
+
+
     const data = streets.map((street) => {
       const totalHouses =
         totalHousesPerStreet.find(
@@ -746,6 +855,14 @@ export const getStreetsInLocation = async (location: string | string[] | undefin
         totalHousesWithConsentYesPerStreet.find(
           (house: StreetHouseCount) => house.streetId === street.id
         )?.totalHouses || 0;
+      
+      const totalHousesWithConsentNo = totalHousesWithConsentNoPerStreet.find(
+        (house: StreetHouseCount) => house.streetId === street.id
+      )?.totalHouses || 0;
+
+      const totalHousesWithVisitRequired = totalHousesWithVisitRequiredPerStreet.find(
+        (house: StreetHouseCount) => house.streetId === street.id
+      )?.totalHouses || 0;
 
       const leftToVisit = Number(totalHouses) - Number(street._count.House);
       return {
@@ -754,6 +871,9 @@ export const getStreetsInLocation = async (location: string | string[] | undefin
         totalHouses: Number(totalHouses),
         leftToVisit: leftToVisit,
         totalHousesWithConsentYes: Number(totalHousesWithConsentYes),
+        totalHousesWithConsentNo: Number(totalHousesWithConsentNo),
+        totalHousesWithVisitRequired: Number(totalHousesWithVisitRequired),
+        
       };
     });
 

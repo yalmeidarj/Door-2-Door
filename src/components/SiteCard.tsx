@@ -18,7 +18,11 @@ type location = {
   totalHouses: number;
   totalHousesVisited: number;
   leftToVisit: number;
-  ShiftLogger: ShiftLogger[]; // Include ShiftLogger array
+  ShiftLogger: ShiftLogger[]; 
+  totalHousesWithConsentYes: number;
+  totalHousesWithConsentNo: number;
+  totalHousesWithToBeVisited:  number
+
 };
 
 type SiteCardProps = {
@@ -59,6 +63,23 @@ export async function SiteCard({ props }: SiteCardProps) {
               <i className="fas fa-walking text-blue-500 text-lg"></i>
                 <span className="text-blue-500 text-md font-medium">{props.leftToVisit}</span>
                 <p className="text-gray-500 text-xs font-semibold mt-1">To be visited</p>
+            </div>
+          </div>
+          <div className="flex flex-row justify-around">
+            <div className="flex flex-col justify-center text-center items-center">
+              <i className="fas fa-home text-green-500 text-lg"></i>
+                <span className="text-green-500 text-md font-medium">{props.totalHousesWithConsentYes}</span>
+                <p className="text-gray-500 text-xs font-semibold mt-1">Yes</p>
+            </div>
+            <div className="flex flex-col justify-center text-center items-center">
+              <i className="fas fa-walking text-blue-500 text-lg"></i>
+                <span className="text-blue-500 text-md font-medium">{props.totalHousesWithConsentNo}</span>
+                <p className="text-gray-500 text-xs font-semibold mt-1">No</p>
+            </div>
+            <div className="flex flex-col justify-center text-center items-center">
+              <i className="fas fa-walking text-blue-500 text-lg"></i>
+                <span className="text-blue-500 text-md font-medium">{props.totalHousesWithToBeVisited}</span>
+                <p className="text-gray-500 text-xs font-semibold mt-1">Visit required</p>
             </div>
           </div>
             {/* Active Users Section */}

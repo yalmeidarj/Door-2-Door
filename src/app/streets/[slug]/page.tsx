@@ -6,6 +6,8 @@ import GoBackButton from "@/components/GoBack"
 import GoBack from "@/components/GoBack"
 import { FaHome, FaCheck, FaTimes, FaCircle } from 'react-icons/fa';
 import { IoIosCheckmarkCircleOutline } from "react-icons/io";
+import { BsPersonWalking } from "react-icons/bs";
+import { RiForbidLine } from "react-icons/ri";
 
 export default async function Page({
     params,
@@ -68,19 +70,47 @@ export default async function Page({
                                 <FaHome className="mr-1" aria-label="Houses" />
                                 <span>{street.totalHouses}</span>
                             </div>
-                            <div className='flex items-center space-x-1'>
+                            {/* <div className='flex items-center space-x-1'>
                                 <IoIosCheckmarkCircleOutline className="text-green-600" aria-label="Final Yes" />
                                 <span>{street.totalHousesWithConsentYes}</span>
-                            </div>
+                            </div> */}
                             </div>
                             <p className="text-sm text-gray-600">Last Visit:
                                 {street.lastVisited?.toLocaleDateString() || 'N/A'}
                             </p>
+                            
                         </div>
 
-                        <div className="flex  text-gray-600 text-sm">
-                            <div className='flex space-x-2'>
+                        <div className="flex flex-col gap-4  text-gray-600 text-sm pb-2">
 
+                            <div className='flex space-x-2 justify-end border-solid border-b-2 border-gray-300 pb-2'>
+                                <div className='flex flex-col items-center justify-center space-y-1'>
+                                    <div className='flex items-center space-x-1'>
+                                        <IoIosCheckmarkCircleOutline className="text-green-600" aria-label="Final Yes" />
+                                        {/* <FaCheck className="mr-1" aria-label="Final Yes" /> */}
+                                        <span>{street.totalHousesWithConsentYes}</span>
+                                    </div>
+                                    <h2 className='text-xs'>Yes</h2>
+                                </div>
+
+                                <div className='flex flex-col items-center justify-center space-y-1'>
+                                    <div className='flex items-center space-x-1'>
+                                        <BsPersonWalking  className="mr-1" aria-label="Not Visited" />
+                                        <span>{street.totalHousesWithVisitRequired}</span>
+                                    </div>
+                                    <h2 className='text-xs'>Visit Required</h2>
+                                </div>
+
+                                <div className='flex flex-col items-center justify-center space-y-1'>
+                                    <div className='flex items-center space-x-1'>
+                                        <RiForbidLine className="mr-1 text-red-600" aria-label="Not Visited" />
+                                        <span>{street.totalHousesWithConsentNo}</span>
+                                    </div>
+                                    <h2 className='text-xs'>No</h2>
+                                </div>
+                            </div>
+
+                            <div className='flex space-x-2 justify-end'>
                                 <div className='flex flex-col items-center justify-center space-y-1'>
                                     <div className='flex items-center space-x-1'>
                                         <FaCheck className="mr-1" aria-label="Visited" />
