@@ -57,7 +57,7 @@ export default function Page() {
 
     //rYeEsydWN!8808168eXkA9gV47A
     useEffect(() => {
-        const socketUrl = process.env.REACT_APP_SOCKET_URL || 'http://localhost:7000';
+        const socketUrl = process.env.REACT_APP_SOCKET_URL || 'https://tdxpuppeteernodeweb.onrender.com';
         const newSocket = io(socketUrl);
         setSocket(newSocket);
 
