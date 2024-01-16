@@ -100,9 +100,8 @@ export default function Page() {
         toast.success("Fetching data from Salesforce, this may take a while...");
 
         setIsLoading(true); // Start loading when emitting the event
-        // socket.emit('getConsentFinal', payload);       
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        setIsLoading(false); // Stop loading when response is received
+        socket.emit('getConsentFinal', payload);       
+
     }
     
     return (
