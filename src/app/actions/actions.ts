@@ -751,6 +751,20 @@ export const getLocationsStats = async (locationId: number) => {
       isDeleted: isDeleted,
       name: name,
       totalHouses: Number(totalHousesWithConsentYes),
+      totalHousesWithConsent: Number(totalHousesWithConsent),
+      totalHousesWithConsentYes: Number(totalHousesWithConsentYes),
+      totalHousesWithConsentNo: Number(totalHousesWithConsentNo),
+      totalHousesVisited: Number(totalHousesVisited),
+      totalHousesNonExistent: Number(totalHousesNonExistent),
+      percentageHousesWithConsentYes: Number(percentageHousesWithConsentYes),
+      percentageHousesWithConsentNo: Number(percentageHousesWithConsentNo),
+      percentageHousesVisited: Number(percentageHousesVisited),
+      totalHousesVisitRequired: Number(totalHousesVisitRequired),
+    
+
+
+
+
       // totalHousesWithConsent: Number(totalHousesWithConsentYes),
       // totalHousesWithConsentYes: Number(totalHousesWithConsentYes),
       // totalHousesWithConsentNo: Number(totalHousesWithConsentYes),
