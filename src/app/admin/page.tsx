@@ -7,7 +7,7 @@ import ClockedInAgents from '@/components/ClockedInAgents';
 import { massUpdateStatusAttemptByLocationId } from '@/lib/automations/updateFromAppToSF';
 import MassUpdateStatusByLocationForm from '@/components/MassUpdateStatusByLocationForm';
 import { initiateSearch, pollJobStatus, handleSearchResults, checkJobStatus } from '@/lib/pupeteerActions';
-import HouseRecordsUploader from '@/components/UpdateHousesForm';
+import HouseRecordsUploader from '@/components/HouseRecordsUploader';
 
 
 type ProjectData = {
