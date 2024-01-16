@@ -38,6 +38,8 @@ export default function Page() {
     const [socket, setSocket] = useState<any>(undefined);
     const [downloadData, setDownloadData] = useState<any>(null);
 
+    
+
     const downloadJSON = (data: ProjectData, filename:string) => {
         const jsonStr = JSON.stringify(data, null, 2);
         const blob = new Blob([jsonStr], { type: "application/json" });
@@ -55,7 +57,8 @@ export default function Page() {
 
     //rYeEsydWN!8808168eXkA9gV47A
     useEffect(() => {
-        const newSocket = io('http://localhost:7000');
+        const socketUrl = process.env.REACT_APP_SOCKET_URL || 'http://localhost:7000';
+        const newSocket = io(socketUrl);
         setSocket(newSocket);
 
         newSocket.on('botResponse', (response) => {
