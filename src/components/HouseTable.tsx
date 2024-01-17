@@ -367,7 +367,11 @@ const HousesTable = () => {
                                 {/* Add an input for filtering */}
 
                                 <input
-                                    value={header.column.getFilterValue() || ''}
+                                        value={
+                                            typeof header.column.getFilterValue() === 'string' ||
+                                                typeof header.column.getFilterValue() === 'number' ?
+                                                header.column.getFilterValue() as string :  ''
+                                        }
                                     onChange={e => header.column.setFilterValue(e.target.value)}
                                     placeholder={`Filter ${header.column.id}...`}
                                     />
@@ -397,3 +401,6 @@ const HousesTable = () => {
 
 export default HousesTable;
 
+function isString(value: unknown): value is string {
+    return typeof value === 'string';
+}
