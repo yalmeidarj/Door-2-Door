@@ -652,7 +652,7 @@ export const getLocationsStats = async (locationId: number) => {
       where: { id: locationId },
       select: {
         name: true,
-        isDeleted: true,
+        isDeleted: false,
       },
     });
 
@@ -661,22 +661,16 @@ export const getLocationsStats = async (locationId: number) => {
       where: { locationId: locationId },
     });
 
-    // Total number of houses with consent Yes
-    // const totalHousesWithConsentYes = await db.house.count({
-    //   where: {
-    //     locationId: locationId,
-    //     statusAttempt:  "Consent Final" ||"Consent Final Yes",
-    //     consent: "Yes",
-    //   },
-    // });
-
-    // Fetch total houses with consent Yes
-    // Fetch total houses with consent Yes
     const totalHousesWithConsentYesResult = await db.$queryRaw<
       TotalHousesResult[]
     >`
-  SELECT COUNT(*) as "totalHouses" FROM "House" WHERE "locationId" = ${locationId} AND "statusAttempt" = 'Consent Final' AND "consent" = 'Yes'
-`;
+      SELECT COUNT(*) as "totalHouses" 
+      FROM "House" 
+      WHERE "locationId" = ${locationId} 
+      
+      AND ("consent" = 'Yes' OR "consent" = 'Consent Final Yes')
+    `;
+
     const totalHousesWithConsentYes = Number(
       totalHousesWithConsentYesResult[0]?.totalHouses || 0
     );
@@ -685,7 +679,10 @@ export const getLocationsStats = async (locationId: number) => {
     const totalHousesWithConsentNoResult = await db.$queryRaw<
       TotalHousesResult[]
     >` 
-      SELECT COUNT(DISTINCT id) as "totalHouses" FROM "House" WHERE "locationId" = ${locationId} AND "statusAttempt" = 'Consent Final' AND "consent" = 'No'
+      SELECT COUNT(DISTINCT id) as "totalHouses"
+      FROM "House"
+      WHERE "locationId" = ${locationId}
+      AND "consent" = 'No'
     `;
 
     const totalHousesWithConsentNo = Number(
@@ -746,12 +743,12 @@ export const getLocationsStats = async (locationId: number) => {
     );
 
     const name = location?.name ?? "";
-    const isDeleted = location?.isDeleted ?? false;
+    const isDeleted =  false;
 
     const data = {
       isDeleted: isDeleted,
       name: name,
-      totalHouses: Number(totalHousesWithConsentYes),
+      totalHouses: Number(totalHouses),
       totalHousesWithConsent: Number(totalHousesWithConsent),
       totalHousesWithConsentYes: Number(totalHousesWithConsentYes),
       totalHousesWithConsentNo: Number(totalHousesWithConsentNo),
@@ -761,20 +758,7 @@ export const getLocationsStats = async (locationId: number) => {
       percentageHousesWithConsentNo: Number(percentageHousesWithConsentNo),
       percentageHousesVisited: Number(percentageHousesVisited),
       totalHousesVisitRequired: Number(totalHousesVisitRequired),
-    
 
-
-
-
-      // totalHousesWithConsent: Number(totalHousesWithConsentYes),
-      // totalHousesWithConsentYes: Number(totalHousesWithConsentYes),
-      // totalHousesWithConsentNo: Number(totalHousesWithConsentYes),
-      // totalHousesVisited: Number(totalHousesWithConsentYes),
-      // totalHousesNonExistent: Number(totalHousesWithConsentYes),
-      // percentageHousesWithConsentYes: Number(totalHousesWithConsentYes),
-      // percentageHousesWithConsentNo: Number(totalHousesWithConsentYes),
-      // percentageHousesVisited: Number(totalHousesWithConsentYes),
-      // totalHousesVisitRequired: Number(totalHousesWithConsentYes)
     };
 
     console.log(data);
@@ -826,8 +810,8 @@ export const getStreetsInLocation = async (location: string | string[] | undefin
     const streets = await db.street.findMany({
       where: { locationId: Number(location) },
       skip: skip,
-      take: take,      
-    
+      take: take,
+
       include: {
         _count: {
           select: {
@@ -856,57 +840,99 @@ export const getStreetsInLocation = async (location: string | string[] | undefin
       },
     });
 
-    const total = await db.street.count({ where: { locationId: Number(location) } });
+    const total = await db.street.count({
+      where: { locationId: Number(location) },
+    });
 
     const totalHousesPerStreet: StreetHouseCount[] = await db.$queryRaw` 
       SELECT "streetId", COUNT(DISTINCT id) as "totalHouses" FROM "House" GROUP BY "streetId"
     `;
 
-    
-    const totalHousesWithConsentYesPerStreet: StreetHouseCount[] = await db.$queryRaw`
-      SELECT "streetId", COUNT(DISTINCT id) as "totalHouses" FROM "House" WHERE "statusAttempt" = 'Consent Final' AND "consent" = 'Yes' GROUP BY "streetId"
+    const totalHousesAlreadyVisitedPerStreet: StreetHouseCount[] =
+      await db.$queryRaw`
+      SELECT "streetId", COUNT(DISTINCT id) as "totalHouses"
+      FROM "House"
+      WHERE "statusAttempt" IN (
+        'Door Knock Attempt 1',
+        'Door Knock Attempt 2',
+        'Door Knock Attempt 3',
+        'Door Knock Attempt 4',
+        'Door Knock Attempt 5',
+        'Door Knock Attempt 6',
+        'Consent Final Yes',
+        'Consent Final No'
+      )
+      GROUP BY "streetId"
     `;
+
+    
+
+    const totalHousesWithConsentYesPerStreet: StreetHouseCount[] =
+      await db.$queryRaw`
+  SELECT "streetId", COUNT(DISTINCT id) as "totalHouses" 
+  FROM "House" 
+  WHERE ("consent" = 'Yes')
+  -- AND ("consent" = 'Yes' OR "consent" = 'Consent Final Yes') 
+  GROUP BY "streetId"
+`;
+
+    const totalHousesWithYes: StreetHouseCount[] = await db.$queryRaw`
+    SELECT "streetId", COUNT(DISTINCT id) as "totalHouses"
+      FROM "House"
+      WHERE "consent" = 'Yes' GROUP BY "streetId"
+  `;
+    
+    // const totalHousesWithConsentYesPerStreet = yes + totalHousesWithYes;
+
+    // combine totalHousesWithConsentYesPerStreet and totalHousesWithYes
+
 
     const totalHousesWithConsentNoPerStreet: any[] = await db.$queryRaw`
-      SELECT "streetId", COUNT(DISTINCT id) as "totalHouses" FROM "House" WHERE "statusAttempt" = 'Consent Final' AND "consent" = 'No' GROUP BY "streetId"
+      SELECT "streetId", COUNT(DISTINCT id) as "totalHouses"
+       FROM "House" 
+       WHERE ("consent" = 'No')
+      GROUP BY "streetId"
     `;
 
-    const totalHousesWithVisitRequiredPerStreet: StreetHouseCount[] = await db.$queryRaw`
+    const totalHousesWithVisitRequiredPerStreet: StreetHouseCount[] =
+      await db.$queryRaw`
       SELECT "streetId", COUNT(DISTINCT id) as "totalHouses" FROM "House" WHERE "statusAttempt" = 'Site Visit Required' GROUP BY "streetId"
     `;
-
 
     const data = streets.map((street) => {
       const totalHouses =
         totalHousesPerStreet.find(
           (house: StreetHouseCount) => house.streetId === street.id
         )?.totalHouses || 0;
-      
+
       const totalHousesWithConsentYes =
         totalHousesWithConsentYesPerStreet.find(
           (house: StreetHouseCount) => house.streetId === street.id
         )?.totalHouses || 0;
-      
-      const totalHousesWithConsentNo = totalHousesWithConsentNoPerStreet.find(
-        (house: StreetHouseCount) => house.streetId === street.id
-      )?.totalHouses || 0;
 
-      const totalHousesWithVisitRequired = totalHousesWithVisitRequiredPerStreet.find(
-        (house: StreetHouseCount) => house.streetId === street.id
-      )?.totalHouses || 0;
+      const totalHousesWithConsentNo =
+        totalHousesWithConsentNoPerStreet.find(
+          (house: StreetHouseCount) => house.streetId === street.id
+        )?.totalHouses || 0;
 
-      const leftToVisit = Number(totalHouses) - Number(street._count.House);
+      const totalHousesWithVisitRequired =
+        totalHousesWithVisitRequiredPerStreet.find(
+          (house: StreetHouseCount) => house.streetId === street.id
+        )?.totalHouses || 0;
+
+      const leftToVisit = 
+        Number(totalHouses) - Number(street._count.House);
+
       return {
         ...street,
-        totalHousesVisited: street._count.House,
+        totalHousesVisited: Number(street._count.House),
         totalHouses: Number(totalHouses),
         leftToVisit: leftToVisit,
         totalHousesWithConsentYes: Number(totalHousesWithConsentYes),
-        totalHousesWithConsentNo: Number(totalHousesWithConsentNoPerStreet),
+        totalHousesWithConsentNo: Number(totalHousesWithConsentNo),
         totalHousesWithVisitRequired: Number(totalHousesWithVisitRequired),
       };
     });
-
 
     return {
       data: data,

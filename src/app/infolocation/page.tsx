@@ -78,6 +78,7 @@ export default async function Page() {
                      {/* <p className="text-gray-600">Houses Visited: {location.totalHousesVisited} | 
                          <span className={`${getCardClassName(location.percentageHousesVisited)}`}>{location.percentageHousesVisited}%</span>
                      </p> */}
+                            <p className="text-gray-600">Houses Visited: {location.totalHousesVisited}</p>
                      <p className="text-gray-600">Non-existent Houses: {location.totalHousesNonExistent}</p>
                         </div>
                     );

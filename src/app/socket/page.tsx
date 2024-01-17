@@ -83,6 +83,21 @@ export default function Page() {
             }
         });
 
+        newSocket.on('AllTableData', (response) => {
+            setIsLoading(false); // Stop loading when response is received
+            if (response.success) {
+                console.log("Success!");
+                
+                console.log("Success!");
+                
+                setDownloadData(response.data);
+
+            } else {
+                console.error(response.error);
+                // Handle error
+            }
+        });
+
         // return () => newSocket.disconnect();
     }, []);
     
