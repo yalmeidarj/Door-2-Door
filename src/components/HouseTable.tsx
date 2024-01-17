@@ -205,19 +205,27 @@ const HousesTable = () => {
     ];
 
     const convertToCSV = (data: House[]): string => {
-        const headers = columns.map(col => col.id); // Use 'id' instead of 'accessorKey'
+        const headers = columns.map(col => col.header); // Use 'header' for more meaningful column names
 
         const rows = data.map(row => {
             return columns.map(col => {
                 let cellValue = '';
 
                 if ('accessorKey' in col && col.accessorKey) {
-                    const accessorKey = col.accessorKey;
-                    // Check if the property exists on the row and is not a function
-                    if (accessorKey in row && typeof row[accessorKey as keyof House] !== 'function') {
-                        const value = row[accessorKey as keyof House];
-                        cellValue = value != null ? value.toString() : '';
+                    const accessorKeys = col.accessorKey.split('.'); // Split the accessorKey to handle nested properties
+                    let value: any = row;
+
+                    // Traverse the nested properties
+                    for (const key of accessorKeys) {
+                        if (value && typeof value === 'object') {
+                            value = value[key];
+                        } else {
+                            value = '';
+                            break;
+                        }
                     }
+
+                    cellValue = value != null ? value.toString() : '';
                 }
 
                 // Replace double quotes in cellValue and enclose in double quotes
