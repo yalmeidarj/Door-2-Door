@@ -53,11 +53,6 @@ export default async function Page() {
         return res;
     }
 
-    // const allActiveLocations = await getActiveLocations();
-    // const getInactiveLocations = await getInactiveLocations();
-    // if ('error' in getInactiveLocations) {
-    //     return <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">Error: {allActiveLocations.error}</div>;
-    // }
 
     const allActiveLocations = await getActiveLocations();
     if ('error' in allActiveLocations) {
@@ -69,42 +64,6 @@ export default async function Page() {
         console.log(`Deleting records from today...`);
         // const result = await deleteRecords();
         // return result;
-    }
-
-    async function createCsvFile(data: FormData) {
-        'use server'
-        // log the chosen site
-        const chosenSite = data.get('site') as string;
-        console.log(chosenSite);
-        
-        const res = await getLocationProjectData(chosenSite);
-        if (res && res.houses) {
-            // Assuming res contains an array of houses
-            const csvData = res.houses.map(house => ({
-                ...house,
-                locationName: res.name,
-                neighborhood: res.neighborhood,
-                priorityStatus: res.priorityStatus
-            }));
-
-            const csvString = convertToCSV(csvData);
-            await downloadCSV(csvString, "myData.csv");
-
-            // Write to CSV file
-            // const writeFileAsync = promisify(fs.writeFile);
-            // await writeFileAsync('output.csv', csvString);
-            // console.log('CSV file created successfully');
-
-            // Download CSV file
-            // const csvString = convertToCSV(
-
-
-
-        } else {
-            console.log('No data found for the given site');
-        }
-
-
     }
 
     return (
