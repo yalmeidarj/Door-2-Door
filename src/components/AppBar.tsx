@@ -38,6 +38,12 @@ const components: { title: string; href: string; description: string }[] = [
             "Create, update, and delete sites/ users",
     },
     {
+        title: "Houses Table",
+        href: "/housestable",
+        description:
+            "View and download all houses in a table, ",
+    },
+    {
         title: "Instructions",
         href: "/instructions",
         description:

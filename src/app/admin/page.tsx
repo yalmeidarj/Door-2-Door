@@ -8,6 +8,7 @@ import { massUpdateStatusAttemptByLocationId } from '@/lib/automations/updateFro
 import MassUpdateStatusByLocationForm from '@/components/MassUpdateStatusByLocationForm';
 import { initiateSearch, pollJobStatus, handleSearchResults, checkJobStatus } from '@/lib/pupeteerActions';
 import HouseRecordsUploader from '@/components/HouseRecordsUploader';
+import HouseTable from '@/components/HouseTable';
 
 
 type ProjectData = {
@@ -141,7 +142,8 @@ export default async function Page() {
     }
     return (
         <main className="p-6 mx-auto max-w-5xl flex flex-col">
-            <h1 className="text-3xl md:text-4xl font-semibold text-gray-900">React Server Component: Upload</h1>
+            <h1 className="text-3xl md:text-4xl font-semibold text-gray-900">Houses Table</h1>
+            <HouseTable />
             <div className="flex flex-row flex-wrap gap-3 justify-center">
                 <FormWrapper
                     title="Fetch Salesforce"

@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/server/db";
+import { get } from "http";
 import { revalidatePath } from "next/cache";
 
 export const updateProperty = async (formData: FormData) => {
@@ -921,6 +922,69 @@ export const getStreetsInLocation = async (location: string | string[] | undefin
   }
 };
 
+export const getAllHouses = async (skip: number, take: number) => {
+  try {
+    const houses = await db.house.findMany({
+      skip: skip,
+      take: take,
+      include: {
+        Location: true,
+        Street: true,
+      },
+      orderBy: {
+        streetNumber: "asc",
+      },
+    });
+
+    const total = await db.house.count();
+    const metadata = {
+      totalRecords: total,
+      hasNextPage: skip + take < total,
+      totalPages: Math.ceil(total / take),
+    };
+
+    return {
+      data: houses,
+      metadata: metadata,
+    };
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting houses" };
+  }
+}
+// get all houses by locationId
+export const getAllHousesInLocation = async (locationId: string, skip: number, take: number) => {
+  try {
+    const houses = await db.house.findMany({
+      where: { locationId: Number(locationId) },
+      skip: skip,
+      take: take,
+      include: {
+        Location: true,
+        Street: true,
+      },
+      orderBy: {
+        lastUpdated: "desc",
+      },
+    });
+
+    const total = await db.house.count({ where: { locationId: Number(locationId) } });
+    const metadata = {
+      totalRecords: total,
+      hasNextPage: skip + take < total,
+      totalPages: Math.ceil(total / take),
+    };
+
+    return {
+      data: houses,
+      metadata: metadata,
+    };
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting houses" };
+  }
+}
+
 export const getHousesInStreet = async (
   street: string | string[] | undefined,
   skip: number,
@@ -1088,37 +1152,14 @@ export async function updateHouseRecords(jsonData: SeedData) {
           data: {
             statusAttempt: house.statusAttempt,
             consent: house.consent,
+            lastUpdated: new Date(),
+            lastUpdatedBy: "SystemAdmin",
           },
         });
       } else {
         console.log(`House not found for ${house.name}, ${house.streetNumber} ${house.street}`);
 
-        let street = await db.street.findFirst({
-          where: { name: house.street },
-        });
 
-        // find locationId by location name
-        const location = await db.location.findFirst({
-          where: { name: jsonData.name },
-        });
-
-        if (!street) {
-          street = await db.street.create({
-            data: { name: house.street, locationId: location?.id as number },
-          });
-        }
-
-        await db.house.create({
-          data: {
-            name: house.name,
-            streetNumber: streetNumberInt,
-            lastName: house.lastName,
-            type: house.type,
-            streetId: street.id,
-            locationId: street.locationId, // Assuming locationId is the same as the street's
-            // Set other necessary fields here
-          },
-        });
       }
     }
 
