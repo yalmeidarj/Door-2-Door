@@ -39,42 +39,7 @@ type House = {
     street: string;
 };
 
-async function downloadCSV(csvString, filename) {
-    // Ensure this code runs only in a browser environment
-    if (typeof window === "undefined") return;
 
-    // Create a Blob from the CSV String
-    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-
-    // Create a link element
-    const link = document.createElement("a");
-
-    // Set URL for the link
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", filename);
-
-    // Append the link to the body and trigger the download
-    document.body.appendChild(link);
-    link.click();
-
-    // Clean up and remove the link
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-}
-
-// Helper function to convert data to CSV format
-function convertToCSV(data: any[]): string {
-    if (data.length === 0) return '';
-
-    const headers = Object.keys(data[0]);
-    const csvRows = data.map(row => headers.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
-    return [headers.join(','), ...csvRows].join('\r\n');
-
-    function replacer(key: string, value: any) {
-        return value === null ? '' : value; // Convert null to empty string
-    }
-}
 
 export default async function Page() {
     async function deleteSiteComplete(data: FormData) {
@@ -184,7 +149,7 @@ export default async function Page() {
                     </FormWrapper>
                 </div>
                 <div className=' '>
-                    <form action={createCsvFile}>
+                    {/* <form action={createCsvFile}>
                         <div className='flex flex-col'>
                             <label htmlFor="site" className="block text-sm font-medium text-gray-700">Choose a site:</label>
                             <select
@@ -202,49 +167,11 @@ export default async function Page() {
                         <div className='flex flex-col mt-8'>
                             <SubmitFormButton title={'Get Csv File'} />
                         </div>
-                    </form>
+                    </form> */}
                 </div>
-                <div className=' '>
-                <HouseTable />
-                </div>
+
         
             </div>
         </>
     );
 }
-      
-// function convertToCSV(data: any[]): string {
-//     if (data.length === 0) return '';
-
-//     // Extract headers
-//     const headers = Object.keys(data[0]);
-
-//     // Map each row object to a CSV string
-//     const rows = data.map(row => {
-//         return headers.map(fieldName => {
-//             // Handle undefined and null values
-//             if (row[fieldName] === null || row[fieldName] === undefined) {
-//                 return '';
-//             }
-
-//             let field = row[fieldName].toString();
-
-//             // Escape double quotes by doubling them
-//             if (field.includes('"')) {
-//                 field = field.replace(/"/g, '""');
-//             }
-
-//             // Quote fields that contain commas or linebreaks
-//             if (field.includes(',') || field.includes('\n')) {
-//                 field = `"${field}"`;
-//             }
-
-//             return field;
-//         }).join(',');
-//     });
-
-//     // Join headers and rows
-//     return [headers.join(','), ...rows].join('\r\n');
-// }
-
-
