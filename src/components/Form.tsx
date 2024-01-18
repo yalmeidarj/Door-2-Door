@@ -20,7 +20,7 @@ export default function Form({ houseId }: { houseId: number }) {
         'Door Knock Attempt 6',
         'Consent Final Yes',
         'Consent Final No',
-        'engineer visit required',
+        'Engineer Visit Required',
         'Home Does Not Exist'
     ];
 

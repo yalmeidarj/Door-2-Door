@@ -535,20 +535,59 @@ export const getLocations = async (skip: number, take: number) => {
       SELECT "locationId", COUNT(DISTINCT id) as "totalHouses" FROM "House" GROUP BY "locationId"
     `;
 
-    const totalHousesWithConsentYesPerLocation: HouseCount[] = await db.$queryRaw`
-      SELECT "locationId", COUNT(DISTINCT id) as "totalHouses" FROM "House" WHERE "statusAttempt" = 'Consent Final' AND "consent" = 'Yes' GROUP BY "locationId"
+    // count the number of houses to be visited, by statusAttempt, excluding: Non Existent, Consent Final, Consent Final Yes, Consent Final No, Site Visit Required, Drop type unverified,
+    const totalHousesToBeVisitedPerLocation: HouseCount[] = await db.$queryRaw`
+      SELECT "locationId",
+      COUNT(DISTINCT id) as "totalHouses" 
+      FROM "House" 
+      WHERE "statusAttempt" 
+      IN ('Home Does Not Exist', 
+      'Consent Final', 
+      'Consent Final Yes', 
+      'Consent Final No', 
+      'Site Visit Required', 
+      'Drop Type Unverified', 
+      ' Drop Type Unverified ', 
+      'Engineer Visit Required',
+      'Door Knock Attempt 1',
+      'Door Knock Attempt 2',
+      'Door Knock Attempt 3',
+      'Door Knock Attempt 4',
+      'Door Knock Attempt 5',
+      'Door Knock Attempt 6'      
+      )
+      GROUP BY "locationId"
     `;
 
-    const totalHousesWithConsentNoPerLocation: HouseCount[] = await db.$queryRaw`
-      SELECT "locationId", COUNT(DISTINCT id) as "totalHouses" FROM "House" WHERE "statusAttempt" = 'Consent Final' AND "consent" = 'No' GROUP BY "locationId"
+    const totalHousesWithConsentYesPerLocation: HouseCount[] =
+      await db.$queryRaw`
+      SELECT "locationId",
+      COUNT(DISTINCT id) as "totalHouses"
+      FROM "House" 
+      WHERE "statusAttempt" = 'Consent Final Yes' 
+      OR "consent" = 'Yes'
+      GROUP BY "locationId"
     `;
 
-    const totalHousesWithToBeVisitedPerLocation: HouseCount[] = await db.$queryRaw`
-      SELECT "locationId", COUNT(DISTINCT id) as "totalHouses" FROM "House" WHERE "statusAttempt" = 'Site Visit Required' GROUP BY "locationId"
+    const totalHousesWithConsentNoPerLocation: HouseCount[] =
+      await db.$queryRaw`
+      SELECT "locationId",
+       COUNT(DISTINCT id) as "totalHouses"
+        FROM "House" 
+        WHERE "statusAttempt" = 'Consent Final No' 
+        OR "consent" = 'No' 
+        GROUP BY "locationId"
     `;
 
+    const totalHousesWithToBeVisitedPerLocation: HouseCount[] =
+      await db.$queryRaw`
+      SELECT "locationId",
+      COUNT(DISTINCT id) as "totalHouses"
+      FROM "House" 
+      WHERE "statusAttempt" = 'Site Visit Required'
+      GROUP BY "locationId"
+    `;
 
-    
     const total = await db.location.count();
     const metadata = {
       totalRecords: total,
@@ -562,7 +601,10 @@ export const getLocations = async (skip: number, take: number) => {
           (house: HouseCount) => house.locationId === location.id
         )?.totalHouses || 0;
 
-      const leftToVisit =  Number(totalHouses) - Number(location._count.House);
+      const leftToVisit = totalHousesToBeVisitedPerLocation.find(
+        (house: HouseCount) => house.locationId === location.id
+      )?.totalHouses;
+
       const totalHousesWithConsentYes =
         totalHousesWithConsentYesPerLocation.find(
           (house: HouseCount) => house.locationId === location.id
@@ -572,18 +614,18 @@ export const getLocations = async (skip: number, take: number) => {
         totalHousesWithConsentNoPerLocation.find(
           (house: HouseCount) => house.locationId === location.id
         )?.totalHouses || 0;
-      
+
       const totalHousesWithToBeVisited =
         totalHousesWithToBeVisitedPerLocation.find(
           (house: HouseCount) => house.locationId === location.id
         )?.totalHouses || 0;
-      
-      
+
       return {
         ...location,
         totalHousesVisited: location._count.House,
         totalHouses: totalHouses,
-        leftToVisit: leftToVisit,
+        // leftToVisit: Number(leftToVisit),
+        leftToVisit: Number(Number(totalHouses) - Number(leftToVisit)),
         totalHousesWithConsentYes: Number(totalHousesWithConsentYes),
         totalHousesWithConsentNo: Number(totalHousesWithConsentNo),
         totalHousesWithToBeVisited: Number(totalHousesWithToBeVisited),
@@ -664,11 +706,10 @@ export const getLocationsStats = async (locationId: number) => {
     const totalHousesWithConsentYesResult = await db.$queryRaw<
       TotalHousesResult[]
     >`
-      SELECT COUNT(*) as "totalHouses" 
-      FROM "House" 
-      WHERE "locationId" = ${locationId} 
-      
-      AND ("consent" = 'Yes' OR "consent" = 'Consent Final Yes')
+      SELECT COUNT(DISTINCT id) as "totalHouses"
+      FROM "House"       
+      WHERE "locationId" = ${locationId}
+      AND ("consent" = 'Yes' OR "statusAttempt" = 'Consent Final Yes')
     `;
 
     const totalHousesWithConsentYes = Number(
@@ -682,7 +723,7 @@ export const getLocationsStats = async (locationId: number) => {
       SELECT COUNT(DISTINCT id) as "totalHouses"
       FROM "House"
       WHERE "locationId" = ${locationId}
-      AND "consent" = 'No'
+      AND ("consent" = 'No' OR "statusAttempt" = 'Consent Final No')
     `;
 
     const totalHousesWithConsentNo = Number(
@@ -696,14 +737,18 @@ export const getLocationsStats = async (locationId: number) => {
         locationId: locationId,
         statusAttempt: {
           in: [
+            "Consent Final",
+            "Consent Final Yes",
+            "Consent Final No",
+            "Site Visit Required",
+            "Drop Type Unverified",
+            "Engineer Visit Required",
             "Door Knock Attempt 1",
             "Door Knock Attempt 2",
             "Door Knock Attempt 3",
             "Door Knock Attempt 4",
             "Door Knock Attempt 5",
             "Door Knock Attempt 6",
-            "Consent Final Yes",
-            "Consent Final No",
           ],
         },
       },
@@ -853,14 +898,19 @@ export const getStreetsInLocation = async (location: string | string[] | undefin
       SELECT "streetId", COUNT(DISTINCT id) as "totalHouses"
       FROM "House"
       WHERE "statusAttempt" IN (
-        'Door Knock Attempt 1',
-        'Door Knock Attempt 2',
-        'Door Knock Attempt 3',
-        'Door Knock Attempt 4',
-        'Door Knock Attempt 5',
-        'Door Knock Attempt 6',
-        'Consent Final Yes',
-        'Consent Final No'
+'Home Does Not Exist', 
+      'Consent Final', 
+      'Consent Final Yes', 
+      'Consent Final No', 
+      'Site Visit Required', 
+      'Drop Type Unverified', 
+      'Engineer Visit Required',
+      'Door Knock Attempt 1',
+      'Door Knock Attempt 2',
+      'Door Knock Attempt 3',
+      'Door Knock Attempt 4',
+      'Door Knock Attempt 5',
+      'Door Knock Attempt 6'  
       )
       GROUP BY "streetId"
     `;
@@ -871,8 +921,8 @@ export const getStreetsInLocation = async (location: string | string[] | undefin
       await db.$queryRaw`
   SELECT "streetId", COUNT(DISTINCT id) as "totalHouses" 
   FROM "House" 
-  WHERE ("consent" = 'Yes')
-  -- AND ("consent" = 'Yes' OR "consent" = 'Consent Final Yes') 
+      WHERE "statusAttempt" = 'Consent Final Yes' 
+      OR "consent" = 'Yes'
   GROUP BY "streetId"
 `;
 
