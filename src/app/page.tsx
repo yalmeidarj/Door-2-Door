@@ -45,8 +45,8 @@ export default async function HomePage({
     console.log(`Total Houses: ${data.data.map((location: any) => location.totalHouses)}`)
     
     return (
-      <div>
-        <h1 className="text-2xl font-bold">Locations</h1>
+      <div className="flex flex-col items-center p-4">
+        <h1 className="text-2xl font-bold">Sites</h1>
         <PaginationControls
           metadata={paginationControls}
         />
