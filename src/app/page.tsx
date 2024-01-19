@@ -19,7 +19,7 @@ export default async function HomePage({
   const { defaultPage, defaultPerPage } = defaultValues
   const page = Number(searchParams.page) || Number(defaultPage )
   const perPage = Number(searchParams.per_page) || Number(defaultPerPage)
-  const start = (page - 1) * perPage
+  const start = (Number(page) - 1) * Number(perPage) 
 
 
   const data = await getLocations(start, perPage)
@@ -42,7 +42,7 @@ export default async function HomePage({
         data.metadata      
     }
 
-    console.log(`Total Houses: ${data.data.map((location: any) => location.totalHouses)}`)
+    console.log(`Data: ${data.data.map((location: any) => location.data)}`)
     
     return (
       <div className="flex flex-col items-center p-4">
