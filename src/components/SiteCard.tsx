@@ -59,7 +59,7 @@ export async function SiteCard({ props }: SiteCardProps) {
               <h3 className="text-md font-medium text-gray-700">Active Users</h3>
               <ul className="flex flex-row gap-2">
                 {activeUsers.map((user, index) => (
-                  <li key={index} className="text-sm text-gray-600">| {user.split(' ')[0]}</li>
+                  <li key={index} className="text-sm text-gray-600">| {user?.split(' ')[0]}</li>
                   ))}
                   
               </ul>
