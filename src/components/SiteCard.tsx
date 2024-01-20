@@ -1,34 +1,6 @@
+import { SiteCardProps } from "@/lib/sites/types";
 import { defaultValues } from "@/lib/utils";
 import Link from "next/link";
-
-type User = {
-  name: string; // Add other relevant fields of User as needed
-};
-
-type ShiftLogger = {
-  isFinished: boolean;
-  User: User;
-};
-
-type location = {
-  id: number;
-  name: string | null;
-  neighborhood: string;
-  priorityStatus: number;
-  totalHouses: number;
-  totalHousesVisited: number;
-  leftToVisit: number;
-  ShiftLogger: ShiftLogger[]; 
-  totalHousesWithConsentYes: number;
-  totalHousesWithConsentNo: number;
-  totalHousesWithToBeVisited:  number
-
-};
-
-type SiteCardProps = {
-  props: location;
-};  
-
 
 export async function SiteCard({ props }: SiteCardProps) {
 
