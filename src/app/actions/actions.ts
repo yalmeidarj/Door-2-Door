@@ -777,6 +777,22 @@ export const getLocationsStats = async (locationId: number) => {
       where: { locationId: locationId, statusAttempt: "Non Existent" },
     });
 
+    const toBeVisited = await db.house.count({
+      where: {
+        locationId: locationId,
+        statusAttempt: {
+          in: [
+            "Door Knock Attempt 1",
+            "Door Knock Attempt 2",
+            "Door Knock Attempt 3",
+            "Door Knock Attempt 4",
+            "Door Knock Attempt 5",
+            "Door Knock Attempt 6",
+          ],
+        },
+      },
+    });
+
     // Total number of houses with consent
     const totalHousesWithConsent =
       Number(totalHousesWithConsentYes) + Number(totalHousesWithConsentNo);
@@ -799,7 +815,7 @@ export const getLocationsStats = async (locationId: number) => {
     const name = location?.name ?? "";
     const isDeleted =  false;
 
-    const toBeVisited = totalHouses - totalHousesVisited;
+    // const toBeVisited = totalHouses - totalHousesVisited;
 
     const data = {
       isDeleted: isDeleted,
