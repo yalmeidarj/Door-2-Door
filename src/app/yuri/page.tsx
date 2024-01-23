@@ -72,7 +72,7 @@ export default async function Page() {
         const consent = data.get('consent')
         // const response = await updateConsent(currentStatus, consent)
     }
-    }
+    
 
     return (
         <>
@@ -136,9 +136,10 @@ export default async function Page() {
                         </div>
                     </form> */}
                 </div>
+            </div>
+    </>
+)
+}
 
         
-            </div>
-        </>
-    );
-}
+
