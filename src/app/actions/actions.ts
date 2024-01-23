@@ -718,7 +718,7 @@ export const getLocationsStats = async (locationId: number) => {
       SELECT COUNT(DISTINCT id) as "totalHouses"
       FROM "House"       
       WHERE "locationId" = ${locationId}
-      AND ("consent" = 'Yes' OR "statusAttempt" = 'Consent Final Yes')
+      AND "statusAttempt" = 'Consent Final Yes'
     `;
 
     const totalHousesWithConsentYes = Number(
