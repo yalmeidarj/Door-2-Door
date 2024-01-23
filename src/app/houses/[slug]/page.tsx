@@ -4,6 +4,7 @@ import { authOptions } from "@/server/auth";
 import GoBack from "@/components/GoBack"
 import { houseCurrentStreet } from "@/lib/houses/helperFunctions"
 import HousesFeed from "@/components/HouseFeed"
+import PageHeaderInfo from "@/components/PageHeaderInfo";
 
 export default async function Page({
     params,
@@ -35,19 +36,22 @@ export default async function Page({
         userId: session?.user.id as string
     } 
 
-    const URL = `/streets/${street.Street.name}?id=${street.Location.id}&per_page=${perPage}&page=${page}`
+    const URL = `/streets/${street.Location.name}?id=${street.Location.id}&per_page=${perPage}&page=${page}`
     return (
         <main className="flex flex-col items-center bg-gray-100 p-4">
-            <div className='flex flex-row md:flex-row w-full md:grow justify-between items-center gap-4 bg-white shadow-md rounded-lg p-4'>
-                <h1 className='text-2xl md:text-2xl font-semibold text-slate-600'>{`${street.Street.name}`}</h1>
+            <PageHeaderInfo 
+                route={street.Street.name}
+                >
                 <GoBack
                     href={URL}
-                    title={`Back to streets`}
+                    title={`${street.Location.name} Streets`}
                 />
-            </div>
+            </PageHeaderInfo>            
             <HousesFeed
                 feed={feed}
             />
         </main>
     )
 }
+
+

@@ -42,7 +42,7 @@ export const houseCurrentStreet = async (streetId: number) => {
     try {
         const street = await db.house.findFirst({
             where: { streetId: streetId },
-            select: { Street: { select: { name: true } }, Location: { select: { id: true } } },
+            select: { Street: { select: { name: true } }, Location: { select: { id: true, name: true } } },
         });
         return street;
     } catch (error) {
