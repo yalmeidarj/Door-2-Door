@@ -34,4 +34,5 @@ export type HouseFeedData = {
 export type HouseItemProps = {
   house: house;
   activeShift: boolean;
+  // locationId: number;
 };

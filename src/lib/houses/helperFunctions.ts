@@ -1,18 +1,43 @@
 import { db } from "@/server/db";
 
 export const isAgentClockedIn = async (agentId: string) => {
-    try {
-    
- const isClockedIn = await db.user.findUnique({
-    where: { id: agentId, isClockedIn: true },
-    select: { isClockedIn: true },
-  });
-        return isClockedIn;
-    } catch (error) {
-        console.log(error);
-        return false;
+  try {
+    const user = await db.user.findUnique({
+      where: { id: agentId },
+      select: {
+        isClockedIn: true,
+        ShiftLogger: {
+          where: {
+            isFinished: false, // Assuming you want the current (unfinished) shift
+          },
+          select: {
+            Location: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return { activeShift: false, locationId: 0 };
     }
-}
+
+    const location = user.ShiftLogger[0]?.Location;
+    return {
+      activeShift: user.isClockedIn,
+      locationId: location.id,
+    };
+  } catch (error) {
+    console.error(error);
+    return { activeShift: false };
+  }
+};
+
+
 export const houseCurrentStreet = async (streetId: number) => {
     try {
         const street = await db.house.findFirst({

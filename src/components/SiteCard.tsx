@@ -9,8 +9,6 @@ export async function SiteCard({ props }: SiteCardProps) {
   // Convert BigInt to String for rendering
   const totalHousesString = props.totalHouses.toString();
 
-  console.log("SiteCard Props:", props);
-
   // Extracting active user names from the ShiftLogger array
   const activeUsers = props.ShiftLogger
     .filter(logger => !logger.isFinished)

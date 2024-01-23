@@ -33,9 +33,11 @@ export default async function RootLayout({
         <Provider session={session}>
         <Toaster />
           <AppBar />
-          <main className="flex flex-col items-center">
-
+          <div className='flex justify-end w-full '>
           <ShiftManager />
+          </div>
+          <main className="flex flex-col items-center p-6">
+
           </main>
 
         {children}

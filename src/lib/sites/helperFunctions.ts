@@ -73,7 +73,7 @@ export const getLocations = async (skip: number, take: number) => {
       COUNT(DISTINCT id) as "totalHouses"
       FROM "House" 
       WHERE "statusAttempt" = 'Consent Final Yes' 
-      OR "consent" = 'Yes'
+      
       GROUP BY "locationId"
     `;
 
@@ -83,7 +83,7 @@ export const getLocations = async (skip: number, take: number) => {
        COUNT(DISTINCT id) as "totalHouses"
         FROM "House" 
         WHERE "statusAttempt" = 'Consent Final No' 
-        OR "consent" = 'No' 
+         
         GROUP BY "locationId"
     `;
 

@@ -64,7 +64,8 @@ export default function Page() {
     useEffect(() => {
         // const socketUrl = process.env.REACT_APP_SOCKET_URL || 'https://tdxpuppeteernodeweb.onrender.com';
         // if in production, use the production url, otherwise use the local url
-        const socketUrl = process.env.NODE_ENV === 'production' ? 'https://tdxpuppeteernodeweb.onrender.com' : 'http://localhost:7000';
+        // const socketUrl = process.env.NODE_ENV === 'production' ? 'https://tdxpuppeteernodeweb.onrender.com' : 'http://localhost:7000';
+        const socketUrl = 'https://tdxpuppeteernodeweb.onrender.com';
         const newSocket = io(socketUrl);
         setSocket(newSocket);
 
@@ -161,7 +162,7 @@ export default function Page() {
                                     className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                     <option value=""></option>
                                     {Object.entries(SalesForce.siteOptions).map(([key, value]) => (
-                                        <option key={value} value={key}>
+                                        <option key={value} value={value}>
                                             {key}
                                         </option>
                                     ))}

@@ -7,9 +7,11 @@ import {
 import { HouseDetailsProps, HouseItemProps } from "@/lib/houses/types";
 import Form from "./Form";
 import HouseCard from "./HouseCard";
-import NotLoggedIn from "./NotLoggedIn";
+import NotClockedIn from "./NotLoggedIn";
 
 export default function HouseItem({ house, activeShift }: HouseItemProps) {
+
+    
     return (
         <>
             <Accordion
@@ -22,7 +24,7 @@ export default function HouseItem({ house, activeShift }: HouseItemProps) {
                         </AccordionTrigger>
                         <AccordionContent>
                             <HouseDetails props={house} />
-                            {activeShift ? <Form houseId={house.id} /> : <NotLoggedIn />}
+                            {activeShift ? <Form houseId={house.id} /> : <NotClockedIn />}
                         </AccordionContent>
                     </AccordionItem>
                 </div>

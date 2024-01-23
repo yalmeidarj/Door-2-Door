@@ -75,7 +75,7 @@ export const getStreetsInLocation = async (
   SELECT "streetId", COUNT(DISTINCT id) as "totalHouses" 
   FROM "House" 
       WHERE "statusAttempt" = 'Consent Final Yes' 
-      OR "consent" = 'Yes'
+      
   GROUP BY "streetId"
 `;
 
@@ -89,10 +89,12 @@ export const getStreetsInLocation = async (
 
     // combine totalHousesWithConsentYesPerStreet and totalHousesWithYes
 
-    const totalHousesWithConsentNoPerStreet: any[] = await db.$queryRaw`
+    const totalHousesWithConsentNoPerStreet: StreetHouseCount[] =
+      await db.$queryRaw`
       SELECT "streetId", COUNT(DISTINCT id) as "totalHouses"
        FROM "House" 
-       WHERE ("consent" = 'No')
+       WHERE "statusAttempt" = 'Consent Final No' 
+      
       GROUP BY "streetId"
     `;
 

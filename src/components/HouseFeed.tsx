@@ -12,7 +12,17 @@ export default async function HousesFeed({ feed }: HouseFeedData) {
         return <div>loading...</div>
     }
 
-    const isClockedIn = await isAgentClockedIn(userId) as boolean;
+    const isClockedIn = await isAgentClockedIn(userId);
+
+    let isClockedInLocationId = true
+    if (isClockedIn.locationId !== housesInStreet.data.houses[0].locationId) {
+        isClockedInLocationId = false
+    }
+    
+
+
+
+
 
     const paginationControls = {
         state: {
@@ -33,7 +43,8 @@ export default async function HousesFeed({ feed }: HouseFeedData) {
                         <HouseItem
                             key={house.id}
                             house={house}
-                            activeShift={isClockedIn}                        
+                            activeShift={isClockedInLocationId}                       
+                            // locationId={isClockedIn.locationId? isClockedIn.locationId : 0}
                         />
                     ))}
               </div>

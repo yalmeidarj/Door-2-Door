@@ -21,11 +21,20 @@ export const updateProperty = async (formData: FormData) => {
 
   const agentId = formData.get("agentId") as string;
   const agentName = formData.get("agentName") as string;
+  const status = formData.get("statusAttempt") as string
+  let consent = " ";
+  if (status === "Consent Final Yes" || status === "Consent Final No") {
+    consent = status.split(" ")[2];
+  } else {
+    consent = formData.get("consent") as string;
+  }
+
   try {
     const updatedHouse = await db.house.update({
       where: { id: id },
       data: {
         ...updatedData,
+        consent: consent, 
         lastUpdated: new Date(),
         lastUpdatedBy: agentName,
       },
@@ -723,7 +732,7 @@ export const getLocationsStats = async (locationId: number) => {
       SELECT COUNT(DISTINCT id) as "totalHouses"
       FROM "House"
       WHERE "locationId" = ${locationId}
-      AND ("consent" = 'No' OR "statusAttempt" = 'Consent Final No')
+      AND "statusAttempt" = 'Consent Final No'
     `;
 
     const totalHousesWithConsentNo = Number(
@@ -790,6 +799,8 @@ export const getLocationsStats = async (locationId: number) => {
     const name = location?.name ?? "";
     const isDeleted =  false;
 
+    const toBeVisited = totalHouses - totalHousesVisited;
+
     const data = {
       isDeleted: isDeleted,
       name: name,
@@ -803,6 +814,7 @@ export const getLocationsStats = async (locationId: number) => {
       percentageHousesWithConsentNo: Number(percentageHousesWithConsentNo),
       percentageHousesVisited: Number(percentageHousesVisited),
       totalHousesVisitRequired: Number(totalHousesVisitRequired),
+      toBeVisited: Number(toBeVisited),
 
     };
 

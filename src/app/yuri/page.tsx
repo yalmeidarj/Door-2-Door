@@ -66,6 +66,14 @@ export default async function Page() {
         // return result;
     }
 
+    async function updateConsentByStatus(data: FormData) {
+        "use server"
+        const currentStatus = data.get('statusAttempt')
+        const consent = data.get('consent')
+        // const response = await updateConsent(currentStatus, consent)
+    }
+    }
+
     return (
         <>
             <div className='flex flex-wrap flex-row gap-0 items-center '>

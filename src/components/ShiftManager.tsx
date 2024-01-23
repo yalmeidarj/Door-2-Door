@@ -105,7 +105,7 @@ export default async function ShiftManager() {
             <ClockInCard
                 className='bg-slate-300 mb-9 shadow-md'
                 agentId={agentId}
-                availableLocations={availableLocations}
+                locations={availableLocations}
             />
         )
 
@@ -148,11 +148,11 @@ function ClockOutCard({ className, paceFinal, formattedStartTime, shiftDurationI
 type ClockInCardProps = {
     className?: string;
     agentId: string;
-    availableLocations: { id: number; name: string }[];
+    locations: { id: number; name: string }[];
 }
 
 
-function ClockInCard({ className, agentId, availableLocations }: ClockInCardProps) {
+function ClockInCard({ className, agentId, locations }: ClockInCardProps) {
     return (
         
         <div className={cn("flex flex-col max-w-md self-end py-2 px-4 m-0 mb-2 border-solid border-gray-300 border-x-2 border-b-2 rounded-bl-md", className)}>
@@ -163,7 +163,7 @@ function ClockInCard({ className, agentId, availableLocations }: ClockInCardProp
             <div className="bg-red-500 animate-blink rounded-full w-2 h-2"></div>
         </div>
 
-        <ClockInHandler agentId={agentId} locations={availableLocations} />
+            <ClockInHandler agentId={agentId} locations={locations} />
     </div>
         )
 }

@@ -19,13 +19,16 @@ export default async function SiteFeed({ start, perPage }: any) {
             data.metadata
     }
     return (
-        <div className="flex flex-col justify-center text-gray-600">
+        <div className="flex flex-col w-md  justify-center text-gray-600">
             <PaginationControls
                 metadata={paginationControls}
             />
+            <div className='flex flex-col md:flex-row md:flex-wrap md:justify-center '>
+            
             {data.data.map((location) => (
                 <SiteCard key={location.id} props={location} />
-            ))}
+                ))}
+                </div>
         </div>
     );
 }
