@@ -48,18 +48,11 @@ export const getStreetsInLocation = async (
       SELECT "streetId", COUNT(DISTINCT id) as "totalHouses" FROM "House" GROUP BY "streetId"
     `;
 
-    const totalHousesAlreadyVisitedPerStreet: StreetHouseCount[] =
+    const totalHousesLeftToVisitPerStreet: StreetHouseCount[] =
       await db.$queryRaw`
       SELECT "streetId", COUNT(DISTINCT id) as "totalHouses"
       FROM "House"
       WHERE "statusAttempt" IN (
-'Home Does Not Exist', 
-      'Consent Final', 
-      'Consent Final Yes', 
-      'Consent Final No', 
-      'Site Visit Required', 
-      'Drop Type Unverified', 
-      'Engineer Visit Required',
       'Door Knock Attempt 1',
       'Door Knock Attempt 2',
       'Door Knock Attempt 3',
@@ -84,10 +77,6 @@ export const getStreetsInLocation = async (
       FROM "House"
       WHERE "consent" = 'Yes' GROUP BY "streetId"
   `;
-
-    // const totalHousesWithConsentYesPerStreet = yes + totalHousesWithYes;
-
-    // combine totalHousesWithConsentYesPerStreet and totalHousesWithYes
 
     const totalHousesWithConsentNoPerStreet: StreetHouseCount[] =
       await db.$queryRaw`
@@ -124,13 +113,16 @@ export const getStreetsInLocation = async (
           (house: StreetHouseCount) => house.streetId === street.id
         )?.totalHouses || 0;
 
-      const leftToVisit = Number(totalHouses) - Number(street._count.House);
+      const leftToVisit = 
+        totalHousesLeftToVisitPerStreet.find(
+          (house: StreetHouseCount) => house.streetId === street.id
+        )?.totalHouses || 0;
 
       return {
         ...street,
         totalHousesVisited: Number(street._count.House),
         totalHouses: Number(totalHouses),
-        leftToVisit: leftToVisit,
+        leftToVisit:  Number(leftToVisit),
         totalHousesWithConsentYes: Number(totalHousesWithConsentYes),
         totalHousesWithConsentNo: Number(totalHousesWithConsentNo),
         totalHousesWithVisitRequired: Number(totalHousesWithVisitRequired),

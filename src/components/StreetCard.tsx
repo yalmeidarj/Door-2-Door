@@ -5,6 +5,7 @@ import { RiForbidLine } from "react-icons/ri";
 import { defaultValues } from "@/lib/utils";
 import Link from "next/link";
 import { StreetCardProps } from "@/lib/streets/types";
+import { MdEngineering } from "react-icons/md";
 
 const StreetCard = ({ street }: StreetCardProps) => {
 
@@ -36,7 +37,6 @@ const StreetCard = ({ street }: StreetCardProps) => {
                     <div className='flex flex-col items-center justify-center space-y-1'>
                         <div className='flex items-center space-x-1'>
                             <IoIosCheckmarkCircleOutline className="text-green-600" aria-label="Final Yes" />
-                            {/* <FaCheck className="mr-1" aria-label="Final Yes" /> */}
                             <span>{street.totalHousesWithConsentYes}</span>
                         </div>
                         <h2 className='text-xs'>Yes</h2>
@@ -44,7 +44,8 @@ const StreetCard = ({ street }: StreetCardProps) => {
 
                     <div className='flex flex-col items-center justify-center space-y-1'>
                         <div className='flex items-center space-x-1'>
-                            <BsPersonWalking className="mr-1" aria-label="Not Visited" />
+                                {/* <BsPersonWalking className="mr-1" aria-label="Not Visited" /> */}
+                                <MdEngineering className="text-lg mr-1" />
                             <span>{street.totalHousesWithVisitRequired}</span>
                         </div>
                         <h2 className='text-xs'>Visit Required</h2>
@@ -69,10 +70,10 @@ const StreetCard = ({ street }: StreetCardProps) => {
                     </div>
                     <div className='flex flex-col items-center justify-center space-y-1'>
                         <div className='flex items-center space-x-1'>
-                            <FaTimes className="mr-1" aria-label="Not Visited" />
+                                <BsPersonWalking className="mr-1" aria-label="To be Visited" />
                             <span>{street.leftToVisit}</span>
                         </div>
-                        <h2 className='text-xs'>Not Visited</h2>
+                        <h2 className='text-xs'>To be Visited</h2>
                     </div>
                 </div>
                 </div>
