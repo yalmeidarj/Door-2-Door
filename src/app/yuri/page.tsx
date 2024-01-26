@@ -13,6 +13,7 @@ import { promisify } from 'util';
 
 import fs from 'fs';
 import HouseTable from '@/components/HouseTable';
+import SeedSfTable from '@/components/houseTable/SeedSfTable';
 
 
 type ProjectData = {
@@ -136,6 +137,8 @@ export default async function Page() {
                         </div>
                     </form> */}
                 </div>
+                <SeedSfTable>
+                </SeedSfTable>
             </div>
     </>
 )
