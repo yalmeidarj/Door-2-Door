@@ -13,7 +13,11 @@ const FormSchema = z.object({
     agentName: z.string(),
     agentId: z.string(),
     externalNotes: z.string().optional(),
-    type: z.string().optional(),
+    type: z.union([
+        z.string(),
+        z.literal(''),
+        z.null(),
+    ]).optional(),
     statusAttempt: z.string(),
     name: z.string().optional(),
     lastName: z.string().optional(),
@@ -165,7 +169,6 @@ export default function Form({ houseId }: { houseId: number }) {
             
         } else {
             console.log("not consent yes");
-
             
             const result = FormSchema.safeParse(newObject);
             if (result.success) {
