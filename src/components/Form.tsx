@@ -5,7 +5,87 @@ import toast, { Toaster } from "react-hot-toast";
 import {  useRef } from "react";
 import SubmitFormButton from "./SubmitFormButton";
 import { useSession } from "next-auth/react";
+import { z } from "zod";
 // import { useFormStatus } from "react-dom";
+
+const FormSchema = z.object({
+    id: z.string(),
+    agentName: z.string(),
+    agentId: z.string(),
+    externalNotes: z.string().optional(),
+    type: z.string().optional(),
+    statusAttempt: z.string(),
+    name: z.string().optional(),
+    lastName: z.string().optional(),
+    phone: z.union([
+        z.string()
+            .trim()
+            .min(10, "Phone number must be at least 10 digits long")
+            .max(10, "Phone number must not be longer than 10 digits")
+            .regex(/^[0-9]+$/, "Phone number must be numeric"),
+        z.literal(''),
+    ]).optional(),
+    email: z.union([
+        z.string().email(),
+        z.literal(''),
+    ]).optional(),
+    internalNotes: z.string().optional(),
+});
+
+const ConsentYesSchema = z.object({
+    id: z.string(),
+    agentName: z.string(),
+    agentId: z.string(),
+    externalNotes: z.string().optional(),
+    type:
+        z.string({
+            required_error: "Type must be provided if status attempt is Consent Final Yes",
+            invalid_type_error: " Type must be provided if status attempt is Consent Final Yes",
+        }),
+    statusAttempt: z.string(),
+    lastName: z.string().optional(),
+    name: z.string().optional(),
+    phone: z.union([
+        z.string()
+        .trim()
+        .min(10, "Phone number must be at least 10 digits long")
+        .max(10, "Phone number must not be longer than 10 digits")
+        .regex(/^[0-9]+$/, "Phone number must be numeric"),
+        z.literal(''),
+    ]).optional(),
+    email: z.union([
+        z.string().email(),
+        z.literal(''),
+    ]).optional(),
+    internalNotes: z.string(),
+}).superRefine((data, ctx) => {
+    if (!data.email && !data.phone) {
+        ctx.addIssue({
+            code: "custom",
+            path: ["email"],
+            message: "Email must be provided if phone is not provided",
+        });
+        ctx.addIssue({
+            code: "custom",
+            path: ["phone"],
+            message: "Phone must be provided if email is not provided",
+        });
+    }
+    if (!data.name && !data.lastName) {
+        ctx.addIssue({
+            code: "custom",
+            path: ["name"],
+            message: "Name must be provided if last name is not provided",
+        });
+        ctx.addIssue({
+            code: "custom",
+            path: ["lastName"],
+            message: "LastName must be provided if name is not provided",
+        });
+    }
+});
+
+
 
 export default function Form({ houseId }: { houseId: number }) {
     const constructionTypes = ['Easy', 'Moderate', 'Hard'];
@@ -37,42 +117,84 @@ export default function Form({ houseId }: { houseId: number }) {
     
 
     async function clientAction(formData: FormData) {
-        const result = await updateProperty(formData);
-
+        
+        
         const currentShift = await getActiveShiftByAgentId(agentId);
 
         const statusAttempt = formData.get("statusAttempt");
-
-        
 
         // Make sure currentShift is not null before proceeding
         if (currentShift.status === "error" || !currentShift.shift) {
             console.error("No current shift found.");
             return;
         }
-
-        if (result.status === "success") {
-            toast.success(result.message);
-
-            const shiftId =  currentShift.shift.id;
-
-            if (statusAttempt === null) {
-                toast.error("No status attempt selected.");
-                return;
+        const shiftId = currentShift.shift.id;
+        
+        const newObject = {
+            id: formData.get("id"),
+            agentName: formData.get("agentName"),
+            agentId: formData.get("agentId"),
+            externalNotes: formData.get("externalNotes"),
+            type: formData.get("type"),
+            statusAttempt: formData.get("statusAttempt"),
+            lastName: formData.get("lastName"),
+            name: formData.get("name"),
+            phone: formData.get("phone"),
+            email: formData.get("email"),
+            internalNotes: formData.get("internalNotes"),
+        }
+        if (statusAttempt === "Consent Final Yes") {
+            console.log("consent yes");
+            console.log(newObject);
+            const result = ConsentYesSchema.safeParse(newObject);
+            if (result.success) {
+                const updateResult = await updateProperty(formData);
+                toast.success(updateResult.status);
+                const shiftUpdate = await updateActiveShiftByShiftId(shiftId, statusAttempt as string);
+                if (shiftUpdate.status !== "success") {
+                    toast.error(shiftUpdate.message);
+                    // return false;
+                }             
+                
+                return true;
             } else {
                 
-                const shiftUpdate = await updateActiveShiftByShiftId(shiftId, statusAttempt as string);
-            
-                if (shiftUpdate.status === "success") {
-                    toast.success(shiftUpdate.message);
-                }
-                else {
-                    toast.error(shiftUpdate.message);
-                }
+                toast.error(result.error.issues[0].message);
+                return false;
             }
+            
         } else {
-            toast.error(result.message);
+            console.log("not consent yes");
+
+            
+            const result = FormSchema.safeParse(newObject);
+            if (result.success) {
+                const updateResult = await updateProperty(formData);
+                if (updateResult.status === "success") {
+
+                    if (statusAttempt === null) {
+                        toast.error("No status attempt selected.");
+                        return;
+                    } else {
+                    
+                        const shiftUpdate = await updateActiveShiftByShiftId(shiftId, statusAttempt as string);
+                
+                        if (shiftUpdate.status !== "success") {
+                            toast.error(shiftUpdate.message);
+                            // return false;
+                        }
+                    }
+                }
+                toast.success(updateResult.status);
+                return true;
+            } else {
+                
+                toast.error(result.error.issues[0].message);
+                return false;
+            }
         }
+
+        
     }
 
     const ref = useRef<HTMLFormElement>(null);
@@ -82,8 +204,10 @@ export default function Form({ houseId }: { houseId: number }) {
             <form
                 ref={ref}
                 action={async (formData) => {
-                    ref.current?.reset();
-                    await clientAction(formData);
+                    const result = await clientAction(formData);
+                    if (result) {
+                        ref.current?.reset();
+                    }
                 }
                 }
                 className="p-4 mx-auto w-full bg-gray-200 "
@@ -130,8 +254,9 @@ export default function Form({ houseId }: { houseId: number }) {
                             <input
                                 type="radio"
                                 id="type"
-                                className="form-radio h-5 w-5 text-gray-600"
                                 name="type"
+                                
+                                className="form-radio h-5 w-5 text-gray-600"
                                 value={option}
                             // onChange={(e) => setDifficulty(e.target.value)}
                             />
@@ -198,7 +323,7 @@ export default function Form({ houseId }: { houseId: number }) {
                             Email
                         </label>
                         <input
-                            type="text"
+                            type="email"
                             id="email"
                             name="email"
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -211,7 +336,7 @@ export default function Form({ houseId }: { houseId: number }) {
                             Phone
                         </label>
                         <input
-                            type="text"
+                            type="tel"
                             id="phone"
                             name="phone"
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"

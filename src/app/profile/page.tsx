@@ -3,6 +3,7 @@ import React from "react";
 import { authOptions } from "@/server/auth";
 import { getShiftsByAgentId } from "../actions/actions";
 import { format } from "date-fns";
+import { DateTime } from "luxon";
 
 type shiftProps = {
     id: number;
@@ -44,6 +45,14 @@ const ProfilePage = async () => {
 
     const { finishedShifts } = shifts as { finishedShifts: any[] };
 
+    // Convert and format dates to Toronto time zone
+    finishedShifts.forEach((shift: shiftProps) => {
+        const torontoZone = 'America/Toronto';
+        shift.startingDate = DateTime.fromJSDate(shift.startingDate).setZone(torontoZone).toJSDate();
+        shift.finishedDate = DateTime.fromJSDate(shift.finishedDate).setZone(torontoZone).toJSDate();
+        shift.formattedShiftLength = format(shift.finishedDate.getTime() - shift.startingDate.getTime(), 'H:mm');
+    });
+    
     return (
         <div className="flex flex-col items-center justify-center">
             <div className="bg-white shadow-sm rounded-lg p-4">
@@ -77,6 +86,7 @@ const ProfilePage = async () => {
                                     <h2 className='text-sm font-semibold text-gray-700'>{shift.Location.name}</h2>
                                 </div>
                                 <h4 className='text-xs text-gray-500'>{format(new Date(shift.startingDate), 'MMM do')}</h4>
+                                    <h4 className='text-xs text-gray-500'></h4>
                             </div>
                             <div className='flex flex-row text-sm justify-end text-gray-500'>
                                 <span>
