@@ -9,6 +9,7 @@ import MassUpdateStatusByLocationForm from '@/components/MassUpdateStatusByLocat
 import { initiateSearch, pollJobStatus, handleSearchResults, checkJobStatus } from '@/lib/pupeteerActions';
 import HouseRecordsUploader from '@/components/HouseRecordsUploader';
 import HouseTable from '@/components/HouseTable';
+import PastShiftsByAgentId from '@/components/PastShiftsByAgentId';
 
 
 type ProjectData = {
@@ -222,6 +223,9 @@ export default async function Page() {
             </div>
             <div className='flex flex-row flex-wrap max-w-full mx-auto px-6'>
             <ClockedInAgents />
+            </div>
+            <div className='flex flex-row flex-wrap max-w-full mx-auto px-6'>
+                <PastShiftsByAgentId />
             </div>
             <HouseRecordsUploader />
             

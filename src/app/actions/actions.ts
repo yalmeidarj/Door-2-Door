@@ -193,7 +193,11 @@ export const getShiftsByAgentId = async (agentId: string) => {
     const shifts = await db.shiftLogger.findMany({
       where: { agentId: agentId },
       select: {
-        Location: true,
+        Location: {
+          select: {
+            name: true,
+          },
+        },
         id: true,
         agentId: true,
         locationId: true,
