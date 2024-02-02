@@ -44,7 +44,6 @@ export default async function HousesFeed({ feed }: HouseFeedData) {
                             key={house.id}
                             house={house}
                             activeShift={isClockedInLocationId}                       
-                            // locationId={isClockedIn.locationId? isClockedIn.locationId : 0}
                         />
                     ))}
               </div>

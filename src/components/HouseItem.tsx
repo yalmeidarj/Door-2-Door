@@ -28,7 +28,8 @@ export default function HouseItem({ house, activeShift }: HouseItemProps) {
                                 ? <Form
                                     info={{
                                         streetNumber: `${house.streetNumber}`,
-                                        streetName: ` ${house.Street.name}`
+                                        streetName: ` ${house.Street.name}`,
+                                        locationName: `${house.Location.name}`
                                     }}    
                                     houseId={house.id}
                                     />

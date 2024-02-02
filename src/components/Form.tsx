@@ -93,8 +93,17 @@ const ConsentYesSchema = z.object({
 });
 
 
+type FormProps = {
+    houseId: number;
+    info: {
+        streetNumber: string;
+        streetName: string;
+        locationName: string;
+    };
+};
 
-export default function Form({ houseId, info }: { houseId: number, info: { streetNumber: string, streetName: string}}) {
+
+export default function Form({ houseId, info, locationName }: FormProps) {
     const constructionTypes = ['Easy', 'Moderate', 'Hard'];
 
     const statusAttemptOptions = [
@@ -232,24 +241,25 @@ export default function Form({ houseId, info }: { houseId: number, info: { stree
 
                 {/* Attempt Number Section */}
                 <div className='flex flex-row justify-between '>
-                    <div className='flex flex-col h-max items-center bg-gray-300 text-slate-600 justify-between border-slate-300 border-dotted border-2 rounded-md px-4 py-7 '>
-                        <span className='text-semibold text-xl'> {info.streetNumber}</span>                
-                        <span className='text-semibold text-xl'> {info.streetName}</span>
+                    <div className='flex flex-col h-max items-center bg-gray-300 text-slate-600 justify-between border-slate-300 border-dotted border-2 rounded-md px-2 py-8 '>
+                        <span className='text-semibold text-xs'> {info.locationName}</span>                
+                        <span className='text-semibold text-xs'> {info.streetNumber}</span>                
+                        <span className='text-semibold text-xs'> {info.streetName}</span>
                 </div>
                 <div className="mb-4 flex flex-col gap-2 items-center">
                     <div className="mb-4">
                     {/* <span className="block text-gray-800 text-sm font-semibold mb-2">Difficulty</span> */}
-                    <div className="flex flex-wrap -mx-2 items-center justify-around border-b-2 border-gray-300">
+                            <div className="flex flex-wrap -mx-2 items-center m-w-full justify-around border-b-2 border-gray-300">
                         {constructionTypes.map((option) => (
-                            <div key={option} className="flex items-center px-2 mb-8">
+                            <div key={option} className="flex flex-col  items-center px-1 mb-8">
+                                <label htmlFor={option} className=" text-gray-500">{option}</label>
                                 <input
                                     type="radio"
                                     id={option}
                                     name="type"
-                                    className="form-radio h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                                    className="form-radio  text-indigo-600 border-gray-300 focus:ring-indigo-500"
                                     value={option}
                                 />
-                                <label htmlFor={option} className="ml-2 text-gray-700">{option}</label>
                             </div>
                         ))}
                     </div>
