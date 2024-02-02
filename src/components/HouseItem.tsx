@@ -24,7 +24,16 @@ export default function HouseItem({ house, activeShift }: HouseItemProps) {
                         </AccordionTrigger>
                         <AccordionContent>
                             <HouseDetails props={house} />
-                            {activeShift ? <Form houseId={house.id} /> : <NotClockedIn />}
+                            {activeShift
+                                ? <Form
+                                    info={{
+                                        streetNumber: `${house.streetNumber}`,
+                                        streetName: ` ${house.Street.name}`
+                                    }}    
+                                    houseId={house.id}
+                                    />
+                                : <NotClockedIn />
+                            }
                         </AccordionContent>
                     </AccordionItem>
                 </div>

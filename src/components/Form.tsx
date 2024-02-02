@@ -6,6 +6,9 @@ import {  useRef } from "react";
 import SubmitFormButton from "./SubmitFormButton";
 import { useSession } from "next-auth/react";
 import { z } from "zod";
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+
 // import { useFormStatus } from "react-dom";
 
 const FormSchema = z.object({
@@ -91,11 +94,10 @@ const ConsentYesSchema = z.object({
 
 
 
-export default function Form({ houseId }: { houseId: number }) {
+export default function Form({ houseId, info }: { houseId: number, info: { streetNumber: string, streetName: string}}) {
     const constructionTypes = ['Easy', 'Moderate', 'Hard'];
 
     const statusAttemptOptions = [
-        "",
         'Door Knock Attempt 1',
         'Door Knock Attempt 2',
         'Door Knock Attempt 3',
@@ -110,7 +112,7 @@ export default function Form({ houseId }: { houseId: number }) {
 
     const session = useSession();
 
-    if (!session || !session.data ) {
+    if (!session || !session.data) {
         return <div>loading...</div>
     }
 
@@ -158,7 +160,7 @@ export default function Form({ houseId }: { houseId: number }) {
                 if (shiftUpdate.status !== "success") {
                     toast.error(shiftUpdate.message);
                     // return false;
-                }             
+                }
                 
                 return true;
             } else {
@@ -211,74 +213,56 @@ export default function Form({ houseId }: { houseId: number }) {
                     if (result) {
                         ref.current?.reset();
                     }
-                }
-                }
-                className="p-4 mx-auto w-full bg-gray-200 "
+                }}
+                className="p-4 mx-auto w-full max-w-2xl sm:p-6 md:p-8 bg-gray-200 shadow-lg rounded-lg"
             >
+                {/* Hidden Inputs for functionality */}
+                <textarea id="id" name="id" className="hidden" value={houseId} />
+                <textarea id="agentName" name="agentName" className="hidden" value={agentName ?? "No Agent Name"} />
+                <textarea id="agentId" name="agentId" className="hidden" value={agentId} />
 
-                <div className="mb-4">
-
-                    <textarea
-                        id="id"
-                        name="id"
-                        className="hidden"
-                        value={houseId}
-                    />
-                    <textarea
-                        id="agentName"
-                        name="agentName"
-                        className="hidden"
-                        value={agentName ?? "No Agent Name"}
-                    />
-                    <textarea
-                        id="agentId"
-                        name="agentId"
-                        className="hidden"
-                        value={agentId}
-                    />
-                    <label htmlFor="externalNotes" className="block text-gray-700 text-sm font-bold mb-2">
-                        SalesForce Notes
-                    </label>
-                    <textarea
-                        id="externalNotes"
-                        name="externalNotes"
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        // required
-                    // value={}
-                    // value={salesForceNotes}
-                    // onChange={(e) => setSalesForceNotes(e.target.value)}
+                {/* External Notes Section */}
+                <div className="mb-6">
+                    <FormItem
+                        label="SalesForce Notes"
+                        input="externalNotes"
+                        type="text"
                     />
                 </div>
 
-                <div className="mb-4">
-                    <span className="block text-gray-700 text-sm font-bold mb-2">Difficulty</span>
-                    {constructionTypes.map((option) => (
-                        <label key={option} className="inline-flex items-center mt-3">
-                            <input
-                                type="radio"
-                                id="type"
-                                name="type"
-                                
-                                className="form-radio h-5 w-5 text-gray-600"
-                                value={option}
-                            // onChange={(e) => setDifficulty(e.target.value)}
-                            />
-                            <span className="ml-2 text-gray-700">{option}</span>
-                        </label>
-                    ))}
+                {/* Attempt Number Section */}
+                <div className='flex flex-row justify-between '>
+                    <div className='flex flex-col h-max items-center bg-gray-300 text-slate-600 justify-between border-slate-300 border-dotted border-2 rounded-md px-4 py-7 '>
+                        <span className='text-semibold text-xl'> {info.streetNumber}</span>                
+                        <span className='text-semibold text-xl'> {info.streetName}</span>
                 </div>
-
-                <div className="mb-4">
-                    <label htmlFor="attemptNumber" className="block text-gray-700 text-sm font-bold mb-2">
-                        Attempt Number
-                    </label>
+                <div className="mb-4 flex flex-col gap-2 items-center">
+                    <div className="mb-4">
+                    {/* <span className="block text-gray-800 text-sm font-semibold mb-2">Difficulty</span> */}
+                    <div className="flex flex-wrap -mx-2 items-center justify-around border-b-2 border-gray-300">
+                        {constructionTypes.map((option) => (
+                            <div key={option} className="flex items-center px-2 mb-8">
+                                <input
+                                    type="radio"
+                                    id={option}
+                                    name="type"
+                                    className="form-radio h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                                    value={option}
+                                />
+                                <label htmlFor={option} className="ml-2 text-gray-700">{option}</label>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div className="mb-4 w-full">
                     <select
                         id="statusAttempt"
                         name="statusAttempt"
-                        className="block appearance-none w-full bg-white border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                    // value={attemptNumber}
-                    // onChange={(e) => setAttemptNumber(e.target.value)}
-                    >
+                        className="block w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded leading-tight focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            >
+                            <option value="" >
+                                    Status Attempt
+                            </option>
                         {statusAttemptOptions.map((option) => (
                             <option key={option} value={option}>
                                 {option}
@@ -286,87 +270,80 @@ export default function Form({ houseId }: { houseId: number }) {
                         ))}
                     </select>
                 </div>
+            </div>
+        </div>
 
-                <div className="mb-4 flex flex-row">
-                    <div className='flex flex-col '>
-
-
-                        <label htmlFor="name" className="block text-gray-700 text-sm font-bold mb-2">
-                            Name
-                        </label>
-                        <input
+                {/* User Info Section with Responsive Grid */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                    {/* Name Field */}
+                    <div>
+                        <FormItem
+                            label="Name"
+                            input="name"
                             type="text"
-                            id="name"
-                            name="name"
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        // value={userInfo.lastName}
-                        // onChange={handleUserInfoChange}
                         />
                     </div>
-                    <div className='flex flex-col '>
-                        <label htmlFor="lastName" className="block text-gray-700 text-sm font-bold mb-2">
-                            Last Name
-                        </label>
-                        <input
+                    {/* Last Name Field */}
+                    <div>
+                        <FormItem
+                            label="Last Name"
+                            input="lastName"
                             type="text"
-                            id="lastName"
-                            name="lastName"
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        // value={userInfo.lastName}
-                        // onChange={handleUserInfoChange}
                         />
                     </div>
-                    {/* Repeat for other user info fields */}
                 </div>
-                <div className="mb-4 flex flex-row">
-                    <div className='flex flex-col '>
 
-
-                        <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">
-                            Email
-                        </label>
-                        <input
+                {/* Email and Phone Section with Responsive Grid */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                    {/* Email Field */}
+                    <div>
+                        <FormItem
+                            label="Email"
+                            input="email"
                             type="email"
-                            id="email"
-                            name="email"
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        // value={userInfo.lastName}
-                        // onChange={handleUserInfoChange}
                         />
                     </div>
-                    <div className='flex flex-col '>
-                        <label htmlFor="phone" className="block text-gray-700 text-sm font-bold mb-2">
-                            Phone
-                        </label>
-                        <input
+                    {/* Phone Field */}
+                    <div>
+                        <FormItem
+                            label="Phone"
+                            input="phone"
                             type="tel"
-                            id="phone"
-                            name="phone"
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        // value={userInfo.lastName}
-                        // onChange={handleUserInfoChange}
                         />
                     </div>
-                    {/* Repeat for other user info fields */}
                 </div>
-
-                <div className="mb-4">
-                    <label htmlFor="internalNotes" className="block text-gray-700 text-sm font-bold mb-2">
-                        Internal Notes
-                    </label>
-                    <textarea
+                {/* Internal Notes Section */}
+                <div className="mb-6">
+                    {/* <FormItem */}
+                    <Textarea
+                        placeholder="Type your message here." 
                         id="internalNotes"
                         name="internalNotes"
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    // value={internalNotes}
-                    // onChange={(e) => setInternalNotes(e.target.value)}
                     />
                 </div>
-                <div className="flex items-end justify-end">
+                {/* Submit Button */}
+                <div className="flex justify-end">
                     <SubmitFormButton title="Update property" />
                 </div>
 
             </form>
+
         </>
     );
+}
+
+function FormItem({ label, input, type, size }: { label: string, input: string, type: string, size?:number }) {
+    return (
+        <>
+            <Input
+                type={type}
+                id={input}
+                name={input}
+                placeholder={label}
+                size={size}
+                className="focus:ring-indigo-500"
+            />
+        </>
+
+    )
 }

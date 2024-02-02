@@ -14,6 +14,12 @@ export type house = {
   externalNotes: string | null;
   phone: string | null;
   email: string | null;
+  Street: {
+    name: string;
+  };
+  Location: {
+    name: string;
+  };
 };
 
 export type HouseDetailsProps = {

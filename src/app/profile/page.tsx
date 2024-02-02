@@ -1,9 +1,9 @@
 import { getServerSession } from "next-auth";
 import React from "react";
 import { authOptions } from "@/server/auth";
-import { getShiftsByAgentId } from "../actions/actions";
 import { format } from "date-fns";
 import { DateTime } from "luxon";
+import { getShiftsByAgentId, getShiftsByLocation, getShiftsByLocationByUser } from "@/lib/profilePage/actions";
 
 type shiftProps = {
     id: number;
@@ -33,7 +33,9 @@ const ProfilePage = async () => {
 
     const shifts = await getShiftsByAgentId(session.user.id);
 
-    if (!shifts) {
+                                                                                           
+
+    if (!shifts ) {
         return (
             <div className="flex items-center justify-center">
                 <div className="bg-sky-700 text-slate-100 p-2 rounded shadow grid grid-cols-2 mt-9">
@@ -54,7 +56,8 @@ const ProfilePage = async () => {
     });
     
     return (
-        <div className="flex flex-col items-center justify-center">
+        <div className="flex w-full flex-col items-center justify-center ">
+        <div className="flex flex-col items-center justify-center ">
             <div className="bg-white shadow-sm rounded-lg p-4">
                 <div className="flex justify-around gap-2 md:items-center border-b border-gray-200 pb-1">
                     <div className="flex-grow">
@@ -73,6 +76,11 @@ const ProfilePage = async () => {
                     </div>
                 </div>
             </div>
+
+            <ShiftsByLocation
+                userId={session.user.id as string}
+            
+            />
 
 
             <div className='flex flex-row flex-wrap mt-4 p-2 w-md'>
@@ -119,7 +127,34 @@ const ProfilePage = async () => {
                 </div>
             </div>
         </div>
+        </div>
     );
 };
+
+async function ShiftsByLocation({ userId }:{ userId: string }) {
+    const shifts = await getShiftsByLocationByUser(userId);
+
+    if (!shifts) {
+        return (
+            <div className="flex items-center justify-center">
+                <div className="bg-sky-700 text-slate-100 p-2 rounded shadow grid grid-cols-2 mt-9">
+                    <p>You have no shifts</p>
+                </div>
+            </div>
+        );
+    }
+    return (
+        <div className="flex w-full  flex-col items-center justify-center mt-9">
+            <h1 className="w-full text-xl font-semibold text-gray-700">Total Hours for Each shift:</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Object.entries(shifts).map(([location, hours]) => (
+                <div key={location} className="bg-sky-700 text-slate-100 p-2 rounded shadow mb-2">
+                    <p>{location}: {hours.toFixed(2)} hours</p>
+                </div>
+            ))}
+        </div>
+        </div>
+    );
+}
 
 export default ProfilePage;

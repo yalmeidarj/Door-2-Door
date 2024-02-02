@@ -84,6 +84,11 @@ export const getHousesInStreet = async (
             name: true,
           },
         },
+        Street: {
+          select: {
+            name: true,
+          },
+        },
       },
 
       // order by street number

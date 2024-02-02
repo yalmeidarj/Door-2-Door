@@ -74,7 +74,7 @@ async function ClockedInAgentCard({ agent }: { agent: PastShiftsProps }) {
 
     let userPace = 0;
     if (updatedHousesFinal !== 0) {
-        userPace = shiftDurationAdjusted / updatedHousesFinal; // this gives adjusted minutes per house update
+        userPace = shiftDurationInMinutes / updatedHousesFinal; // this gives adjusted minutes per house update
     }
     return (
         <div className='bg-white shadow-md  rounded-lg p-4'>

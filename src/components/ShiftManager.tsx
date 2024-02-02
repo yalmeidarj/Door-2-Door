@@ -76,7 +76,7 @@ export default async function ShiftManager() {
 
         let userPace = 0;
         if (updatedHousesFinal !== 0) {
-            userPace = shiftDurationAdjusted / updatedHousesFinal; // this gives adjusted minutes per house update
+            userPace = shiftDurationInMinutes / updatedHousesFinal; // this gives adjusted minutes per house update
         }
 
         // Ensure userPace is not NaN

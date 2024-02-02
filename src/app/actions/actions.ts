@@ -1084,6 +1084,60 @@ export async function seed(data: SeedData) {
   }
 }
 
+export async function createLocationAndHouses(jsonData: SeedData) {
+  try {
+    // Create location
+    const location = await db.location.create({
+      data: {
+        name: jsonData.name,
+        neighborhood: jsonData.neighborhood,
+        priorityStatus: jsonData.priorityStatus,
+      },
+    });
+
+    // Map to keep track of created streets for house association, with corrected type
+    const streetsMap: { [key: string]: number } = {};
+
+    // Create streets
+    for (const streetName of jsonData.streets) {
+      const street = await db.street.create({
+        data: {
+          name: streetName,
+          locationId: location.id,
+        },
+      });
+      streetsMap[streetName] = street.id; // Store street id for later use
+    }
+
+    // Create houses
+    for (const house of jsonData.houses) {
+      await db.house.create({
+        data: {
+          streetNumber: Number(house.streetNumber),
+          lastName: house.lastName,
+          name: house.name,
+          type: house.type,
+          streetId: streetsMap[house.street], // Associate with street using map
+          locationId: location.id, // Associate with location
+          lastUpdated: new Date(), // Assuming you want to set this manually
+          statusAttempt: house.statusAttempt,
+          consent: house.consent,
+          email: house.email,
+          externalNotes: house.notes, // Assuming 'notes' maps to 'externalNotes'
+          phone: house.phone,
+          // Add other fields as necessary
+        },
+      });
+    }
+
+    return { status: "success", message: "Location and houses created" };
+  } catch (error) {
+    console.error(error);
+    return { status: "error", message: "Error creating location and houses" };
+  }
+}
+
+
 export async function updateHouseRecords(jsonData: SeedData) {
   try {
     for (const house of jsonData.houses) {
@@ -1168,5 +1222,51 @@ export async function deleteRecords() {
 
 
 
+export const updateLatLonByStreetId = async ( streetId: string) => {
+  const houses = await db.house.findMany({
+    where: {
+      // locationId: 7,
+      streetId: Number(streetId),
+    },
+    select: {
+      id: true,
+      streetNumber: true,
+      Street: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
 
+  let allData = [];
+
+  for (const house of houses) {
+    const address = `${house.streetNumber} ${house.Street.name}`;
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${address}&accept-language=en&countrycodes=ca&limit=1`
+    );
+    const data = await response.json();
+    if (data.length === 0) {
+      console.log(`No data found for ${address}`);
+      continue;
+    }
+    const lat = parseFloat(data[0].lat);
+    const lon = parseFloat(data[0].lon);
+    await db.house.update({
+      where: { id: house.id },
+      data: {
+        latitud: lat,
+        longitud: lon,
+      },
+    });
+    allData.push({ lat: lat, lon: lon });
+
+
+
+
+    console.log(`Updated lat and lon for ${address}`);
+  }
+  return allData;
+};
 

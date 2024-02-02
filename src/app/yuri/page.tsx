@@ -1,5 +1,5 @@
 import { SalesForce } from '@/lib/utils';
-import { AllLocations, deleteRecords, getActiveLocations, getAllAgents, getAllClockedInAgents, getAllLocationsDropDown, getInactiveLocations, hardDeleteLocation, seed, softDeleteLocation } from '../actions/actions';
+import { AllLocations, deleteRecords, getActiveLocations, getAllAgents, getAllClockedInAgents, getAllLocationsDropDown, getInactiveLocations, hardDeleteLocation, seed, softDeleteLocation, updateLatLonByStreetId } from '../actions/actions';
 import SubmitFormButton from '@/components/SubmitFormButton';
 import { FormWrapper } from '@/components/FormWrapper';
 import PastShifts from '@/components/PastShifts';
@@ -54,6 +54,16 @@ export default async function Page() {
         return res;
     }
 
+    async function createLatLon(data: FormData) {
+        'use server'
+        const chosenSite = data.get('streetId') as string;
+
+        // const res = await updateLatLonByStreetId(chosenSite);
+        const res = await updateLatLonByStreetId("58");
+        console.log(res);
+
+        return res;
+    }
 
     const allActiveLocations = await getActiveLocations();
     if ('error' in allActiveLocations) {
@@ -138,10 +148,17 @@ export default async function Page() {
                     </form> */}
                 </div>
                 <div className=' '>
+                    <form action={createLatLon}>
+                        <div className='flex flex-col'>
+                            <div className='flex flex-col mt-8'>
+                                <SubmitFormButton title={'Create Lat Lon'} />
+                            </div>
+                        </div>
+                    </form>
                 
                 </div>
-                {/* <SeedSfTable>
-                </SeedSfTable> */}
+                <SeedSfTable>
+                </SeedSfTable>
             </div>
     </>
 )
