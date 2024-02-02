@@ -103,7 +103,7 @@ type FormProps = {
 };
 
 
-export default function Form({ houseId, info, locationName }: FormProps) {
+export default function Form({ houseId, info }: FormProps) {
     const constructionTypes = ['Easy', 'Moderate', 'Hard'];
 
     const statusAttemptOptions = [
