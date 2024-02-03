@@ -27,6 +27,11 @@ export async function SiteCard({ props }: SiteCardProps) {
   return (
     <>
       <div className="bg-white rounded-lg shadow-lg p-4 w-sm m-4 max-w-sm">
+        <Link
+          href={`/streets/${props.name}?id=${props.id}&per_page=${perPage}&page=${page}`}
+          className="hover:text-blue-700 text-sm font-semibold"
+          aria-label={`Visit ${props.name}`}
+        >
         <div className='flex flex-row justify-between items-center mb-2 gap-2 '>
         <div className=' '>
         
@@ -92,6 +97,7 @@ export async function SiteCard({ props }: SiteCardProps) {
             ))}
           </ul>
         </div>
+      </Link>
       </div>
 
 
