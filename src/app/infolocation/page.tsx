@@ -5,7 +5,7 @@ import { getLocationsStats } from "@/lib/infolocation/helperFunctions";
 
 // Assuming this is the type of your successful response
 type LocationStats = {
-    isDeleted: boolean;
+    isDeleted: boolean | undefined;
     name: string;
     totalHouses: number;
     totalHousesWithConsent: number;
