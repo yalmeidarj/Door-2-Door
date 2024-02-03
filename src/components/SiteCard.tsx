@@ -1,9 +1,9 @@
 import { getLocationTotalHoursSpentByAllUsers } from "@/lib/sites/helperFunctions";
 import { SiteCardProps } from "@/lib/sites/types";
 import { defaultValues } from "@/lib/utils";
-import { error } from "console";
+
 import Link from "next/link";
-import { number } from "zod";
+
 
 export async function SiteCard({ props }: SiteCardProps) {
 
@@ -11,6 +11,8 @@ export async function SiteCard({ props }: SiteCardProps) {
 
   // Convert BigInt to String for rendering
   const totalHousesString = props.totalHouses.toString();
+
+  const housesTotal = Number(props.totalHouses);
 
   const totalHoursSpent = await getLocationTotalHoursSpentByAllUsers(props.id);
 
@@ -26,6 +28,7 @@ export async function SiteCard({ props }: SiteCardProps) {
 
   return (
     <>
+      
       <div className="bg-white rounded-lg shadow-lg p-4 w-sm m-4 max-w-sm">
         <Link
           href={`/streets/${props.name}?id=${props.id}&per_page=${perPage}&page=${page}`}
@@ -73,7 +76,9 @@ export async function SiteCard({ props }: SiteCardProps) {
             <div className="text-green-500 text-md font-semibold">
               {props.totalHousesWithConsentYes}
             </div>
-            <p className="text-gray-500 text-xs">Yes</p>
+              <p className="text-gray-500 text-xs">Yes</p>
+
+
           </div>
           <div className="text-center">
             <div className="text-blue-500 text-md font-semibold">

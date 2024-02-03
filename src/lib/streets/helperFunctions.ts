@@ -48,17 +48,21 @@ export const getStreetsInLocation = async (
       SELECT "streetId", COUNT(DISTINCT id) as "totalHouses" FROM "House" GROUP BY "streetId"
     `;
 
-    const totalHousesLeftToVisitPerStreet: StreetHouseCount[] =
-      await db.$queryRaw`
-      SELECT "streetId", COUNT(DISTINCT id) as "totalHouses"
+          // "Door Knock Attempt 1",
+          //   "Door Knock Attempt 2",
+          //   "Door Knock Attempt 3",
+          //   "Door Knock Attempt 4",
+          //   "Door Knock Attempt 5",
+          //   "Door Knock Attempt 6";
+    
+    const totalHousesLeftToVisitPerStreet: StreetHouseCount[] = await db.$queryRaw`
+      SELECT "streetId", COUNT(DISTINCT id) AS "totalHouses"
       FROM "House"
-      WHERE "statusAttempt" IN (
-      'Door Knock Attempt 1',
-      'Door Knock Attempt 2',
-      'Door Knock Attempt 3',
-      'Door Knock Attempt 4',
-      'Door Knock Attempt 5',
-      'Door Knock Attempt 6'  
+      WHERE "statusAttempt" NOT IN (
+        'Consent Final Yes',
+        'Consent Final No',
+        'Site Visit Required',
+        'House Does Not Exist'
       )
       GROUP BY "streetId"
     `;

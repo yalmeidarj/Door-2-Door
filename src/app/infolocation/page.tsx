@@ -1,5 +1,7 @@
 import { defaultValues } from "@/lib/utils";
-import { getAllLocationIds, getLocationsStats } from "../actions/actions"
+import { getAllLocationIds } from "../actions/actions"
+import { getLocationsStats } from "@/lib/infolocation/helperFunctions";
+
 
 // Assuming this is the type of your successful response
 type LocationStats = {

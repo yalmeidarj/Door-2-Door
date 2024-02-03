@@ -62,21 +62,11 @@ export const getLocations = async (skip: number, take: number) => {
       SELECT "locationId",
       COUNT(DISTINCT id) as "totalHouses" 
       FROM "House" 
-      WHERE "statusAttempt" 
-      IN ('Home Does Not Exist', 
-      'Consent Final', 
-      'Consent Final Yes', 
-      'Consent Final No', 
-      'Site Visit Required', 
-      'Drop Type Unverified', 
-      ' Drop Type Unverified ', 
-      'Engineer Visit Required',
-      'Door Knock Attempt 1',
-      'Door Knock Attempt 2',
-      'Door Knock Attempt 3',
-      'Door Knock Attempt 4',
-      'Door Knock Attempt 5',
-      'Door Knock Attempt 6'      
+      WHERE "statusAttempt" NOT IN (
+        'Consent Final Yes',
+        'Consent Final No',
+        'Site Visit Required',
+        'House Does Not Exist'
       )
       GROUP BY "locationId"
     `;
@@ -138,9 +128,10 @@ export const getLocations = async (skip: number, take: number) => {
           (house: HouseCount) => house.locationId === location.id
         )?.totalHouses || 0;
 
-      const leftToVisit = needToVisit.find(
+      const leftToVisit = totalHousesToBeVisitedPerLocation.find(
         (house: HouseCount) => house.locationId === location.id
       )?.totalHouses || 0;
+
 
       const totalHousesWithConsentYes =
         totalHousesWithConsentYesPerLocation.find(

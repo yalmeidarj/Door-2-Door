@@ -699,15 +699,23 @@ interface TotalHousesResult {
   totalHouses: bigint; // or number, depending on the actual type returned
 }
 
+// type HouseCount = {
+//   streetId: number;
+//   totalHouses: number;
+// };
 
 export const getLocationsStats = async (locationId: number) => {
   try {
     // Location name
     const location = await db.location.findUnique({
-      where: { id: locationId },
+      where: {
+        id: locationId,
+        // isDeleted: false,
+      },
+
       select: {
         name: true,
-        isDeleted: false,
+        isDeleted: true,
       },
     });
 
@@ -781,21 +789,23 @@ export const getLocationsStats = async (locationId: number) => {
       where: { locationId: locationId, statusAttempt: "Non Existent" },
     });
 
-    const toBeVisited = await db.house.count({
-      where: {
-        locationId: locationId,
-        statusAttempt: {
-          in: [
-            "Door Knock Attempt 1",
-            "Door Knock Attempt 2",
-            "Door Knock Attempt 3",
-            "Door Knock Attempt 4",
-            "Door Knock Attempt 5",
-            "Door Knock Attempt 6",
-          ],
-        },
-      },
-    });
+    const toBeVisited: HouseCount[] = await db.$queryRaw`
+      SELECT COUNT(DISTINCT id) as "totalHouses"
+      FROM "House"
+      WHERE "locationId" = ${locationId}
+      AND "statusAttempt" NOT IN (
+        'Consent Final Yes',
+        'Consent Final No',
+        'Site Visit Required',
+        'House Does Not Exist'
+      )
+      GROUP BY "locationId"
+    `;
+
+    const leftToVisit =
+      toBeVisited.find((house: unknown) => house.streetId === house.id)
+        ?.totalHouses || 0;
+
 
     // Total number of houses with consent
     const totalHousesWithConsent =
