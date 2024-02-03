@@ -802,9 +802,9 @@ export const getLocationsStats = async (locationId: number) => {
       GROUP BY "locationId"
     `;
 
-    const leftToVisit =
-      toBeVisited.find((house: unknown) => house.streetId === house.id)
-        ?.totalHouses || 0;
+    // const leftToVisit =
+    //   toBeVisited.find((house: unknown) => house.streetId === house.id)
+    //     ?.totalHouses || 0;
 
 
     // Total number of houses with consent
