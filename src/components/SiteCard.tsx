@@ -1,6 +1,9 @@
+import { getLocationTotalHoursSpentByAllUsers } from "@/lib/sites/helperFunctions";
 import { SiteCardProps } from "@/lib/sites/types";
 import { defaultValues } from "@/lib/utils";
+import { error } from "console";
 import Link from "next/link";
+import { number } from "zod";
 
 export async function SiteCard({ props }: SiteCardProps) {
 
@@ -8,6 +11,12 @@ export async function SiteCard({ props }: SiteCardProps) {
 
   // Convert BigInt to String for rendering
   const totalHousesString = props.totalHouses.toString();
+
+  const totalHoursSpent = await getLocationTotalHoursSpentByAllUsers(props.id);
+
+  if (typeof totalHoursSpent !== 'number' ) {
+    return 'No Hours for this site...';
+  } 
 
   // Extracting active user names from the ShiftLogger array
   const activeUsers = props.ShiftLogger
@@ -17,54 +26,75 @@ export async function SiteCard({ props }: SiteCardProps) {
 
   return (
     <>
-      <div className="flex flex-col flex-wrap justify-center text-gray-600">
-            <Link href={`/streets/${props.name}?id=${props.id}&per_page=${perPage}&page=${page}`}
-            className=" hover:text-blue-700 text-sm font-semibold">
-        <div className="bg-white rounded-lg shadow-lg p-3 m-4 w-80">
-          <h2 className="text-xl font-bold mb-1">{props.name}</h2>
-          <p className="text-gray-500 text-sm mb-2">{props.neighborhood === 'to be verified' ? 'Neighborhood' : props.neighborhood}</p>
-          <div className="flex flex-row justify-around">
-            <div className="flex flex-col justify-center text-center items-center">
-              <i className="fas fa-home text-green-500 text-lg"></i>
-              <span className="text-green-500 text-md font-medium">{totalHousesString}</span>
-              <p className="text-gray-500 text-xs font-semibold mt-1">Houses</p>
-            </div>
-            <div className="flex flex-col justify-center text-center items-center">
-              <i className="fas fa-walking text-blue-500 text-lg"></i>
-                <span className="text-blue-500 text-md font-medium">{props.leftToVisit}</span>
-                <p className="text-gray-500 text-xs font-semibold mt-1">To be visited</p>
-            </div>
-          </div>
-          <div className="flex flex-row justify-around">
-            <div className="flex flex-col justify-center text-center items-center">
-              <i className="fas fa-home text-green-500 text-lg"></i>
-                <span className="text-green-500 text-md font-medium">{props.totalHousesWithConsentYes}</span>
-                <p className="text-gray-500 text-xs font-semibold mt-1">Yes</p>
-            </div>
-            <div className="flex flex-col justify-center text-center items-center">
-              <i className="fas fa-walking text-blue-500 text-lg"></i>
-                <span className="text-blue-500 text-md font-medium">{props.totalHousesWithConsentNo}</span>
-                <p className="text-gray-500 text-xs font-semibold mt-1">No</p>
-            </div>
-            <div className="flex flex-col justify-center text-center items-center">
-              <i className="fas fa-walking text-blue-500 text-lg"></i>
-                <span className="text-blue-500 text-md font-medium">{props.totalHousesWithToBeVisited}</span>
-                <p className="text-gray-500 text-xs font-semibold mt-1">Visit required</p>
-            </div>
-          </div>
-            {/* Active Users Section */}
-            <div className="mt-3 text-center">
-              <h3 className="text-md font-medium text-gray-700">Active Users</h3>
-              <ul className="flex flex-row gap-2">
-                {activeUsers.map((user, index) => (
-                  <li key={index} className="text-sm text-gray-600">| {user?.split(' ')[0]}</li>
-                  ))}
-                  
-              </ul>
-            </div>
+      <div className="bg-white rounded-lg shadow-lg p-4 w-sm m-4 max-w-sm">
+        <div className='flex flex-row justify-between items-center mb-2 gap-2 '>
+        <div className=' '>
+        
+          <header className="text-lg font-semibold">{props.name}</header>
+        {/* <p className="text-gray-500 text-sm mb-2">
+          {props.neighborhood === 'to be verified' ? 'Neighborhood' : props.neighborhood}
+          </p> */}
         </div>
-            </Link>
+          <div className="flex flex-col border-dotted px-2 border-gray-300 border-2 text-blue-500 text-md font-semibold rounded-sm">
+              {Number(totalHoursSpent / 2).toFixed(2)}
+            <p className="text-gray-500 text-xs">Hours</p>
+            </div>
+        
+        </div>
+        
+        <div className="flex flex-row justify-between mb-2">
+          <div className="text-center">
+            <div className="text-green-500 text-md font-semibold">
+              {totalHousesString}
+            </div>
+            <p className="text-gray-500 text-xs">Houses</p>
+          </div>
+          <div className="text-center">
+            <div className="text-blue-500 text-md font-semibold">
+              {props.leftToVisit}
+            </div>
+            <p className="text-gray-500 text-xs">To be visited</p>
+          </div>
+          <div className="text-center">
+            {/* <div className="text-blue-500 text-md font-semibold">
+              {Number(totalHoursSpent / 2).toFixed(2)}
+            </div>
+            <p className="text-gray-500 text-xs">Hours</p> */}
+          </div>
+        </div>
+        <hr className="border-gray-200 my-2" />
+        <div className="flex flex-row justify-between my-2">
+          <div className="text-center">
+            <div className="text-green-500 text-md font-semibold">
+              {props.totalHousesWithConsentYes}
+            </div>
+            <p className="text-gray-500 text-xs">Yes</p>
+          </div>
+          <div className="text-center">
+            <div className="text-blue-500 text-md font-semibold">
+              {props.totalHousesWithConsentNo}
+            </div>
+            <p className="text-gray-500 text-xs">No</p>
+          </div>
+          <div className="text-center">
+            <div className="text-blue-500 text-md font-semibold">
+              {props.totalHousesWithToBeVisited}
+            </div>
+            <p className="text-gray-500 text-xs">Visit required</p>
+          </div>
+        </div>
+        <hr className="border-gray-200 my-2" />
+        <div className="mt-3">
+          <h3 className="text-md font-semibold text-gray-700">Active Users</h3>
+          <ul className="text-sm text-gray-600">
+            {activeUsers.map((user, index) => (
+              <li key={index}>{user?.split(' ')[0]}</li>
+            ))}
+          </ul>
+        </div>
       </div>
+
+
     </>
   );
 }

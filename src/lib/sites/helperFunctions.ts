@@ -1,6 +1,20 @@
 import { db } from "@/server/db";
 import { HouseCount } from "./types";
 
+
+// Function to calculate total hours spent by all users in a location
+const calculateTotalHoursPerLocation = (shiftLoggers: any[]): number => {
+  return shiftLoggers.reduce((totalHours, shiftLogger) => {
+    if (shiftLogger.finishedDate) {
+      const timeDiff = shiftLogger.finishedDate.getTime() - shiftLogger.startingDate.getTime();
+      totalHours += timeDiff / (1000 * 60 * 60); // Convert milliseconds to hours
+    }
+    return totalHours;
+  }, 0);
+};
+
+
+
 export const getLocations = async (skip: number, take: number) => {
   try {
     const locationsWithStats = await db.location.findMany({
@@ -142,6 +156,11 @@ export const getLocations = async (skip: number, take: number) => {
         totalHousesWithToBeVisitedPerLocation.find(
           (house: HouseCount) => house.locationId === location.id
         )?.totalHouses || 0;
+      
+      const shiftLoggersForLocation = location.ShiftLogger || [];
+      const totalHours = calculateTotalHoursPerLocation(
+        shiftLoggersForLocation
+      );
 
       return {
         ...location,
@@ -152,8 +171,11 @@ export const getLocations = async (skip: number, take: number) => {
         totalHousesWithConsentYes: Number(totalHousesWithConsentYes),
         totalHousesWithConsentNo: Number(totalHousesWithConsentNo),
         totalHousesWithToBeVisited: Number(totalHousesWithToBeVisited),
+        totalHours: totalHours,
       };
     });
+
+
 
     return {
       data: data,
@@ -162,5 +184,32 @@ export const getLocations = async (skip: number, take: number) => {
   } catch (error) {
     console.error(error);
     return { error: "Error getting locations" };
+  }
+};
+
+export const getLocationTotalHoursSpentByAllUsers = async (locationId: number) => {
+  
+  const excludedAgentIds = [
+    "clqzzv2rp0000anwgwdm445kb",
+    "clqauhij10000o4ihuxl3nu10",
+  ];
+  try {
+    const shiftLoggers = await db.shiftLogger.findMany({
+      where: {
+        locationId: locationId,
+        isFinished: true,
+        NOT: {
+          agentId: {
+            in: excludedAgentIds,
+          },
+        },
+        
+      },
+    });
+
+    return calculateTotalHoursPerLocation(shiftLoggers);
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting location total hours" };
   }
 };

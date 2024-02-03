@@ -351,6 +351,7 @@ function FormItem({ label, input, type, size }: { label: string, input: string, 
                 name={input}
                 placeholder={label}
                 size={size}
+                autoComplete="off"
                 className="focus:ring-indigo-500"
             />
         </>

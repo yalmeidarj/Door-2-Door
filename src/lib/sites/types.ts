@@ -19,6 +19,7 @@ export type location = {
   totalHousesWithConsentYes: number;
   totalHousesWithConsentNo: number;
   totalHousesWithToBeVisited: number;
+  totalHours: number;
 };
 
 export type SiteCardProps = {
