@@ -37,3 +37,5 @@ next-env.d.ts
 
 finalData.json
 webGuide.py
+
+authWithJwt.ts

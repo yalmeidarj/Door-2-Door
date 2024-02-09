@@ -48,6 +48,7 @@ export const authOptions: NextAuthOptions = {
         // userId: ,
       },
     }),
+    
   },
   adapter: PrismaAdapter(db),
   providers: [

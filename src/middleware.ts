@@ -1,11 +1,9 @@
 import { withAuth, NextRequestWithAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server"; // Import NextResponse
 
-
-
 export default withAuth(
   function middleware(req: NextRequestWithAuth) {
-    console.log(req.nextUrl.pathname)
+    console.log(req.nextUrl.pathname);
     console.log(req.nextauth.token);
     // console.log(req.nextauth.token?.role);
 
@@ -17,7 +15,7 @@ export default withAuth(
 
     // Continue with the middleware processing if the user is ADMIN
     return NextResponse.next();
-  },
+  }
   // {
   //   callbacks: {
   //     authorized: ({ token }) => token?.role === "ADMIN", // Check if the role is ADMIN
