@@ -4,10 +4,9 @@ import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import { Popup } from 'react-leaflet/Popup'
 import { Marker } from 'react-leaflet/Marker'
 import L from 'leaflet';
-import 'leaflet.markercluster';
-import 'leaflet/dist/leaflet.css';
-import 'leaflet.markercluster/dist/MarkerCluster.css';
-import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+// import 'leaflet.markercluster';
+// import 'leaflet/dist/leaflet.css';
+// import 'leaflet.markercluster/dist/MarkerCluster.css';
 import { CiFlag1 } from "react-icons/ci";
 
 // Define the type for a single location
@@ -22,33 +21,33 @@ interface MapWithMarkersProps {
     locations: Location[];
 }
 
-const MapWithMarkers: React.FC<MapWithMarkersProps> = ({ locations }) => {
-    const map = useMap();
+// const MapWithMarkers: React.FC<MapWithMarkersProps> = ({ locations }) => {
+//     const map = useMap();
 
-    useEffect(() => {
-        if (!map) return;
+//     useEffect(() => {
+//         if (!map) return;
 
-        const markers = L.markerClusterGroup();
-        locations.forEach((location) => {
-            const marker = L.marker([location.lat, location.lng]);
+//         const markers = L.markerClusterGroup();
+//         locations.forEach((location) => {
+//             const marker = L.marker([location.lat, location.lng]);
 
-            // Check if the location has a name, and if so, add a popup to the marker
-            if (location.name) {
-                marker.bindPopup(location.name);
-            }
+//             // Check if the location has a name, and if so, add a popup to the marker
+//             if (location.name) {
+//                 marker.bindPopup(location.name);
+//             }
 
-            markers.addLayer(marker);
-        });
+//             markers.addLayer(marker);
+//         });
 
-        map.addLayer(markers);
+//         map.addLayer(markers);
 
-        return () => {
-            map.removeLayer(markers);
-        };
-    }, [map, locations]);
+//         return () => {
+//             map.removeLayer(markers);
+//         };
+//     }, [map, locations]);
 
-    return null;
-};
+//     return null;
+// };
 
 const LeafletMap: React.FC = () => {
     const locations: Location[] = [
