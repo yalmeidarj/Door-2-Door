@@ -7,7 +7,7 @@ export type ShiftLogger = {
   User: User;
 };
 
-export type location = {
+export type LocationType = {
   id: number;
   name: string | null;
   neighborhood: string;
@@ -16,14 +16,14 @@ export type location = {
   totalHousesVisited: number;
   leftToVisit: number;
   ShiftLogger: ShiftLogger[];
-  totalHousesWithConsentYes: number;
-  totalHousesWithConsentNo: number;
-  totalHousesWithToBeVisited: number;
-  totalHours: number;
+  totalHousesWithConsentYes?: number;
+  totalHousesWithConsentNo?: number;
+  totalHousesWithToBeVisited?: number;
+  totalHours?: number;
 };
 
 export type SiteCardProps = {
-  props: location;
+  props: LocationType;
 };
 
     

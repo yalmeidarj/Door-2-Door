@@ -4,10 +4,10 @@ import { IoIosCheckmarkCircleOutline } from "react-icons/io";
 import { RiForbidLine } from "react-icons/ri";
 import { defaultValues } from "@/lib/utils";
 import Link from "next/link";
-import { StreetCardProps } from "@/lib/streets/types";
+import { StreetType } from "@/lib/streets/types";
 import { MdEngineering } from "react-icons/md";
 
-const StreetCard = ({ street }: StreetCardProps) => {
+const StreetCard = ({ street }: StreetType) => {
 
     const { defaultPage, defaultPerPage } = defaultValues;
     return (

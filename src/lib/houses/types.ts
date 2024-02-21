@@ -1,4 +1,4 @@
-export type house = {
+export type HouseType = {
   id: number;
   streetNumber: number;
   lastName: string | null;
@@ -23,7 +23,7 @@ export type house = {
 };
 
 export type HouseDetailsProps = {
-  props: house;
+  props: HouseType;
 };
 
 export type HousesFeedProps = {
@@ -38,7 +38,7 @@ export type HouseFeedData = {
 }
 
 export type HouseItemProps = {
-  house: house;
+  house: HouseType;
   activeShift: boolean;
   // locationId: number;
 };

@@ -201,7 +201,7 @@ export default function Page() {
                                 onClick={() => downloadJSON(downloadData, `${downloadData.name}.json`)}>
                                 Download JSON
                             </button>
-                                    <NewSiteCreator  />
+                                    <HouseRecordsUploader  />
                         </div>
                     )}
                 </div>

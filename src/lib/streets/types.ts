@@ -4,7 +4,7 @@ export type StreetFeedProps = {
   perPage: number;
 };
 
-export type StreetCardProps = {
+export type StreetType = {
   street: {
     id: number;
     name: string;

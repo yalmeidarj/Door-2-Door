@@ -41,3 +41,5 @@ webGuide.py
 authWithJwt.ts
 
 /ignore
+
+railway.session.sql

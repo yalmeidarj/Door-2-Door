@@ -10,6 +10,7 @@ import { initiateSearch, pollJobStatus, handleSearchResults, checkJobStatus } fr
 import HouseRecordsUploader from '@/components/HouseRecordsUploader';
 import HouseTable from '@/components/HouseTable';
 import PastShiftsByAgentId from '@/components/PastShiftsByAgentId';
+import HouseManager from '@/components/houseManager/HouseManager';
 
 
 type ProjectData = {
@@ -228,6 +229,9 @@ export default async function Page() {
                 <PastShiftsByAgentId />
             </div>
             <HouseRecordsUploader />
+            <div className=' '>
+                <HouseManager />
+            </div>
             
         </main>
 

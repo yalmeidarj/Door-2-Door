@@ -1136,6 +1136,7 @@ export async function createLocationAndHouses(jsonData: SeedData) {
           externalNotes: house.notes, // Assuming 'notes' maps to 'externalNotes'
           phone: house.phone,
           // Add other fields as necessary
+          
         },
       });
     }
