@@ -218,7 +218,6 @@ export const SalesForce = {
     OTWAON10_5111A: "158",
     PCNGON62_1011A: "159",
     PCNGON62_1021B: "160",
-    PCNGON62_1031A: "161",
     PCNGON62_1061A: "162",
     PCNGON62_1063A: "163",
     PCNGON62_1106A: "164",
