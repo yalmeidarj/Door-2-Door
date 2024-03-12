@@ -11,6 +11,7 @@ import HouseRecordsUploader from '@/components/HouseRecordsUploader';
 import HouseTable from '@/components/HouseTable';
 import PastShiftsByAgentId from '@/components/PastShiftsByAgentId';
 import HouseManager from '@/components/houseManager/HouseManager';
+import FinishedShiftsByLocal from '@/components/FinishedShiftsByLocal';
 
 
 type ProjectData = {
@@ -144,8 +145,9 @@ export default async function Page() {
     }
     return (
         <main className="p-6 mx-auto max-w-5xl flex flex-col">
-            <h1 className="text-3xl md:text-4xl font-semibold text-gray-900">Houses Table</h1>
-            <HouseTable />
+            {/* <h1 className="text-3xl md:text-4xl font-semibold text-gray-900">Houses Table</h1>
+            <HouseTable /> */}
+            {/* <FinishedShiftsByLocal /> */}
             <div className="flex flex-row flex-wrap gap-3 justify-center">
                 <FormWrapper
                     title="Fetch Salesforce"

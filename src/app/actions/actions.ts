@@ -242,6 +242,8 @@ export const getShiftsByAgentId = async (agentId: string) => {
   }
 };
 
+ 
+
 export const getShiftsByLocationId = async (locationId: number) => {
   try {
     const shifts = await db.shiftLogger.findMany({

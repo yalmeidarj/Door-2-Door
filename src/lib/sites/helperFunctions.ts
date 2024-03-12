@@ -204,3 +204,19 @@ export const getLocationTotalHoursSpentByAllUsers = async (locationId: number) =
     return { error: "Error getting location total hours" };
   }
 };
+
+export const getLocationsIds = async () => {
+  try {
+    const locations = await db.location.findMany({
+      select: {
+        id: true,
+      },
+    });
+
+    return locations.map((location) => location.id);
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting location ids" };
+  }
+};
+
