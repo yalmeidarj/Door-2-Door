@@ -62,7 +62,7 @@ export const getStreetsInLocation = async (
         'Consent Final Yes',
         'Consent Final No',
         'Site Visit Required',
-        'House Does Not Exist'
+        'Home Does Not Exist'
       )
       GROUP BY "streetId"
     `;
