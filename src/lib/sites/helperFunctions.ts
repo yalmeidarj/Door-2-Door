@@ -66,7 +66,7 @@ export const getLocations = async (skip: number, take: number) => {
         'Consent Final Yes',
         'Consent Final No',
         'Site Visit Required',
-        'House Does Not Exist'
+        'Home Does Not Exist'
       )
       GROUP BY "locationId"
     `;
