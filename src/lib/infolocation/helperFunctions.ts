@@ -85,7 +85,10 @@ export const getLocationsStats = async (locationId: number) => {
       where: {
         locationId: locationId,
         statusAttempt: {
-          in: ["Site Visit Required"],
+          in: [
+            "Site Visit Required",
+            "Engineer Visit Required",
+          ],
         },
       },
     });

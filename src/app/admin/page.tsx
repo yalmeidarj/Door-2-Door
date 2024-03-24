@@ -59,52 +59,6 @@ export default async function Page() {
         return res;
     }
 
-    // async function upload(data: FormData) {
-    //     'use server'
-    //     console.log('uploading, this may take a while...');
-
-    //     const chosenSite = data.get('site') as string;
-    //     const username = data.get('username') as string;
-    //     const password = data.get('password') as string;
-
-    //     const baseURL = SalesForce.puppeterApi.url
-    //     // const chosenSiteName = SalesForce.puppeterApi.sites[chosenSite]
-
-
-
-    //     if (!chosenSite || !username || !password) {
-    //         console.log("Missing credentials");
-    //         return;
-    //     }
-
-    //     console.log(chosenSite);
-    //     console.log(username);
-    //     console.log(password);
-    //     const URL = `${baseURL}/search?chosenSite=${chosenSite}&username=${username}&password=${password}`;
-
-    //     const response: ProjectData = await fetch(URL)
-    //         .then((response) => response.json());
-        
-
-    //     if (!response  ) {
-    //         console.log('no response');
-    //         return;
-    //     }
-
-
-    //     try {
-    //         console.log(response.data);
-
-    //         await seed(response.data);
-                
-    //     }
-    //     catch (err) {
-    //         console.log(err);
-    //         console.log('error seeding');
-    //     }
-        
-    // }
-
     const upload = async (data: FormData) => {
         "use server"
         // event.preventDefault();

@@ -55,13 +55,15 @@ export const getStreetsInLocation = async (
           //   "Door Knock Attempt 5",
           //   "Door Knock Attempt 6";
     
-    const totalHousesLeftToVisitPerStreet: StreetHouseCount[] = await db.$queryRaw`
+    const totalHousesLeftToVisitPerStreet: StreetHouseCount[] =
+      await db.$queryRaw`
       SELECT "streetId", COUNT(DISTINCT id) AS "totalHouses"
       FROM "House"
       WHERE "statusAttempt" NOT IN (
         'Consent Final Yes',
         'Consent Final No',
         'Site Visit Required',
+        'Engineer Visit Required',
         'Home Does Not Exist'
       )
       GROUP BY "streetId"
@@ -93,7 +95,11 @@ export const getStreetsInLocation = async (
 
     const totalHousesWithVisitRequiredPerStreet: StreetHouseCount[] =
       await db.$queryRaw`
-      SELECT "streetId", COUNT(DISTINCT id) as "totalHouses" FROM "House" WHERE "statusAttempt" = 'Site Visit Required' GROUP BY "streetId"
+      SELECT "streetId", COUNT(DISTINCT id) as "totalHouses"
+      FROM "House" 
+      WHERE "statusAttempt" = 'Site Visit Required'
+      OR "statusAttempt" = 'Engineer Visit Required'
+      GROUP BY "streetId"
     `;
 
     const data = streets.map((street) => {
