@@ -1151,90 +1151,38 @@ export async function createLocationAndHouses(jsonData: SeedData) {
 }
 
 
-// export async function updateHouseRecords(jsonData: SeedData) {
-//   try {
-//     for (const house of jsonData.houses) {
-//       const streetNumberInt = Number(house.streetNumber);
-
-//       if (isNaN(streetNumberInt)) {
-//         console.log(`Invalid street number for ${house.name}: ${house.streetNumber}`);
-//         continue;
-//       }
-
-//       const existingHouse = await db.house.findFirst({
-//         where: {
-//           name: house.name,
-//           streetNumber: streetNumberInt,
-//           Street: { name: house.street },
-//         },
-//       });
-
-//       if (existingHouse) {
-//         await db.house.update({
-//           where: { id: existingHouse.id },
-//           data: {
-//             statusAttempt: house.statusAttempt,
-//             consent: house.consent,
-//             lastUpdated: new Date(),
-//             lastUpdatedBy: "SystemAdmin",
-//           },
-//         });
-//       } else {
-//         console.log(`House not found for ${house.name}, ${house.streetNumber} ${house.street}`);
-
-
-//       }
-//     }
-
-//     return {
-//       status: "success",
-//       message: `Successfully updated ${jsonData.houses.length} houses`,
-//     };
-//   } catch (error) {
-//     console.error(error);
-//     return { status: "error", message: "Error updating property" };
-//   }
-// }
 export async function updateHouseRecords(jsonData: SeedData) {
   try {
     for (const house of jsonData.houses) {
-      // Trim string properties
-      const nameTrimmed = house.name.trim();
-      const streetTrimmed = house.street.trim();
+      const streetNumberInt = Number(house.streetNumber);
 
-      // Convert and validate streetNumber
-      const streetNumberInt = Number(house.streetNumber.trim());
       if (isNaN(streetNumberInt)) {
-        console.log(
-          `Invalid street number for ${nameTrimmed}: ${house.streetNumber}`
-        );
+        console.log(`Invalid street number for ${house.name}: ${house.streetNumber}`);
         continue;
       }
 
-      // Attempt to find an existing house record with trimmed values
       const existingHouse = await db.house.findFirst({
         where: {
-          name: nameTrimmed,
+          name: house.name,
           streetNumber: streetNumberInt,
-          Street: { name: streetTrimmed },
+          Street: { name: house.street },
         },
       });
 
-      // Update or log missing house
       if (existingHouse) {
         await db.house.update({
           where: { id: existingHouse.id },
           data: {
-            statusAttempt: house.statusAttempt.trim(), // Assuming statusAttempt is a string that needs trimming
-            consent: house.consent, // Assuming consent does not need trimming
+            statusAttempt: house.statusAttempt,
+            consent: house.consent,
             lastUpdated: new Date(),
             lastUpdatedBy: "SystemAdmin",
           },
         });
       } else {
-        console.log(
-          `House not found for ${nameTrimmed}, ${streetNumberInt} ${streetTrimmed}`
-        );
+        console.log(`House not found for ${house.name}, ${house.streetNumber} ${house.street}`);
+
+
       }
     }
 
@@ -1247,6 +1195,60 @@ export async function updateHouseRecords(jsonData: SeedData) {
     return { status: "error", message: "Error updating property" };
   }
 }
+
+
+// export async function updateHouseRecords(jsonData: SeedData) {
+//   try {
+//     for (const house of jsonData.houses) {
+//       // Trim string properties
+//       const nameTrimmed = house.name.trim();
+//       const streetTrimmed = house.street.trim();
+
+//       // Convert and validate streetNumber
+//       const streetNumberInt = Number(house.streetNumber.trim());
+//       if (isNaN(streetNumberInt)) {
+//         console.log(
+//           `Invalid street number for ${nameTrimmed}: ${house.streetNumber}`
+//         );
+//         continue;
+//       }
+
+//       // Attempt to find an existing house record with trimmed values
+//       const existingHouse = await db.house.findFirst({
+//         where: {
+//           name: nameTrimmed,
+//           streetNumber: streetNumberInt,
+//           Street: { name: streetTrimmed },
+//         },
+//       });
+
+//       // Update or log missing house
+//       if (existingHouse) {
+//         await db.house.update({
+//           where: { id: existingHouse.id },
+//           data: {
+//             statusAttempt: house.statusAttempt.trim(), // Assuming statusAttempt is a string that needs trimming
+//             consent: house.consent, // Assuming consent does not need trimming
+//             lastUpdated: new Date(),
+//             lastUpdatedBy: "SystemAdmin",
+//           },
+//         });
+//       } else {
+//         console.log(
+//           `House not found for ${nameTrimmed}, ${streetNumberInt} ${streetTrimmed}`
+//         );
+//       }
+//     }
+
+//     return {
+//       status: "success",
+//       message: `Successfully updated ${jsonData.houses.length} houses`,
+//     };
+//   } catch (error) {
+//     console.error(error);
+//     return { status: "error", message: "Error updating property" };
+//   }
+// }
 
 
 // temporary function to delete all records from location 10, for testing purposes
