@@ -188,10 +188,23 @@ export const getShift = async (id: string) => {
   }
 };
 
-export const getShiftsByAgentId = async (agentId: string) => {
+export const getShiftsByAgentId = async (
+  agentId: string,
+  startDate: string,
+  endDate: string
+) => {
   try {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
     const shifts = await db.shiftLogger.findMany({
-      where: { agentId: agentId },
+      where: {
+        agentId: agentId,
+        startingDate: {
+          gte: start,
+          lte: end,
+        },
+      },
       select: {
         Location: {
           select: {
@@ -214,27 +227,56 @@ export const getShiftsByAgentId = async (agentId: string) => {
       },
     });
 
-    const activeShifts = shifts.filter((shift) => shift.isFinished === false);
-    const finishedShifts = shifts
-      .filter((shift) => shift.isFinished === true)
-      .map((shift) => {
-        const start = shift.startingDate?.getTime();
-        const end = shift.finishedDate?.getTime();
-        if (start && end && end > start) {
-          const shiftLength = end - start;
-          const hours = Math.floor(shiftLength / 3600000); // Convert milliseconds to hours and floor it
-          const minutes = Math.floor((shiftLength % 3600000) / 60000); // Convert remainder to minutes
-          const formattedShiftLength = `${hours}h ${minutes}m`;
-          return { ...shift, formattedShiftLength };
-        }
-        return shift;
-      });
+    const activeShifts = shifts.filter((shift) => !shift.isFinished);
+    const finishedShifts = shifts.filter((shift) => shift.isFinished);
 
+    const totalTimePerLocation: { [key: string]: number } = {};
+
+    const finishedShiftsWithDuration = finishedShifts.map((shift) => {
+      if (!shift.finishedDate) {
+        return shift;
+      }
+      const duration =
+        shift.finishedDate.getTime() - shift.startingDate.getTime();
+      const locationName = shift.Location.name;
+      if (duration > 0) {
+        totalTimePerLocation[locationName] =
+          (totalTimePerLocation[locationName] || 0) + duration;
+      }
+      const formattedDuration = `${Math.floor(duration / 3600000)}h ${
+        Math.floor((duration % 3600000) / 60000)
+      }m`;
+      return { ...shift, formattedDuration };
+    });
+
+    const totalHoursWorked = Object.values(totalTimePerLocation).reduce(
+      (acc, curr) => acc + curr,
+      0
+    );
+
+    // Convert totalTimePerLocation from milliseconds to a more readable format
+    const totalTimePerLocationFormatted = Object.keys(
+      totalTimePerLocation
+    ).reduce((acc, locationName) => {
+      const duration = totalTimePerLocation[locationName];
+      const hours = Math.floor(duration / 3600000);
+      const minutes = Math.floor((duration % 3600000) / 60000);
+      acc[locationName] = `${hours}h ${minutes}m`;
+      return acc;
+    }, {} as { [key: string]: string });
+
+    const totalHours = Math.floor(totalHoursWorked / 3600000);
+    const totalMinutes = Math.floor((totalHoursWorked % 3600000) / 60000);
+    
     const data = {
-      activeShifts: activeShifts,
-      finishedShifts: finishedShifts,
+      activeShifts,
+      finishedShifts: finishedShiftsWithDuration,
+      totalHoursWorked: `${totalHours}h ${totalMinutes}m`,
+      totalTimePerLocation: totalTimePerLocationFormatted,
     };
 
+    console.log(`\nTotal time worked: ${totalHours}h${totalMinutes}m\n`);
+    console.log(`\nTotal time per location:`, totalTimePerLocationFormatted);
     return data;
   } catch (error) {
     console.error(error);
@@ -242,7 +284,11 @@ export const getShiftsByAgentId = async (agentId: string) => {
   }
 };
 
- 
+// // Convert totalHoursWorked to hours and minutes
+// const hours = Math.floor(totalHoursWorked / 3600000); // Convert milliseconds to hours and floor it
+// const minutes = Math.floor((totalHoursWorked % 3600000) / 60000); // Convert remainder to minutes
+// console.log(`\nTotal time worked: ${hours}h${minutes}m\n`);
+
 
 export const getShiftsByLocationId = async (locationId: number) => {
   try {

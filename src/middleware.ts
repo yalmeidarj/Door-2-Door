@@ -5,9 +5,9 @@ export default withAuth(
   function middleware(req: NextRequestWithAuth) {
     console.log(req.nextUrl.pathname);
     console.log(req.nextauth.token);
-    // console.log(req.nextauth.token?.role);
+    console.log(req.nextauth.token?.role);
 
-    // Check if the user is not an ADMIN
+    // // Check if the user is not an ADMIN
     // if (req.nextauth.token?.role !== "ADMIN") {
     //   // Redirect to '/forbiddenUser' if not ADMIN
     //   return NextResponse.redirect("http://localhost:3000/forbiddenUser");

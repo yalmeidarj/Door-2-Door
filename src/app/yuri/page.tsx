@@ -2,7 +2,6 @@ import { SalesForce } from '@/lib/utils';
 import { AllLocations, deleteRecords, getActiveLocations, getAllAgents, getAllClockedInAgents, getAllLocationsDropDown, getInactiveLocations, hardDeleteLocation, seed, softDeleteLocation, updateLatLonByStreetId } from '../actions/actions';
 import SubmitFormButton from '@/components/SubmitFormButton';
 import { FormWrapper } from '@/components/FormWrapper';
-import PastShifts from '@/components/PastShifts';
 import ClockedInAgents from '@/components/ClockedInAgents';
 import { massUpdateStatusAttemptByLocationId } from '@/lib/automations/updateFromAppToSF';
 import MassUpdateStatusByLocationForm from '@/components/MassUpdateStatusByLocationForm';

@@ -2,7 +2,6 @@ import { SalesForce } from '@/lib/utils';
 import { AllLocations, getActiveLocations, getAllAgents, getAllClockedInAgents, getAllLocationsDropDown, seed, softDeleteLocation } from '../actions/actions';
 import SubmitFormButton from '@/components/SubmitFormButton';
 import { FormWrapper } from '@/components/FormWrapper';
-import PastShifts from '@/components/PastShifts';
 import ClockedInAgents from '@/components/ClockedInAgents';
 import { massUpdateStatusAttemptByLocationId } from '@/lib/automations/updateFromAppToSF';
 import MassUpdateStatusByLocationForm from '@/components/MassUpdateStatusByLocationForm';
@@ -169,7 +168,7 @@ export default async function Page() {
                 </FormWrapper >
 
             </div>
-            <div className='flex flex-row flex-wrap gap-3 max-w-full mx-auto px-6'>
+            {/* <div className='flex flex-row flex-wrap gap-3 max-w-full mx-auto px-6'>
                 <PastShifts
                     agents={allAgents}
                 />
@@ -177,12 +176,14 @@ export default async function Page() {
                 <MassUpdateStatusByLocationForm
                     data={allActiveLocations}
                 />
-            </div>
-            <div className='flex flex-row flex-wrap max-w-full mx-auto px-6'>
-            <ClockedInAgents />
-            </div>
-            <div className='flex flex-row flex-wrap max-w-full mx-auto px-6'>
+            </div> */}
+            {/* <div className='flex flex-row flex-wrap max-w-full mx-auto'>
+            </div> */}
+            <div className='flex flex-col sm:flex sm:flex-row flex-wrap min-w-full mx-auto border-gray-400 border rounded-sm'>
                 <PastShiftsByAgentId />
+            </div>
+            <div className='flex flex-col sm:flex sm:flex-row flex-wrap min-w-full mx-auto border-gray-400 border rounded-sm'>
+            <ClockedInAgents />
             </div>
             <HouseRecordsUploader />
             <div className=' '>
