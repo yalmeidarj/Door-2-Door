@@ -19,6 +19,13 @@ export const updateProperty = async (formData: FormData) => {
   const id = Number(formData.get("id"));
   if (!id) throw new Error("No id found in form data");
 
+
+  // if phone number is provided, clean it up by removing all non-numeric characters
+  if (updatedData.phone) {
+    const newPhone = updatedData.phone as string;
+    const cleanedPhone = newPhone.replace(/\D/g, "");
+    updatedData.phone = cleanedPhone;
+  }
   const agentId = formData.get("agentId") as string;
   const agentName = formData.get("agentName") as string;
   const status = formData.get("statusAttempt") as string
@@ -1209,7 +1216,7 @@ export async function updateHouseRecords(jsonData: SeedData) {
 
       const existingHouse = await db.house.findFirst({
         where: {
-          name: house.name,
+          // name: house.name,
           streetNumber: streetNumberInt,
           Street: { name: house.street },
         },

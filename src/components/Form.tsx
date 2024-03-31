@@ -2,95 +2,16 @@
 
 import { getActiveShiftByAgentId, updateActiveShiftByShiftId, updateProperty } from "../app/actions/actions";
 import toast, { Toaster } from "react-hot-toast";
-import {  useRef } from "react";
+import {  use, useEffect, useRef, useState } from "react";
 import SubmitFormButton from "./SubmitFormButton";
 import { useSession } from "next-auth/react";
 import { z } from "zod";
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { ConsentYesSchema, FormSchema } from "@/lib/houses/types";
+import PhoneInput from "./PhoneInput";
 
-// import { useFormStatus } from "react-dom";
 
-const FormSchema = z.object({
-    id: z.string(),
-    agentName: z.string(),
-    agentId: z.string(),
-    externalNotes: z.string().optional(),
-    type: z.union([
-        z.string(),
-        z.literal(''),
-        z.null(),
-    ]).optional(),
-    statusAttempt: z.string(),
-    name: z.string().optional(),
-    lastName: z.string().optional(),
-    phone: z.union([
-        z.string()
-            .trim()
-            .min(10, "Phone number must be at least 10 digits long")
-            .max(10, "Phone number must not be longer than 10 digits")
-            .regex(/^[0-9]+$/, "Phone number must be numeric"),
-        z.literal(''),
-    ]).optional(),
-    email: z.union([
-        z.string().email(),
-        z.literal(''),
-    ]).optional(),
-    internalNotes: z.string().optional(),
-});
-
-const ConsentYesSchema = z.object({
-    id: z.string(),
-    agentName: z.string(),
-    agentId: z.string(),
-    externalNotes: z.string().optional(),
-    type:
-        z.string({
-            required_error: "Type must be provided if status attempt is Consent Final Yes",
-            invalid_type_error: " Type must be provided if status attempt is Consent Final Yes",
-        }),
-    statusAttempt: z.string(),
-    lastName: z.string().optional(),
-    name: z.string().optional(),
-    phone: z.union([
-        z.string()
-        .trim()
-        .min(10, "Phone number must be at least 10 digits long")
-        .max(10, "Phone number must not be longer than 10 digits")
-        .regex(/^[0-9]+$/, "Phone number must be numeric"),
-        z.literal(''),
-    ]).optional(),
-    email: z.union([
-        z.string().email(),
-        z.literal(''),
-    ]).optional(),
-    internalNotes: z.string(),
-}).superRefine((data, ctx) => {
-    if (!data.email && !data.phone) {
-        ctx.addIssue({
-            code: "custom",
-            path: ["email"],
-            message: "Email must be provided if phone is not provided",
-        });
-        ctx.addIssue({
-            code: "custom",
-            path: ["phone"],
-            message: "Phone must be provided if email is not provided",
-        });
-    }
-    if (!data.name && !data.lastName) {
-        ctx.addIssue({
-            code: "custom",
-            path: ["name"],
-            message: "Name must be provided if last name is not provided",
-        });
-        ctx.addIssue({
-            code: "custom",
-            path: ["lastName"],
-            message: "LastName must be provided if name is not provided",
-        });
-    }
-});
 
 
 type FormProps = {
@@ -105,6 +26,7 @@ type FormProps = {
 
 export default function Form({ houseId, info }: FormProps) {
     const constructionTypes = ['Easy', 'Moderate', 'Hard'];
+    // const [phone, setPhone] = useState('');
 
     const statusAttemptOptions = [
         'Door Knock Attempt 1',
@@ -129,7 +51,6 @@ export default function Form({ houseId, info }: FormProps) {
     const agentName = session.data.user.name
 
 
-    
 
     async function clientAction(formData: FormData) {
         
@@ -144,20 +65,21 @@ export default function Form({ houseId, info }: FormProps) {
             return;
         }
         const shiftId = currentShift.shift.id;
-        
+        const phoneNumber = formData.get("phone") as string;
         const newObject = {
-            id: formData.get("id"),
-            agentName: formData.get("agentName"),
-            agentId: formData.get("agentId"),
-            externalNotes: formData.get("externalNotes"),
-            type: formData.get("type"),
-            statusAttempt: formData.get("statusAttempt"),
-            lastName: formData.get("lastName"),
-            name: formData.get("name"),
-            phone: formData.get("phone"),
-            email: formData.get("email"),
-            internalNotes: formData.get("internalNotes"),
+            id: formData.get("id") ,
+            agentName: formData.get("agentName") ,
+            agentId: formData.get("agentId") ,
+            externalNotes: formData.get("externalNotes") ,
+            type: formData.get("type") ,
+            statusAttempt: formData.get("statusAttempt") ,
+            lastName: formData.get("lastName") ,
+            name: formData.get("name") ,
+            phone: phoneNumber.slice(2).replace(/\D/g, ''),
+            email: formData.get("email") ,
+            internalNotes: formData.get("internalNotes") ,
         }
+        console.log(newObject.phone);
         if (statusAttempt === "Consent Final Yes") {
             console.log("consent yes");
             console.log(newObject);
@@ -212,6 +134,12 @@ export default function Form({ houseId, info }: FormProps) {
     }
 
     const ref = useRef<HTMLFormElement>(null);
+    const [resetCounter, setResetCounter] = useState(0);
+
+    const handleFormReset = () => {
+        ref.current?.reset();
+        setResetCounter(resetCounter + 1); // Increment to trigger reset
+    };
 
     return (
         <>
@@ -220,7 +148,8 @@ export default function Form({ houseId, info }: FormProps) {
                 action={async (formData) => {
                     const result = await clientAction(formData);
                     if (result) {
-                        ref.current?.reset();
+                        // ref.current?.reset();
+                        handleFormReset();
                     }
                 }}
                 className="p-4 mx-auto w-full max-w-2xl sm:p-6 md:p-8 bg-gray-200 shadow-lg rounded-lg"
@@ -245,86 +174,79 @@ export default function Form({ houseId, info }: FormProps) {
                         <span className='text-semibold text-xs'> {info.locationName}</span>                
                         <span className='text-semibold text-xs'> {info.streetNumber}</span>                
                         <span className='text-semibold text-xs'> {info.streetName}</span>
-                </div>
-                <div className="mb-4 flex flex-col gap-2 items-center">
-                    <div className="mb-4">
-                    {/* <span className="block text-gray-800 text-sm font-semibold mb-2">Difficulty</span> */}
-                            <div className="flex flex-wrap -mx-2 items-center m-w-full justify-around border-b-2 border-gray-300">
-                        {constructionTypes.map((option) => (
-                            <div key={option} className="flex flex-col  items-center px-1 mb-8">
-                                <label htmlFor={option} className=" text-gray-500">{option}</label>
-                                <input
-                                    type="radio"
-                                    id={option}
-                                    name="type"
-                                    className="form-radio  text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                                    value={option}
-                                />
+                    </div>
+                    <div className="mb-4 flex flex-col gap-2 items-center">
+                        <div className="mb-4">
+                            {/* <span className="block text-gray-800 text-sm font-semibold mb-2">Difficulty</span> */}
+                                    <div className="flex flex-wrap -mx-2 items-center m-w-full justify-around border-b-2 border-gray-300">
+                                {constructionTypes.map((option) => (
+                                    <div key={option} className="flex flex-col  items-center px-1 mb-8">
+                                        <label htmlFor={option} className=" text-gray-500">{option}</label>
+                                        <input
+                                            type="radio"
+                                            id={option}
+                                            name="type"
+                                            className="form-radio  text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                                            value={option}
+                                        />
+                                    </div>
+                                ))}
                             </div>
-                        ))}
+                        </div>
+                        <div className="mb-4 w-full">
+                            <select
+                                id="statusAttempt"
+                                name="statusAttempt"
+                                className="block w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded leading-tight focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                    >
+                                    <option value="" >
+                                            Status Attempt
+                                    </option>
+                                {statusAttemptOptions.map((option) => (
+                                    <option key={option} value={option}>
+                                        {option}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                 </div>
-                <div className="mb-4 w-full">
-                    <select
-                        id="statusAttempt"
-                        name="statusAttempt"
-                        className="block w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded leading-tight focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            >
-                            <option value="" >
-                                    Status Attempt
-                            </option>
-                        {statusAttemptOptions.map((option) => (
-                            <option key={option} value={option}>
-                                {option}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            </div>
-        </div>
 
-                {/* User Info Section with Responsive Grid */}
+                {/* Hpme owner Info Section */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
-                    {/* Name Field */}
-                    <div>
+                    {/* Name Field */}                    
                         <FormItem
                             label="Name"
                             input="name"
                             type="text"
                         />
-                    </div>
-                    {/* Last Name Field */}
-                    <div>
+                    
+                    {/* Last Name Field */}                    
                         <FormItem
                             label="Last Name"
                             input="lastName"
                             type="text"
                         />
-                    </div>
+                        
                 </div>
 
                 {/* Email and Phone Section with Responsive Grid */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
-                    {/* Email Field */}
-                    <div>
-                        <FormItem
-                            label="Email"
-                            input="email"
-                            type="email"
-                        />
-                    </div>
-                    {/* Phone Field */}
-                    <div>
-                        <FormItem
-                            label="Phone"
-                            input="phone"
-                            type="tel"
-                        />
-                    </div>
+                {/* Email Field */}                    
+                    <FormItem
+                        label="Email"
+                        input="email"
+                        type="email"
+                    />
+                
+                {/* Phone Field */}                    
+                    <PhoneInput
+                        key={resetCounter} 
+                    />
+                    
                 </div>
                 {/* Internal Notes Section */}
                 <div className="mb-6">
-                    {/* <FormItem */}
                     <Textarea
                         placeholder="Type your message here." 
                         id="internalNotes"
@@ -335,9 +257,7 @@ export default function Form({ houseId, info }: FormProps) {
                 <div className="flex justify-end">
                     <SubmitFormButton title="Update property" />
                 </div>
-
             </form>
-
         </>
     );
 }
@@ -358,3 +278,6 @@ function FormItem({ label, input, type, size }: { label: string, input: string, 
 
     )
 }
+
+
+

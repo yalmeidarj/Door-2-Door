@@ -95,7 +95,7 @@ export const getLocationsStats = async (locationId: number) => {
 
     // Total number of houses non existent
     const totalHousesNonExistent = await db.house.count({
-      where: { locationId: locationId, statusAttempt: "Non Existent" },
+      where: { locationId: locationId, statusAttempt: "Home Does Not Exist" },
     });
 
     const toBeVisited: HouseCount[] = await db.$queryRaw`
