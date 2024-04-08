@@ -106,8 +106,10 @@ export const getLocationsStats = async (locationId: number) => {
         'Consent Final Yes',
         'Consent Final No',
         'Site Visit Required',
+        'Engineer Visit Required',
         'Home Does Not Exist'
       )
+
       GROUP BY "locationId"
     `;
 
@@ -153,7 +155,8 @@ export const getLocationsStats = async (locationId: number) => {
       percentageHousesWithConsentNo: Number(percentageHousesWithConsentNo),
       percentageHousesVisited: Number(percentageHousesVisited),
       totalHousesVisitRequired: Number(totalHousesVisitRequired),
-      toBeVisited: Number(leftToVisit),
+      toBeVisited:
+        Number(leftToVisit),
     };
 
     console.log(data);

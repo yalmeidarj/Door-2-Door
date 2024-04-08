@@ -40,7 +40,7 @@ const HousesTable = () => {
   const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
   const [locations, setLocations] = useState<LocationDropdown>([]);
   const [selectedLocationId, setSelectedLocationId] = useState<string>("");
-
+  const [selectedLocationName, setSelectLocationName] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0); // Current page
   const [rowsPerPage, setRowsPerPage] = useState(100); // Rows per page
@@ -77,6 +77,15 @@ const HousesTable = () => {
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
     setSelectedLocationId(event.target.value);
+
+    // Find the location object from the locations array
+    const selectedLocation = locations.find(location => location.id.toString() === event.target.value);
+
+    // Set the selectedLocationName state to the found location's name
+    // If the selected location is found, update the name, otherwise set it to an empty string
+    setSelectLocationName(selectedLocation ? selectedLocation.name : "");
+    
+    
   };
 
   // Fetch data with pagination
@@ -150,14 +159,15 @@ const HousesTable = () => {
     return [headers.join(","), ...rows].join("\r\n");
   };
 
-  const downloadCSV = () => {
+  const downloadCSV = (name: string) => {
     const csvData = convertToCSV(initialCsvData);
     console.log(`CSV Data:\n${csvData}`); // Debugging: Inspect CSV data
     const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", "houses_data.csv");
+    // link.setAttribute("download", "houses_data.csv");
+    link.setAttribute("download", `${name}.csv`);
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
@@ -211,10 +221,14 @@ const HousesTable = () => {
         value={selectedLocationId}
         onChange={handleLocationChange}
         className="mb-4 p-2 rounded border border-gray-300"
+        // onChange={setSelectLocationName(location.name)}
       >
         <option value=" ">Select a Location</option>
         {locations.map((location) => (
-          <option key={location.id} value={location.id}>
+          <option
+            key={location.id}
+            value={location.id}
+          >
             {location.name}
           </option>
         ))}
@@ -285,10 +299,11 @@ const HousesTable = () => {
             </label>
             <button
               className="bg-gray-100 hover:bg-green-400 text-green-700 font-semibold hover:text-white py-1 px-3 text-sm border border-green-500 rounded hover:border-transparent disabled:opacity-50"
-              onClick={downloadCSV}
+              onClick={() => downloadCSV(selectedLocationName)} // Pass selectedLocationName to downloadCSV function
             >
-              Download CSV
+              Download {selectedLocationName}.csv
             </button>
+
           </div>
         </div>
       </div>

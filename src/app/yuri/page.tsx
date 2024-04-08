@@ -156,8 +156,7 @@ export default async function Page() {
                     </form>
                 
                 </div>
-                <SeedSfTable>
-                </SeedSfTable>
+                <SeedSfTable />
             </div>
     </>
 )
