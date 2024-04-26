@@ -912,9 +912,10 @@ export const getLocationsStats = async (locationId: number) => {
   }
 };
 
-export const getAllLocationIds = async () => {
+export const getAllLocationIds = async (isActive: boolean) => {
   try {
     const locations = await db.location.findMany({
+      where: { isDeleted: isActive },
       select: {
         name: true,
         id: true,

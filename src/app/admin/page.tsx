@@ -101,13 +101,12 @@ export default async function Page() {
             {/* <h1 className="text-3xl md:text-4xl font-semibold text-gray-900">Houses Table</h1>
             <HouseTable /> */}
             {/* <FinishedShiftsByLocal /> */}
-            <div className="flex flex-row flex-wrap gap-3 justify-center">
-                <FormWrapper
+            <div className="flex flex-row flex-wrap gap-3 justify-between mb-4">
+                {/* <FormWrapper
                     title="Fetch Salesforce"
                     description="Use this form to fetch a site from Salesforce"
                 >
                     <form className="mt-6 max-w-md flex flex-col gap-4" action={upload}>
-                        {/* Create credentials input fields */}
                         <div>
                             <label htmlFor="username" className="block text-sm font-medium text-gray-700">SALESFORCE Username:</label>
                             <input
@@ -115,16 +114,13 @@ export default async function Page() {
                                 type="text" id="username" name="username"
                                 className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md hover:border-indigo-300" />
                         </div>
-
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-gray-700">SALESFORCE Password:</label>
                             <input
                                 required
                                 type="password" id="password" name="password"
                                 className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md hover:border-indigo-300" />
-                        </div>
-
-                        {/* Create a dropdown menu with siteOptions */}
+                        </div>                        
                         <div>
                             <label htmlFor="site" className="block text-sm font-medium text-gray-700">Choose a site:</label>
                             <select
@@ -142,7 +138,7 @@ export default async function Page() {
 
                         <SubmitFormButton title="Initiate SF Fetching" />
                     </form>
-                </FormWrapper >
+                </FormWrapper > */}
 
                 <FormWrapper
                     title="Delete Site"
@@ -167,15 +163,15 @@ export default async function Page() {
                     </form>
                 </FormWrapper >
 
+                <MassUpdateStatusByLocationForm
+                    data={allActiveLocations}
+                />
             </div>
             {/* <div className='flex flex-row flex-wrap gap-3 max-w-full mx-auto px-6'>
                 <PastShifts
                     agents={allAgents}
                 />
 
-                <MassUpdateStatusByLocationForm
-                    data={allActiveLocations}
-                />
             </div> */}
             {/* <div className='flex flex-row flex-wrap max-w-full mx-auto'>
             </div> */}

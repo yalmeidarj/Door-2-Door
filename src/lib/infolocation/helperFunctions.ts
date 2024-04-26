@@ -10,14 +10,14 @@ type HouseCount = {
 };
     
 export const getLocationsStats = async (locationId: number) => {
+
   try {
     // Location name
     const location = await db.location.findUnique({
       where: {
         id: locationId,
-        // isDeleted: false,
-      },
 
+      },
       select: {
         name: true,
         isDeleted: true,
@@ -77,18 +77,14 @@ export const getLocationsStats = async (locationId: number) => {
             "Door Knock Attempt 6",
           ],
         },
-        },
-        
+      },
     });
 
     const totalHousesVisitRequired = await db.house.count({
       where: {
         locationId: locationId,
         statusAttempt: {
-          in: [
-            "Site Visit Required",
-            "Engineer Visit Required",
-          ],
+          in: ["Site Visit Required", "Engineer Visit Required"],
         },
       },
     });
@@ -155,8 +151,7 @@ export const getLocationsStats = async (locationId: number) => {
       percentageHousesWithConsentNo: Number(percentageHousesWithConsentNo),
       percentageHousesVisited: Number(percentageHousesVisited),
       totalHousesVisitRequired: Number(totalHousesVisitRequired),
-      toBeVisited:
-        Number(leftToVisit),
+      toBeVisited: Number(leftToVisit),
     };
 
     console.log(data);
@@ -165,5 +160,71 @@ export const getLocationsStats = async (locationId: number) => {
   } catch (error) {
     console.error(error);
     return { error: "Error getting locations" };
+  }
+};
+
+// export const getAllLocationsStats = async (isActive: boolean) => {
+//   try {
+//     const locations = await db.location.findMany({
+//       where: {
+//         isDeleted: isActive,
+//       },
+//       select: {
+//         id: true,
+//       },
+//     });
+
+//     const allLocationsStats = await Promise.all(
+//       locations.map(async (loc) => {
+//         const stats = await getLocationsStats(loc.id);
+//         if ("error" in stats) {
+//           // Handle error case
+//           return stats;
+//         }
+//         return {
+//           name: stats.name,
+//           isDeleted: stats.isDeleted,
+//           totalHouses: stats.totalHouses,
+//           totalHousesWithConsent: stats.totalHousesWithConsent,
+//           totalHousesWithConsentYes: stats.totalHousesWithConsentYes,
+//           totalHousesWithConsentNo: stats.totalHousesWithConsentNo,
+//           totalHousesVisited: stats.totalHousesVisited,
+//           totalHousesNonExistent: stats.totalHousesNonExistent,
+//           percentageHousesWithConsentYes: stats.percentageHousesWithConsentYes,
+//           percentageHousesWithConsentNo: stats.percentageHousesWithConsentNo,
+//           percentageHousesVisited: stats.percentageHousesVisited,
+//           totalHousesVisitRequired: stats.totalHousesVisitRequired,
+//           toBeVisited: stats.toBeVisited,
+//         };
+//       })
+//     );
+
+//     return allLocationsStats;
+//   } catch (error) {
+//     console.error(error);
+//     return { error: "Error getting all locations stats" };
+//   }
+// };
+
+
+export const getAllLocationsStats = async (isActive: boolean) => {
+  try {
+    const locations = await db.location.findMany({
+      where: {
+        isDeleted: isActive,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    // Batch location statistics queries
+    const statsPromises = locations.map((loc) => getLocationsStats(loc.id));
+    const allLocationsStats = await Promise.all(statsPromises);
+
+    return allLocationsStats;
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting all locations stats" };
   }
 };

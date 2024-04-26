@@ -80,7 +80,9 @@ export async function massUpdateStatusAttemptByLocationId(locationId: string, cu
                 statusAttempt: currentStatusAttempt,
                 },
                 data: {
-                    statusAttempt: newStatusAttempt,
+                  statusAttempt: newStatusAttempt,
+                  lastUpdatedBy: "systemAdmin",
+                  lastUpdated: new Date(),
                 },
             });
 
