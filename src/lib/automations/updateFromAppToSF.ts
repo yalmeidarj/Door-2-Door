@@ -39,7 +39,7 @@ export async function massUpdateStatusAttemptByLocationId(locationId: string, cu
         const houses = await db.house.updateMany({
           where: {
             locationId: Number(locationId),
-            statusAttempt: " " || "" || undefined || null || "No Attempt ",
+            statusAttempt: "No Attempt ",
           },
           data: {
             statusAttempt: newStatusAttempt,
