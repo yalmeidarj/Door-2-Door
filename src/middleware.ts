@@ -3,9 +3,6 @@ import { NextResponse } from "next/server"; // Import NextResponse
 
 export default withAuth(
   function middleware(req: NextRequestWithAuth) {
-    console.log(req.nextUrl.pathname);
-    console.log(req.nextauth.token);
-    console.log(req.nextauth.token?.role);
 
     // // Check if the user is not an ADMIN
     // if (req.nextauth.token?.role !== "ADMIN") {

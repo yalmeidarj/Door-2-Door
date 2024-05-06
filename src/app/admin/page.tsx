@@ -1,5 +1,5 @@
 import { SalesForce } from '@/lib/utils';
-import { AllLocations, getActiveLocations, getAllAgents, getAllClockedInAgents, getAllLocationsDropDown, seed, softDeleteLocation } from '../actions/actions';
+import { AllLocations, getActiveLocations, getAllAgents, getAllClockedInAgents, getAllLocationsDropDown, getUserById, seed, softDeleteLocation } from '../actions/actions';
 import SubmitFormButton from '@/components/SubmitFormButton';
 import { FormWrapper } from '@/components/FormWrapper';
 import ClockedInAgents from '@/components/ClockedInAgents';
@@ -11,6 +11,8 @@ import HouseTable from '@/components/HouseTable';
 import PastShiftsByAgentId from '@/components/PastShiftsByAgentId';
 import HouseManager from '@/components/houseManager/HouseManager';
 import FinishedShiftsByLocal from '@/components/FinishedShiftsByLocal';
+import { getServerSession } from 'next-auth';
+import { authOptions } from "@/server/auth";
 
 
 type ProjectData = {
@@ -64,8 +66,8 @@ export default async function Page() {
 
         // const formData = new FormData(event.target);
         const chosenSite = data.get('site') as string;
-        const username = data.get('username')as string;
-        const password = data.get('password')as string;
+        const username = data.get('username') as string;
+        const password = data.get('password') as string;
 
         if (!chosenSite || !username || !password) {
             console.log("Missing credentials");
@@ -76,7 +78,7 @@ export default async function Page() {
         const jobId = await initiateSearch(chosenSite, username, password);
 
         if (jobId) {
-            pollJobStatus(jobId, (status:any) => {
+            pollJobStatus(jobId, (status: any) => {
                 handleSearchResults(status);
                 // Additional code to update UI based on the status
             });
@@ -96,13 +98,45 @@ export default async function Page() {
     if ('error' in allActiveLocations) {
         return <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">Error: {allActiveLocations.error}</div>;
     }
-    return (
-        <main className="p-6 mx-auto max-w-5xl flex flex-col">
-            {/* <h1 className="text-3xl md:text-4xl font-semibold text-gray-900">Houses Table</h1>
+
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user || !session.user.id) {
+        return (
+            <div className="flex items-center justify-center">
+                <div className="bg-sky-700 text-slate-100 p-2 rounded shadow grid grid-cols-2 mt-9">
+                    <p>You are not logged in</p>
+                </div>
+            </div>
+        );
+    }
+
+    const user = await getUserById(session.user.id);
+
+    if (!user || 'error' in user) {
+        return <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">Error</div>;
+    }
+
+    console.log(`USER ID: ${session.user.id}`)
+    if (user.role !== 'ADMIN') {
+        console.log(`USER OBJECT: ${user.role}`);
+        return (
+            <div className="flex items-center justify-center">
+                <div className="bg-sky-700 text-slate-100 p-2 rounded shadow grid grid-cols-2 mt-9">
+                    <p>You are not authorized to view this page</p>
+                </div>
+            </div>
+        );
+    }
+    
+
+        return (
+            <main className="p-6 mx-auto max-w-5xl flex flex-col">
+                {/* <h1 className="text-3xl md:text-4xl font-semibold text-gray-900">Houses Table</h1>
             <HouseTable /> */}
-            {/* <FinishedShiftsByLocal /> */}
-            <div className="flex flex-row flex-wrap gap-3 justify-between mb-4">
-                {/* <FormWrapper
+                {/* <FinishedShiftsByLocal /> */}
+                <div className="flex flex-row flex-wrap gap-3 justify-between mb-4">
+                    {/* <FormWrapper
                     title="Fetch Salesforce"
                     description="Use this form to fetch a site from Salesforce"
                 >
@@ -140,58 +174,57 @@ export default async function Page() {
                     </form>
                 </FormWrapper > */}
 
-                <FormWrapper
-                    title="Delete Site"
-                    description="Use this form to delete a site"
-                >
-                    <form action={deleteSite}>
-                        <div className='flex flex-col gap-4'>
-                            <label htmlFor="site" className="block text-sm font-medium text-gray-700">Choose a site:</label>
-                            <select
-                                required
-                                name="site" id="site"
-                                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                <option value=""></option>
-                                {allActiveLocations.map((location) => (
-                                    <option key={location.id} value={location.id}>
-                                        {location.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <SubmitFormButton title="Delete site" />
-                        </div>
-                    </form>
-                </FormWrapper >
+                    <FormWrapper
+                        title="Delete Site"
+                        description="Use this form to delete a site"
+                    >
+                        <form action={deleteSite}>
+                            <div className='flex flex-col gap-4'>
+                                <label htmlFor="site" className="block text-sm font-medium text-gray-700">Choose a site:</label>
+                                <select
+                                    required
+                                    name="site" id="site"
+                                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    <option value=""></option>
+                                    {allActiveLocations.map((location) => (
+                                        <option key={location.id} value={location.id}>
+                                            {location.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <SubmitFormButton title="Delete site" />
+                            </div>
+                        </form>
+                    </FormWrapper >
 
-                <MassUpdateStatusByLocationForm
-                    data={allActiveLocations}
-                />
-            </div>
-            {/* <div className='flex flex-row flex-wrap gap-3 max-w-full mx-auto px-6'>
+                    <MassUpdateStatusByLocationForm
+                        data={allActiveLocations}
+                    />
+                </div>
+                {/* <div className='flex flex-row flex-wrap gap-3 max-w-full mx-auto px-6'>
                 <PastShifts
                     agents={allAgents}
                 />
 
             </div> */}
-            {/* <div className='flex flex-row flex-wrap max-w-full mx-auto'>
+                {/* <div className='flex flex-row flex-wrap max-w-full mx-auto'>
             </div> */}
-            <div className='flex flex-col sm:flex sm:flex-row flex-wrap min-w-full mx-auto border-gray-400 border rounded-sm'>
-                <PastShiftsByAgentId />
-            </div>
-            <div className='flex flex-col sm:flex sm:flex-row flex-wrap min-w-full mx-auto border-gray-400 border rounded-sm'>
-            <ClockedInAgents />
-            </div>
-            <HouseRecordsUploader />
-            <div className=' '>
-                <HouseManager />
-            </div>
+                <div className='flex flex-col sm:flex sm:flex-row flex-wrap min-w-full mx-auto border-gray-400 border rounded-sm'>
+                    <PastShiftsByAgentId />
+                </div>
+                <div className='flex flex-col sm:flex sm:flex-row flex-wrap min-w-full mx-auto border-gray-400 border rounded-sm'>
+                    <ClockedInAgents />
+                </div>
+                <HouseRecordsUploader />
+                <div className=' '>
+                    <HouseManager />
+                </div>
             
-        </main>
+            </main>
 
-    );
+        );
 
-}
-
+    }
 
 
 

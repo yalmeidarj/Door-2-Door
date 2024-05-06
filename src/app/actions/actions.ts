@@ -297,6 +297,22 @@ export const getShiftsByAgentId = async (
 // console.log(`\nTotal time worked: ${hours}h${minutes}m\n`);
 
 
+
+export const getUserById = async (id: string) => {
+  try {
+    const user = await db.user.findUnique({
+      where: { id: id },
+      select: {
+        role: true,
+      },
+    });
+    return user;
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting user" };
+  }
+};
+
 export const getShiftsByLocationId = async (locationId: number) => {
   try {
     const shifts = await db.shiftLogger.findMany({
