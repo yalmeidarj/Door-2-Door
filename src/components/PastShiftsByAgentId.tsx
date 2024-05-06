@@ -118,7 +118,9 @@ export default function PastShiftsByAgentId() {
             />
             <div className="grid grid-cols-1 w-full items-center mx-auto sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 py-4">
                 {finishedShifts.length > 0 ? (
+                
                     finishedShifts.map((shift) => (
+                        
                         <ShiftCard key={shift.id} shift={shift} />
                     ))
                 ) : (

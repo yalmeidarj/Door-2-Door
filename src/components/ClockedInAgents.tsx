@@ -60,7 +60,7 @@ async function ClockedInAgentCard({ agent }: { agent: PastShiftsProps }) {
     }
 
     const startingDate = shiftId.shift.startingDate
-    const updateHouses = shiftId.shift.updatedHouses
+    const updateHouses = shiftId.shift.updatedHouses as number
     const updateHousesFinal = shiftId.shift.updatedHousesFinal
 
         const updatedHouses = updateHouses as number;
@@ -74,8 +74,11 @@ async function ClockedInAgentCard({ agent }: { agent: PastShiftsProps }) {
 
     let userPace = 0;
     if (updatedHousesFinal !== 0) {
-        userPace = shiftDurationInMinutes / updatedHousesFinal; // this gives adjusted minutes per house update
+        userPace = shiftDurationInMinutes / (updateHouses + updatedHousesFinal); // this gives adjusted minutes per house update
+    } else {
+        userPace = shiftDurationInMinutes / updateHouses 
     }
+
     return (
         <div className='bg-white shadow-md  rounded-lg p-4'>
             <div className='flex justifiy-between gap-2 md:items-center border-b border-gray-200 pb-1'>

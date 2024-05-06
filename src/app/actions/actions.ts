@@ -1391,3 +1391,39 @@ export const updateLatLonByStreetId = async ( streetId: string) => {
   return allData;
 };
 
+import { DateTime } from 'luxon';
+
+type PaceData = {
+  editedHouses: number;
+  editedHousesFinal: number;
+  shiftStart: Date;
+  shiftEnd: Date;
+};
+  
+
+
+export async function calculatePace({ editedHouses, editedHousesFinal, shiftStart, shiftEnd }: PaceData) {
+  // Convert to number
+  const updatedHouses = editedHouses as number;
+  const updatedHousesFinal = editedHousesFinal as number;
+
+  // Set the shift start and end times
+  const startTime = DateTime.fromJSDate(new Date(shiftStart));
+  const endTime = DateTime.fromJSDate(new Date(shiftEnd));
+
+  // Calculate the shift duration in minutes
+  const shiftDurationInMilliseconds = endTime.diff(
+    startTime,
+    "milliseconds"
+  ).milliseconds;
+  let shiftDurationInMinutes = shiftDurationInMilliseconds / 1000 / 60; // convert from ms to minutes
+
+  // Adjust for the number of houses updated
+  let shiftDurationAdjusted = shiftDurationInMinutes - updatedHouses * 1.5;
+
+  let userPace = 0;
+  if (updatedHousesFinal !== 0) {
+    userPace = shiftDurationAdjusted / updatedHousesFinal; // this gives adjusted minutes per house update
+  }
+  return userPace;
+}
