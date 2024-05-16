@@ -1,7 +1,6 @@
 'use client'
 import { getAllHousesInLocationSeeding, getAllLocationsDropDown } from "@/app/actions/actions";
 import { useEffect, useState } from "react";
-import page from "../../../ignore/leafletmap/page";
 // import { House } from "@prisma/client";
 import { LocationDropdown } from "../houseTable/columns/forSeeding";
 import  Table  from "./Table";
