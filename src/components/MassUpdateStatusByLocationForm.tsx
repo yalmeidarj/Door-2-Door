@@ -10,9 +10,9 @@ import { useRef } from "react";
 type Location = {
     id: number;
     name: string;
-    neighborhood: string;
-    priorityStatus: number;
-    isDeleted: boolean;
+    // neighborhood: string;
+    // priorityStatus: number;
+    // isDeleted: boolean;
 }[] | {
     error: string;
 }
