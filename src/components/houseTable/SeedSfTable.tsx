@@ -127,7 +127,7 @@ const HousesTable = () => {
           setData(result.data);
             setTotalRecords(result.metadata.totalRecords);
             setTotalPages(result.metadata.totalPages);
-            setInitialCsvData(response);
+            setInitialCsvData(result.data);
           }
         }
       } catch (error) {
