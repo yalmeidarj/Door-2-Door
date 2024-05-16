@@ -41,6 +41,7 @@ export const updateProperty = async (formData: FormData) => {
       where: { id: id },
       data: {
         ...updatedData,
+        isConcilatedInSalesForce: false,
         consent: consent, 
         lastUpdated: new Date(),
         lastUpdatedBy: agentName,
@@ -313,6 +314,17 @@ export const getUserById = async (id: string) => {
   }
 };
 
+export const getAllUsers = async () => {
+  try {
+    const users = await db.user.findMany();
+    return users;
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting users" };
+  }
+}
+
+
 export const getShiftsByLocationId = async (locationId: number) => {
   try {
     const shifts = await db.shiftLogger.findMany({
@@ -469,19 +481,6 @@ export const getActiveShiftByAgentId = async (agentId: string) => {
     console.error(error);
     return { status: "error", message: "Error updating property" };
   }
-};
-
-type UpdateShiftFormData = {
-  id: string;
-  agentId: string;
-  locationId: number;
-  startingDate: Date;
-  finishedDate: Date;
-  isFinished: boolean;
-  updatedHouses: number;
-  updatedHousesFinal: number;
-  pace: number;
-  paceFinal: number;
 };
 
 export const updateActiveShiftByShiftId = async (shiftId: string, statusAttempt: string) => {
@@ -725,9 +724,6 @@ export const getLocations = async (skip: number, take: number) => {
     return { error: "Error getting locations" };
   }
 };
-
-
-
 
 
 // Soft delete a location
@@ -1013,8 +1009,25 @@ export const getAllHousesInLocation = async (locationId: string, skip: number, t
       totalPages: Math.ceil(total / take),
     };
 
+    // clean houses data
+    const data = houses.map((house) => {
+      return {
+        id: house.id,
+        streetNumber: house.streetNumber ,
+        street: { name: house.Street.name as string },
+        name: house.name as string,
+        lastName: house.lastName as string,
+        type: house.type as string,
+        phone: house.phone as string,
+        email: house.email as string,
+        statusAttempt: house.statusAttempt as string,
+        consent: house.consent as string,
+        location: house.Location.name as string,
+      };
+    });
+
     return {
-      data: houses,
+      data: data,
       metadata: metadata,
     };
   } catch (error) {
@@ -1022,6 +1035,64 @@ export const getAllHousesInLocation = async (locationId: string, skip: number, t
     return { error: "Error getting houses" };
   }
 }
+
+// get all houses by locationId
+export const getAllHousesInLocationSeeding = async (locationId: string, skip: number, take: number) => {
+  try {
+    const houses = await db.house.findMany({
+      where: {
+        locationId: Number(locationId),
+        isConcilatedInSalesForce: false,
+        lastUpdatedBy:{
+          not: 'SysAdmin',
+        },        
+       },
+      skip: skip,
+      take: take,
+      include: {
+        Location: true,
+        Street: true,
+      },
+      orderBy: {
+        lastUpdated: "desc",
+      },
+    });
+
+    const total = await db.house.count({ where: { locationId: Number(locationId) } });
+    const metadata = {
+      totalRecords: total,
+      hasNextPage: skip + take < total,
+      totalPages: Math.ceil(total / take),
+    };
+
+    // clean houses data
+    const data = houses.map((house) => {
+      return {
+        id: house.id,
+        streetNumber: house.streetNumber ,
+        street: { name: house.Street.name as string },
+        name: house.name as string,
+        lastName: house.lastName as string,
+        type: house.type as string,
+        phone: house.phone as string,
+        email: house.email as string,
+        statusAttempt: house.statusAttempt as string,
+        isConcilatedInSalesForce: house.isConcilatedInSalesForce as boolean,
+        consent: house.consent as string,
+        location: house.Location.name as string,
+      };
+    });
+
+    return {
+      data: data,
+      metadata: metadata,
+    };
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting houses" };
+  }
+}
+
 
 export const getHousesInStreet = async (
   street: string | string[] | undefined,
@@ -1221,7 +1292,7 @@ export async function createLocationAndHouses(jsonData: SeedData) {
 }
 
 
-export async function updateHouseRecords(jsonData: SeedData) {
+export async function updateHouseRecordsAsAdmin(jsonData: SeedData) {
   try {
     for (const house of jsonData.houses) {
       const streetNumberInt = Number(house.streetNumber);
@@ -1247,6 +1318,7 @@ export async function updateHouseRecords(jsonData: SeedData) {
             consent: house.consent,
             lastUpdated: new Date(),
             lastUpdatedBy: "SystemAdmin",
+            isConcilatedInSalesForce: true,
           },
         });
       } else {
@@ -1266,60 +1338,40 @@ export async function updateHouseRecords(jsonData: SeedData) {
   }
 }
 
+export async function getHouseSFStatus(houseId: string) {
+  try {
+    const house = await db.house.findUnique({
+      where: { id: Number(houseId) },
+      select: {
+        isConcilatedInSalesForce: true,
+      },
+    });
 
-// export async function updateHouseRecords(jsonData: SeedData) {
-//   try {
-//     for (const house of jsonData.houses) {
-//       // Trim string properties
-//       const nameTrimmed = house.name.trim();
-//       const streetTrimmed = house.street.trim();
+    if (!house) {
+      return { error: "House not found" };
+    }
 
-//       // Convert and validate streetNumber
-//       const streetNumberInt = Number(house.streetNumber.trim());
-//       if (isNaN(streetNumberInt)) {
-//         console.log(
-//           `Invalid street number for ${nameTrimmed}: ${house.streetNumber}`
-//         );
-//         continue;
-//       }
+    return house.isConcilatedInSalesForce;
+  } catch (error) {
+    console.error(error);
+    return { error: "Error getting house" };
+  }
+}
 
-//       // Attempt to find an existing house record with trimmed values
-//       const existingHouse = await db.house.findFirst({
-//         where: {
-//           name: nameTrimmed,
-//           streetNumber: streetNumberInt,
-//           Street: { name: streetTrimmed },
-//         },
-//       });
 
-//       // Update or log missing house
-//       if (existingHouse) {
-//         await db.house.update({
-//           where: { id: existingHouse.id },
-//           data: {
-//             statusAttempt: house.statusAttempt.trim(), // Assuming statusAttempt is a string that needs trimming
-//             consent: house.consent, // Assuming consent does not need trimming
-//             lastUpdated: new Date(),
-//             lastUpdatedBy: "SystemAdmin",
-//           },
-//         });
-//       } else {
-//         console.log(
-//           `House not found for ${nameTrimmed}, ${streetNumberInt} ${streetTrimmed}`
-//         );
-//       }
-//     }
+export const switchSFStatus = async (houseId: string, status: boolean) => {
+  try {
+    const updatedHouse = await db.house.update({
+      where: { id: Number(houseId) },
+      data: { isConcilatedInSalesForce: status },
+    });
 
-//     return {
-//       status: "success",
-//       message: `Successfully updated ${jsonData.houses.length} houses`,
-//     };
-//   } catch (error) {
-//     console.error(error);
-//     return { status: "error", message: "Error updating property" };
-//   }
-// }
-
+    return { status: "success", message: "Property updated", house: updatedHouse };
+  } catch (error) {
+    console.error(error);
+    return { status: "error", message: "Error updating property" };
+  }
+};
 
 // temporary function to delete all records from location 10, for testing purposes
 export async function deleteRecords() {

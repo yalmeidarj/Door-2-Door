@@ -60,21 +60,23 @@ const fuzzyFilter: FilterFn<House> = (row, columnId, filterValue, addMeta) => {
 };
 
 export const columns: ColumnDef<House>[] = [
-  {
-    accessorKey: "id",
-    header: "id",
-    // size: 50,
-    filterFn: fuzzyFilter as FilterFn<House>,
-  },
+  // {
+  //   accessorKey: "id",
+  //   header: "id",
+  //   // size: 50,
+  //   filterFn: fuzzyFilter as FilterFn<House>,
+  // },
+
   {
     accessorKey: "streetNumber",
-    header: "streetNumber",
-    // size: 100,
+    header: "House Number",
+    size: 10,
     filterFn: fuzzyFilter as FilterFn<House>,
   },
   {
-    accessorKey: "lastName",
-    header: "lastName",
+    accessorKey: "Street.name",
+    header: "Street",
+    // size: 50,
     filterFn: fuzzyFilter as FilterFn<House>,
   },
   {
@@ -83,15 +85,20 @@ export const columns: ColumnDef<House>[] = [
     filterFn: fuzzyFilter as FilterFn<House>,
   },
   {
-    accessorKey: "notes",
-    header: "notes",
+    accessorKey: "lastName",
+    header: "lastName",
     filterFn: fuzzyFilter as FilterFn<House>,
   },
-  {
-    accessorKey: "salesForceNotes",
-    header: "salesForceNotes",
-    filterFn: fuzzyFilter as FilterFn<House>,
-  },
+  // {
+  //   accessorKey: "notes",
+  //   header: "notes",
+  //   filterFn: fuzzyFilter as FilterFn<House>,
+  // },
+  // {
+  //   accessorKey: "salesForceNotes",
+  //   header: "salesForceNotes",
+  //   filterFn: fuzzyFilter as FilterFn<House>,
+  // },
   {
     accessorKey: "phone",
     header: "phone",
@@ -108,30 +115,30 @@ export const columns: ColumnDef<House>[] = [
     // size: 50,
     filterFn: fuzzyFilter as FilterFn<House>,
   },
-  {
-    accessorKey: "streetId",
-    header: "streetId",
-    // size: 50,
-    filterFn: fuzzyFilter as FilterFn<House>,
-  },
-  {
-    accessorKey: "locationId",
-    header: "locationId",
-    // size: 50,
-    filterFn: fuzzyFilter as FilterFn<House>,
-  },
-  {
-    accessorKey: "lastUpdated",
-    header: "lastUpdated",
-    // size: 50,
-    filterFn: fuzzyFilter as FilterFn<House>,
-  },
-  {
-    accessorKey: "lastUpdatedBy",
-    header: "lastUpdatedBy",
-    // size: 50,
-    filterFn: fuzzyFilter as FilterFn<House>,
-  },
+  // {
+  //   accessorKey: "streetId",
+  //   header: "streetId",
+  //   // size: 50,
+  //   filterFn: fuzzyFilter as FilterFn<House>,
+  // },
+  // {
+  //   accessorKey: "locationId",
+  //   header: "locationId",
+  //   // size: 50,
+  //   filterFn: fuzzyFilter as FilterFn<House>,
+  // },
+  // {
+  //   accessorKey: "lastUpdated",
+  //   header: "lastUpdated",
+  //   // size: 50,
+  //   filterFn: fuzzyFilter as FilterFn<House>,
+  // },
+  // {
+  //   accessorKey: "lastUpdatedBy",
+  //   header: "lastUpdatedBy",
+  //   // size: 50,
+  //   filterFn: fuzzyFilter as FilterFn<House>,
+  // },
   {
     accessorKey: "statusAttempt",
     header: "statusAttempt",
@@ -158,12 +165,6 @@ export const columns: ColumnDef<House>[] = [
   //     filterFn: fuzzyFilter as FilterFn<House>,
   //   },
 
-  {
-    accessorKey: "Street.name",
-    header: "street",
-    // size: 50,
-    filterFn: fuzzyFilter as FilterFn<House>,
-  },
   {
     accessorKey: "Location.name",
     header: "location",

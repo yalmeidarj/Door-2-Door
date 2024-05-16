@@ -123,6 +123,9 @@ const HousesTable = () => {
     setPage(0); // Reset to first page
   };
 
+  const handlePageChange = (newPage: any) => {
+    setPage(Math.max(0, Math.min(newPage, totalPages - 1))); // Ensure newPage is within range
+  };
   // const columns = columns
 
   const convertToCSV = (data: House[]): string => {
@@ -174,9 +177,7 @@ const HousesTable = () => {
     document.body.removeChild(link);
   };
 
-  const handlePageChange = (newPage: any) => {
-    setPage(Math.max(0, Math.min(newPage, totalPages - 1))); // Ensure newPage is within range
-  };
+
 
   const table = useReactTable({
     data,
@@ -186,7 +187,7 @@ const HousesTable = () => {
     },
     state: {
       columnFilters,
-    },
+    },    
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -215,7 +216,7 @@ const HousesTable = () => {
     );
   }
   return (
-    <div className="m-4 p-2 gap-2 w-full bg-slate-600 overflow-auto">
+    <div className="m-4 p-2 gap-2 bg-slate-600 ">
       {/* Step 4: Dropdown for selecting location */}
       <select
         value={selectedLocationId}
@@ -309,12 +310,12 @@ const HousesTable = () => {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full table-auto border-collapse border border-green-800">
+        <table className="min-w-full  border-collapse border border-green-800">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
+              <tr className="bg-blue-400 " key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <th key={header.id}>
+                  <th className="max-w-fit " key={header.id}>
                     <div className="flex flex-col ">
                       {flexRender(
                         header.column.columnDef.header,
@@ -332,7 +333,7 @@ const HousesTable = () => {
                         onChange={(e) =>
                           header.column.setFilterValue(e.target.value)
                         }
-                        placeholder={`Filter ${header.column.id}...`}
+                        placeholder={`${header.column.id}...`}
                       />
                     </div>
                   </th>
@@ -344,10 +345,10 @@ const HousesTable = () => {
             {table.getRowModel().rows.map((row, rowIndex) => (
               <tr
                 key={row.id}
-                className={`${rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
+                className={`max-w-fit ${rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="border border-green-800">
+                  <td key={cell.id} className="bg-red-500 max-w-[40px] border border-green-800">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -365,3 +366,4 @@ export default HousesTable;
 function isString(value: unknown): value is string {
   return typeof value === "string";
 }
+

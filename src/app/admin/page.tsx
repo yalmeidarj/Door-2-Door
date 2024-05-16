@@ -13,6 +13,7 @@ import HouseManager from '@/components/houseManager/HouseManager';
 import FinishedShiftsByLocal from '@/components/FinishedShiftsByLocal';
 import { getServerSession } from 'next-auth';
 import { authOptions } from "@/server/auth";
+import Link from 'next/link';
 
 
 type ProjectData = {
@@ -135,6 +136,14 @@ export default async function Page() {
                 {/* <h1 className="text-3xl md:text-4xl font-semibold text-gray-900">Houses Table</h1>
             <HouseTable /> */}
                 {/* <FinishedShiftsByLocal /> */}
+                <div className='flex flex-row flex-wrap gap-3 max-w-full mx-auto'>
+                    <Link
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        href="/seeding"
+                    >   Go to Seeding page
+                        
+                    </Link>
+                    </div>
                 <div className="flex flex-row flex-wrap gap-3 justify-between mb-4">
                     {/* <FormWrapper
                     title="Fetch Salesforce"

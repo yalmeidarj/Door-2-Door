@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useSession } from "next-auth/react";
 import toast, { Toaster } from "react-hot-toast";
 import SubmitFormButton from "./SubmitFormButton";
-import { updateHouseRecords } from "../app/actions/actions";
+import { updateHouseRecordsAsAdmin } from "../app/actions/actions";
 import { revalidatePath } from 'next/cache';
 import Spinner from './Spinner';
 
@@ -46,8 +46,9 @@ const HouseRecordsUploader: React.FC = () => {
                     const jsonData = JSON.parse(text as string);
                     // await new Promise ((resolve ) => setTimeout(resolve, 4000));
                     // toast.success("success");
-                    const result = await updateHouseRecords(jsonData);
+                    const result = await updateHouseRecordsAsAdmin(jsonData);
                     if (result.status === "success") {
+                        console.log(`****\nSuccess: ${result.message}\n****`);
                         toast.success(result.message);
                     } else {
                         toast.error(result.message);

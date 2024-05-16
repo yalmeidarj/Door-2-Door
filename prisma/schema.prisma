@@ -34,6 +34,7 @@ model House {
   streetId      Int
   locationId    Int
   lastUpdated   DateTime @default(now())
+  isConcilatedInSalesForce Boolean @default(false)
   lastUpdatedBy String?
   statusAttempt String?
   consent       String?
