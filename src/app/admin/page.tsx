@@ -1,4 +1,3 @@
-import { SalesForce } from '@/lib/utils';
 import { AllLocations, getActiveLocations, getAllAgents, getAllClockedInAgents, getAllLocationsDropDown, getUserById, seed, softDeleteLocation } from '../actions/actions';
 import SubmitFormButton from '@/components/SubmitFormButton';
 import { FormWrapper } from '@/components/FormWrapper';
@@ -7,10 +6,10 @@ import { massUpdateStatusAttemptByLocationId } from '@/lib/automations/updateFro
 import MassUpdateStatusByLocationForm from '@/components/MassUpdateStatusByLocationForm';
 import { initiateSearch, pollJobStatus, handleSearchResults, checkJobStatus } from '@/lib/pupeteerActions';
 import HouseRecordsUploader from '@/components/HouseRecordsUploader';
-import HouseTable from '@/components/HouseTable';
+
 import PastShiftsByAgentId from '@/components/PastShiftsByAgentId';
 import HouseManager from '@/components/houseManager/HouseManager';
-import FinishedShiftsByLocal from '@/components/FinishedShiftsByLocal';
+
 import { getServerSession } from 'next-auth';
 import { authOptions } from "@/server/auth";
 import Link from 'next/link';
@@ -140,7 +139,7 @@ export default async function Page() {
                     <Link
                         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                         href="/seeding"
-                    >   Go to Seeding page
+                    >   View houses not updated in SalesForce
                         
                     </Link>
                     </div>
