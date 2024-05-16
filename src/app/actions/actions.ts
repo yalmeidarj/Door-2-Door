@@ -534,7 +534,11 @@ export const getShiftsByAgentIdFinished = async (agentId: string) => {
 export const getActiveLocations = async () => {
   try {
     const locations = await db.location.findMany({
-      where: {isDeleted: false}
+      where: { isDeleted: false },
+            select: {
+        name: true,
+        id: true,
+      }
     });
     return locations;
   } catch (error) {

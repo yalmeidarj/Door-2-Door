@@ -1,5 +1,5 @@
 'use client'
-import { getAllHousesInLocationSeeding, getAllLocationsDropDown } from "@/app/actions/actions";
+import { getActiveLocations, getAllHousesInLocationSeeding, getAllLocationsDropDown } from "@/app/actions/actions";
 import { useEffect, useState } from "react";
 // import { House } from "@prisma/client";
 import { LocationDropdown } from "../houseTable/columns/forSeeding";
@@ -41,7 +41,7 @@ export default function CompactTable() {
     useEffect(() => {
         const fetchLocations = async () => {
             try {
-                const fetchedLocations = await getAllLocationsDropDown();
+                const fetchedLocations = await getActiveLocations();
                 // Check if fetchedLocations is an array and set locations
                 if (Array.isArray(fetchedLocations)) {
                     setLocations(fetchedLocations);
