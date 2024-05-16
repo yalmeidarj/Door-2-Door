@@ -1001,7 +1001,6 @@ export const getAllHousesInLocation = async (locationId: string, skip: number, t
         lastUpdated: "desc",
       },
     });
-
     const total = await db.house.count({ where: { locationId: Number(locationId) } });
     const metadata = {
       totalRecords: total,
@@ -1009,30 +1008,13 @@ export const getAllHousesInLocation = async (locationId: string, skip: number, t
       totalPages: Math.ceil(total / take),
     };
 
-    // clean houses data
-    const data = houses.map((house) => {
-      return {
-        id: house.id,
-        streetNumber: house.streetNumber ,
-        street: { name: house.Street.name as string },
-        name: house.name as string,
-        lastName: house.lastName as string,
-        type: house.type as string,
-        phone: house.phone as string,
-        email: house.email as string,
-        statusAttempt: house.statusAttempt as string,
-        consent: house.consent as string,
-        location: house.Location.name as string,
-      };
-    });
-
     return {
-      data: data,
+      data: houses,
       metadata: metadata,
     };
   } catch (error) {
-    console.error(error);
-    return { error: "Error getting houses" };
+	    console.error(error);
+      return { error: "Error getting houses" };
   }
 }
 

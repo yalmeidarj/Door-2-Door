@@ -14,9 +14,29 @@ import { useEffect, useState } from "react";
 import { ColumnDef, ColumnFilter, FilterFn } from "@tanstack/react-table";
 import Spinner from "@/components/Spinner"
 import { set } from "date-fns";
-import { House, LocationDropdown } from "./columns/forSeeding";
+import {  House, LocationDropdown } from "./columns/forSeeding";
 import {columns} from "@/components/houseTable/columns/forSeeding"
 
+
+// type House = {
+//   id: number;
+//   streetNumber: number;
+//   streetId: number;
+//   locationId: number;
+//   lastUpdated: Date;
+//   lastUpdatedBy: string | null;
+//   street: { name: string; };
+//   name: string;
+//   lastName: string;
+//   type: string;
+//   location: string;
+//   statusAttempt: string;
+//   internalNotes: string;
+//   externalNotes: string;
+//   isDeleted: boolean;
+//   consent: string;
+
+// };
 
 const fuzzyFilter: FilterFn<House> = (row, columnId, filterValue, addMeta) => {
   // Get the value from the row using the columnId
@@ -101,11 +121,13 @@ const HousesTable = () => {
             skip,
             take
           );
-          if (result && result.data) {
-            setData(result.data);
+          if (result && result.data && result.metadata) {
+
+            
+          setData(result.data);
             setTotalRecords(result.metadata.totalRecords);
             setTotalPages(result.metadata.totalPages);
-            setInitialCsvData(result.data);
+            setInitialCsvData(response);
           }
         }
       } catch (error) {

@@ -60,12 +60,12 @@ const fuzzyFilter: FilterFn<House> = (row, columnId, filterValue, addMeta) => {
 };
 
 export const columns: ColumnDef<House>[] = [
-  // {
-  //   accessorKey: "id",
-  //   header: "id",
-  //   // size: 50,
-  //   filterFn: fuzzyFilter as FilterFn<House>,
-  // },
+  {
+    accessorKey: "id",
+    header: "id",
+    // size: 50,
+    filterFn: fuzzyFilter as FilterFn<House>,
+  },
 
   {
     accessorKey: "streetNumber",
@@ -89,16 +89,16 @@ export const columns: ColumnDef<House>[] = [
     header: "lastName",
     filterFn: fuzzyFilter as FilterFn<House>,
   },
-  // {
-  //   accessorKey: "notes",
-  //   header: "notes",
-  //   filterFn: fuzzyFilter as FilterFn<House>,
-  // },
-  // {
-  //   accessorKey: "salesForceNotes",
-  //   header: "salesForceNotes",
-  //   filterFn: fuzzyFilter as FilterFn<House>,
-  // },
+  {
+    accessorKey: "notes",
+    header: "notes",
+    filterFn: fuzzyFilter as FilterFn<House>,
+  },
+  {
+    accessorKey: "salesForceNotes",
+    header: "salesForceNotes",
+    filterFn: fuzzyFilter as FilterFn<House>,
+  },
   {
     accessorKey: "phone",
     header: "phone",
@@ -115,30 +115,30 @@ export const columns: ColumnDef<House>[] = [
     // size: 50,
     filterFn: fuzzyFilter as FilterFn<House>,
   },
-  // {
-  //   accessorKey: "streetId",
-  //   header: "streetId",
-  //   // size: 50,
-  //   filterFn: fuzzyFilter as FilterFn<House>,
-  // },
-  // {
-  //   accessorKey: "locationId",
-  //   header: "locationId",
-  //   // size: 50,
-  //   filterFn: fuzzyFilter as FilterFn<House>,
-  // },
-  // {
-  //   accessorKey: "lastUpdated",
-  //   header: "lastUpdated",
-  //   // size: 50,
-  //   filterFn: fuzzyFilter as FilterFn<House>,
-  // },
-  // {
-  //   accessorKey: "lastUpdatedBy",
-  //   header: "lastUpdatedBy",
-  //   // size: 50,
-  //   filterFn: fuzzyFilter as FilterFn<House>,
-  // },
+  {
+    accessorKey: "streetId",
+    header: "streetId",
+    // size: 50,
+    filterFn: fuzzyFilter as FilterFn<House>,
+  },
+  {
+    accessorKey: "locationId",
+    header: "locationId",
+    // size: 50,
+    filterFn: fuzzyFilter as FilterFn<House>,
+  },
+  {
+    accessorKey: "lastUpdated",
+    header: "lastUpdated",
+    // size: 50,
+    filterFn: fuzzyFilter as FilterFn<House>,
+  },
+  {
+    accessorKey: "lastUpdatedBy",
+    header: "lastUpdatedBy",
+    // size: 50,
+    filterFn: fuzzyFilter as FilterFn<House>,
+  },
   {
     accessorKey: "statusAttempt",
     header: "statusAttempt",
