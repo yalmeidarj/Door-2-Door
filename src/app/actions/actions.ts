@@ -1264,6 +1264,7 @@ export async function createLocationAndHouses(jsonData: SeedData) {
           email: house.email,
           externalNotes: house.notes, // Assuming 'notes' maps to 'externalNotes'
           phone: house.phone,
+          isConcilatedInSalesForce: true, 
           // Add other fields as necessary
           
         },

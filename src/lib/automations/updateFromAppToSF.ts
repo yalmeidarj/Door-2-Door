@@ -43,6 +43,7 @@ export async function massUpdateStatusAttemptByLocationId(locationId: string, cu
           },
           data: {
             statusAttempt: newStatusAttempt,
+            isConcilatedInSalesForce: false,
           },
         });
           
