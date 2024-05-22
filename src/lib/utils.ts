@@ -57,7 +57,7 @@ export const SalesForce = {
   tableSelector:
     "body > div.container.map.noPad > div:nth-child(2) > div > div.row.mapTable.ng-scope > div.col-lg-10.col-md-12.col-sm-12.col-xs-12 > div",
   // body > div.container.map.noPad > div:nth-child(2) > div > div.row.mapSearch.ng-scope > div.col-lg-10.col-md-12.col-sm-12.col-xs-12 > div > div.col-lg-3.col-md-3.col-sm-3 > select > option:nth-child(1)
-  siteOptions:   siteOptions: {
+  siteOptions: {
     ALTOON41_2012A: "1",
     ALTOON41_3013C: "2",
     ALTOON41_3023B: "3",
