@@ -32,6 +32,9 @@ export default async function StreetFeed({ id, start, perPage }: StreetFeedProps
                     </>                
                 ))}
             </div>
+            <PaginationControls
+                metadata={paginationControls}
+            />
         </>
     )
 }

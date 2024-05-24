@@ -24,15 +24,22 @@ export function PaginationControls({ metadata }: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const pathname = usePathname();
-    const { perPage, currentPage } = metadata.state;
-    const { totalPages, totalRecords, hasNextPage } = metadata.data;
-    const { defaultPerPage} = defaultValues
+    const { perPage } = metadata.state;
+    const { totalPages } = metadata.data;
+    const { defaultPerPage } = defaultValues;
 
     const [localPerPage, setLocalPerPage] = useState(perPage);
+    const [currentPage, setCurrentPage] = useState(metadata.state.currentPage);
 
     useEffect(() => {
         setLocalPerPage(perPage);
     }, [perPage]);
+
+    useEffect(() => {
+        const pageParam = searchParams.get('page');
+        const page = pageParam ? parseInt(pageParam, 10) : 1;
+        setCurrentPage(page);
+    }, [searchParams]);
 
     const changePage = (newPage: number, newPerPage?: number) => {
         const newSearchParams = new URLSearchParams(searchParams);
@@ -71,10 +78,9 @@ export function PaginationControls({ metadata }: Props) {
     return (
         <div className="flex flex-col justify-center items-center space-x-2 py-2">
             <div className='flex justify-end w-full items-center'>
-
-                <span className="text-sm text-slate-200">Page {currentPage} of {totalPages}</span>
+                <span className="text-sm text-slate-400">Page {currentPage} of {totalPages}</span>
             </div>
-            
+
             <div className='flex justify-between items-center space-x-1'>
                 <button
                     className="px-2 py-1 border border-gray-400 rounded text-sm 

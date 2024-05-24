@@ -46,7 +46,10 @@ export default async function HousesFeed({ feed }: HouseFeedData) {
                             activeShift={isClockedInLocationId}                       
                         />
                     ))}
-              </div>
+            </div>
+            <PaginationControls
+                metadata={paginationControls}
+            />
         </>
     )
 }
