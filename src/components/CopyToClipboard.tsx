@@ -25,7 +25,7 @@ const CopyToClipboard: React.FC<CopyToClipboardProps> = ({ text }) => {
             
         >
             <div
-                className='text-xs ml-1 '>            
+                className='text-sm m-1 '>            
                 {copied ?                
                     <BsCheck2
                         className='text-green-600 '

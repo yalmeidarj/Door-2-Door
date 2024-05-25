@@ -5,6 +5,19 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export const statusOptions = [
+  "Door Knock Attempt 1",
+  "Door Knock Attempt 2",
+  "Door Knock Attempt 3",
+  "Door Knock Attempt 4",
+  "Door Knock Attempt 5",
+  "Door Knock Attempt 6",
+  "Consent Final Yes",
+  "Consent Final No",
+  "Engineer Visit Required",
+  "Home Does Not Exist",
+];
+
 export function getConditionalClass(statusAttempt: string, consent: string) {
   // Handle cases where "Door Knock Attempt" is part of the string
   if (statusAttempt.includes("Door Knock Attempt")) {

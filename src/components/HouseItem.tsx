@@ -10,7 +10,6 @@ import HouseCard from "./HouseCard";
 import NotClockedIn from "./NotLoggedIn";
 
 export default function HouseItem({ house, activeShift }: HouseItemProps) {
-
     
     return (
         <>

@@ -21,6 +21,9 @@ interface House {
     statusAttempt: string;
     consent: string;
     location: string;
+    internalNotes: string;
+    lastUpdatedBy: string;
+    lastUpdated: Date;
 }
 
 export default function CompactTable() {
@@ -64,15 +67,12 @@ export default function CompactTable() {
         event: React.ChangeEvent<HTMLSelectElement>
     ) => {
         setSelectedLocationId(event.target.value);
-
         // Find the location object from the locations array
         const selectedLocation = locations.find(location => location.id.toString() === event.target.value);
 
         // Set the selectedLocationName state to the found location's name
         // If the selected location is found, update the name, otherwise set it to an empty string
         setSelectLocationName(selectedLocation ? selectedLocation.name : "");
-
-
     };
 
     // Fetch data with pagination

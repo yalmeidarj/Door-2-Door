@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { ConsentYesSchema, FormSchema } from "@/lib/houses/types";
 import PhoneInput from "./PhoneInput";
+import { statusOptions } from "@/lib/utils";
 
 
 
@@ -28,18 +29,7 @@ export default function Form({ houseId, info }: FormProps) {
     const constructionTypes = ['Easy', 'Moderate', 'Hard'];
     // const [phone, setPhone] = useState('');
 
-    const statusAttemptOptions = [
-        'Door Knock Attempt 1',
-        'Door Knock Attempt 2',
-        'Door Knock Attempt 3',
-        'Door Knock Attempt 4',
-        'Door Knock Attempt 5',
-        'Door Knock Attempt 6',
-        'Consent Final Yes',
-        'Consent Final No',
-        'Engineer Visit Required',
-        'Home Does Not Exist'
-    ];
+    const statusAttemptOptions = statusOptions;
 
     const session = useSession();
 
@@ -78,21 +68,16 @@ export default function Form({ houseId, info }: FormProps) {
             phone: phoneNumber.slice(2).replace(/\D/g, ''),
             email: formData.get("email") ,
             internalNotes: formData.get("internalNotes") ,
-        }
-        console.log(newObject.phone);
+        }        
         if (statusAttempt === "Consent Final Yes") {
-            console.log("consent yes");
-            console.log(newObject);
             const result = ConsentYesSchema.safeParse(newObject);
             if (result.success) {
                 const updateResult = await updateProperty(formData);
                 toast.success(updateResult.status);
                 const shiftUpdate = await updateActiveShiftByShiftId(shiftId, statusAttempt as string);
                 if (shiftUpdate.status !== "success") {
-                    toast.error(shiftUpdate.message);
-                    // return false;
-                }
-                
+                    toast.error(shiftUpdate.message);                    
+                }                
                 return true;
             } else {
                 

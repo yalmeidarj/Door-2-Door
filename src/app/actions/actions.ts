@@ -1055,7 +1055,7 @@ export const getAllHousesInLocationSeeding = async (locationId: string, skip: nu
     const data = houses.map((house) => {
       return {
         id: house.id,
-        streetNumber: house.streetNumber ,
+        streetNumber: house.streetNumber,
         street: { name: house.Street.name as string },
         name: house.name as string,
         lastName: house.lastName as string,
@@ -1066,6 +1066,9 @@ export const getAllHousesInLocationSeeding = async (locationId: string, skip: nu
         isConcilatedInSalesForce: house.isConcilatedInSalesForce as boolean,
         consent: house.consent as string,
         location: house.Location.name as string,
+        lastUpdated: house.lastUpdated as Date,
+        lastUpdatedBy: house.lastUpdatedBy as string,
+        internalNotes: house.internalNotes as string,
       };
     });
 
