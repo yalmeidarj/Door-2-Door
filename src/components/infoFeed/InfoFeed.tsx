@@ -36,10 +36,6 @@ export default async function InfoFeed({ isActive }: { isActive: boolean }) {
         return <div>Error: {allIds.error}</div>;
     }
 
-    // const fetchStatsPromises: Promise<LocationStats | ErrorResponse>[] = getAllLocationsStats(true)
-    // const fetchStatsPromises: Promise<LocationStats | ErrorResponse>[] = allIds.map(id =>
-    //     getLocationsStats(id.id)
-    // );
     const fetchStatsPromises = await getAllLocationsStats(isActive);
 
     if ('error' in fetchStatsPromises) {
@@ -63,15 +59,19 @@ export default async function InfoFeed({ isActive }: { isActive: boolean }) {
 
 
     return (
-        <div className='flex justify-center flex-wrap flex-row gap-0 items-center '>
+        <div className='flex flex-col gap-4 mx-auto items-center '>
+            <InfoConditionalFormat />
+        <div className='flex justify-evenly flex-wrap flex-row gap-0 items-center '>
             {
                 allStats.map((location, index) => {
                     if ("totalHouses" in location) {
                         return (
-                            <InfoLocationCard
-                                key={index}
-                                location={location}
-                            />
+                            <>
+                                <InfoLocationCard
+                                    key={index}
+                                    location={location}
+                                />
+                            </>
                         )
                     } else {
                         // Handle error response
@@ -80,23 +80,98 @@ export default async function InfoFeed({ isActive }: { isActive: boolean }) {
                 })
             }
         </div>
+        </div>
     );
 }
 
 function InfoLocationCard({ location }: { location: LocationStats }) {
+    
+    const getConsentYesColor = (percentage:number) => {
+        if (percentage > 83) {
+            return 'bg-green-500 text-white';
+        } else if (percentage >= 70 && percentage <= 83) {
+            return 'bg-yellow-500 text-white';
+        } else {
+            return 'bg-red-500 text-white';
+        }
+    };
+
     return (
-        <div className="p-4 mb-4 bg-white shadow rounded-lg text-sm">
-            {/* JSX using location properties */}
-            <h2 className="text-md font-semibold">{location.name}</h2>
-            {location.isDeleted ? <span className="text-red-500">Not Active</span> : null}
-            <p className="text-gray-600">Total Houses: {location.totalHouses}</p>
-            <p className="text-gray-600">Visit Required: {location.totalHousesVisitRequired}</p>
-            <p className="text-gray-600">Houses with Consent: {location.totalHousesWithConsent}</p>
-            <p className="text-gray-600">Consent Yes: {location.totalHousesWithConsentYes} | {location.percentageHousesWithConsentYes}%</p>
-            <p className="text-gray-600">Consent No: {location.totalHousesWithConsentNo} | {location.percentageHousesWithConsentNo}%</p>
-            <p className="text-gray-600">Houses Visited: {location.totalHousesVisited} | {location.percentageHousesVisited}%</p>
-            <p className="text-gray-600">To be Visited: {location.toBeVisited}</p>
-            <p className="text-gray-600">Non-existent Houses: {location.totalHousesNonExistent}</p>
+        <div className="p-3 mb-6 bg-white shadow rounded-lg text-sm border border-gray-200 ">
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold">{location.name}</h2>
+                {location.isDeleted && (
+                    <span className="flex items-center text-red-500">
+                        <span className="h-2 w-2 bg-red-500 rounded-full mr-2"></span>
+                        Not Active
+                    </span>
+                )}
+            </div>
+
+            <div className="flex flex-col gap-2 text-gray-700">
+                <div className=" w-full flex flex-col">
+                <div className={`flex justify-between items-center w-full`}>
+                    <p>Total Houses:</p>
+                    <p className="font-medium text-gray-900">{location.totalHouses}</p>
+                </div>
+                    <div className={`${getConsentYesColor(location.percentageHousesWithConsentYes)} flex justify-between items-center w-full`}>
+                        <p className={`px-2 py-1 rounded font-semibold`}>
+                            Consent Yes:
+                        </p>
+                        <p className={` px-2 py-1 rounded text-center font-semibold`}>
+                            {location.totalHousesWithConsentYes} | {location.percentageHousesWithConsentYes}%
+                        </p>
+                    </div>
+                    <div className="flex justify-between">
+                        <p>Consent No:</p>
+                        <p className="font-medium text-gray-900">{location.totalHousesWithConsentNo} | {location.percentageHousesWithConsentNo}%</p>
+                    </div>
+                </div>
+                <div className="flex justify-between">
+                    <p>Total with Consent:</p>
+                    <p className="font-medium text-gray-900">{location.totalHousesWithConsent}</p>
+                </div>
+
+                <div className="flex justify-between">
+                    <p>Houses Visited:</p>
+                    <p className="font-medium text-gray-900">{location.totalHousesVisited} | {location.percentageHousesVisited}%</p>
+                </div>
+                <div className="flex justify-between">
+                    <p>Visit Required:</p>
+                    <p className="font-medium text-gray-900">{location.totalHousesVisitRequired}</p>
+                </div>
+
+                {/* <div className="flex justify-between">
+                    <p>To be Visited:</p>
+                    <p className="font-medium text-gray-900">{location.toBeVisited}</p>
+                </div> */}
+
+                <div className="flex justify-between">
+                    <p>Non-exist.:</p>
+                    <p className="font-medium text-gray-900">{location.totalHousesNonExistent}</p>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+
+function InfoConditionalFormat() {
+    return (
+        <div className="p-2 mb-4 bg-gray-100 shadow rounded-lg text-xs">
+            <h3 className="text-md font-semibold mb-2">Conditional Format Rules</h3>
+            <div className="flex items-center mb-1">
+                <span className="inline-block w-4 h-4 bg-green-500 rounded mr-2"></span>
+                <span className="text-gray-700">> 83%</span>
+            </div>
+            <div className="flex items-center mb-1">
+                <span className="inline-block w-4 h-4 bg-yellow-500 rounded mr-2"></span>
+                <span className="text-gray-700">70% - 83%</span>
+            </div>
+            <div className="flex items-center">
+                <span className="inline-block w-4 h-4 bg-red-500 rounded mr-2"></span>
+                <span className="text-gray-700">{'<'} 70%</span>
+            </div>
         </div>
     );
 }
