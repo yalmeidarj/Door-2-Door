@@ -162,7 +162,7 @@ function InfoConditionalFormat() {
             <h3 className="text-md font-semibold mb-2">Conditional Format Rules</h3>
             <div className="flex items-center mb-1">
                 <span className="inline-block w-4 h-4 bg-green-500 rounded mr-2"></span>
-                <span className="text-gray-700">> 83%</span>
+                <span className="text-gray-700">{'>'} 83%</span>
             </div>
             <div className="flex items-center mb-1">
                 <span className="inline-block w-4 h-4 bg-yellow-500 rounded mr-2"></span>
