@@ -1226,6 +1226,60 @@ export async function seed(data: SeedData) {
   }
 }
 
+// export async function createLocationAndHouses(jsonData: SeedData) {
+//   try {
+//     // Create location
+//     const location = await db.location.create({
+//       data: {
+//         name: jsonData.name,
+//         neighborhood: jsonData.neighborhood,
+//         priorityStatus: jsonData.priorityStatus,
+//       },
+//     });
+
+//     // Map to keep track of created streets for house association, with corrected type
+//     const streetsMap: { [key: string]: number } = {};
+
+//     // Create streets
+//     for (const streetName of jsonData.streets) {
+//       const street = await db.street.create({
+//         data: {
+//           name: streetName,
+//           locationId: location.id,
+//         },
+//       });
+//       streetsMap[streetName] = street.id; // Store street id for later use
+//     }
+
+//     // Create houses
+//     for (const house of jsonData.houses) {
+//       await db.house.create({
+//         data: {
+//           streetNumber: Number(house.streetNumber),
+//           lastName: house.lastName,
+//           name: house.name,
+//           type: house.type,
+//           streetId: streetsMap[house.street], // Associate with street using map
+//           locationId: location.id, // Associate with location
+//           lastUpdated: new Date(), // Assuming you want to set this manually
+//           statusAttempt: house.statusAttempt,
+//           consent: house.consent,
+//           email: house.email,
+//           externalNotes: house.notes, // Assuming 'notes' maps to 'externalNotes'
+//           phone: house.phone,
+//           isConcilatedInSalesForce: true, 
+//           // Add other fields as necessary
+          
+//         },
+//       });
+//     }
+
+//     return { status: "success", message: "Location and houses created" };
+//   } catch (error) {
+//     console.error(error);
+//     return { status: "error", message: "Error creating location and houses" };
+//   }
+// }
 export async function createLocationAndHouses(jsonData: SeedData) {
   try {
     // Create location
@@ -1237,7 +1291,7 @@ export async function createLocationAndHouses(jsonData: SeedData) {
       },
     });
 
-    // Map to keep track of created streets for house association, with corrected type
+    // Map to keep track of created streets for house association
     const streetsMap: { [key: string]: number } = {};
 
     // Create streets
@@ -1253,9 +1307,15 @@ export async function createLocationAndHouses(jsonData: SeedData) {
 
     // Create houses
     for (const house of jsonData.houses) {
+      // Convert streetNumber to a number
+      const streetNumber = Number(house.streetNumber);
+      if (isNaN(streetNumber)) {
+        throw new Error(`Invalid street number: ${house.streetNumber}`);
+      }
+
       await db.house.create({
         data: {
-          streetNumber: Number(house.streetNumber),
+          streetNumber: streetNumber,
           lastName: house.lastName,
           name: house.name,
           type: house.type,
@@ -1267,9 +1327,8 @@ export async function createLocationAndHouses(jsonData: SeedData) {
           email: house.email,
           externalNotes: house.notes, // Assuming 'notes' maps to 'externalNotes'
           phone: house.phone,
-          isConcilatedInSalesForce: true, 
+          isConcilatedInSalesForce: true,
           // Add other fields as necessary
-          
         },
       });
     }
@@ -1277,7 +1336,7 @@ export async function createLocationAndHouses(jsonData: SeedData) {
     return { status: "success", message: "Location and houses created" };
   } catch (error) {
     console.error(error);
-    return { status: "error", message: "Error creating location and houses" };
+return { status: "error", message: "Error creating location and houses" };
   }
 }
 

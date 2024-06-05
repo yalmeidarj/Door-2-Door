@@ -101,8 +101,8 @@ function InfoLocationCard({ location }: { location: LocationStats }) {
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold">{location.name}</h2>
                 {location.isDeleted && (
-                    <span className="flex items-center text-red-500">
-                        <span className="h-2 w-2 bg-red-500 rounded-full mr-2"></span>
+                    <span className="flex items-center text-xs text-red-500">
+                        <span className="h-2 w-2 bg-red-500 rounded-full mr-0.5"></span>
                         Not Active
                     </span>
                 )}
@@ -127,24 +127,24 @@ function InfoLocationCard({ location }: { location: LocationStats }) {
                         <p className="font-medium text-gray-900">{location.totalHousesWithConsentNo} | {location.percentageHousesWithConsentNo}%</p>
                     </div>
                 </div>
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                     <p>Total with Consent:</p>
                     <p className="font-medium text-gray-900">{location.totalHousesWithConsent}</p>
-                </div>
+                </div> */}
 
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                     <p>Houses Visited:</p>
                     <p className="font-medium text-gray-900">{location.totalHousesVisited} | {location.percentageHousesVisited}%</p>
+                </div> */}
+                <div className="flex justify-between">
+                    <p>Left to Visit:</p>
+                    <p className="font-medium text-gray-900">{location.toBeVisited}</p>
                 </div>
                 <div className="flex justify-between">
                     <p>Visit Required:</p>
                     <p className="font-medium text-gray-900">{location.totalHousesVisitRequired}</p>
                 </div>
 
-                {/* <div className="flex justify-between">
-                    <p>To be Visited:</p>
-                    <p className="font-medium text-gray-900">{location.toBeVisited}</p>
-                </div> */}
 
                 <div className="flex justify-between">
                     <p>Non-exist.:</p>
