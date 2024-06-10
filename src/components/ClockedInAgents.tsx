@@ -9,6 +9,7 @@ interface ShiftLoggerProps {
     finishedDate: Date | null;
     updatedHouses: number | null;
     updatedHousesFinal: number | null;
+    updatedHousesFinalNo: number | null;
     Location: {
         id: number;
         name: string;
@@ -103,8 +104,12 @@ async function ClockedInAgentCard({ agent }: { agent: PastShiftsProps }) {
                             
                                 </div>
                             <div className='flex flex-row items-center justify-between gap-1'>
-                                <p className='text-xs text-gray-600'>With Consent</p>
-                                <p className='text-sm text-gray-800'>{shift.updatedHousesFinal}</p>
+                                <p className='text-xs text-gray-600'>Consent</p>
+                                <p className='text-sm text-gray-800'><span className='text-xs text-white rounded-xs p-1 '>{shift.updatedHousesFinal}</span></p>
+                            </div>
+                            <div className='flex flex-row items-center justify-between gap-1'>
+                                <p className='text-xs text-gray-600'>No</p>
+                                <p className='text-sm text-gray-800'><span className='text-xs text-white rounded-xs p-1 '>{shift.updatedHousesFinalNo}</span></p>
                             </div>
                         </div>
                         <div className='flex flex-row justify-between items-center gap-1 '>
@@ -121,7 +126,6 @@ async function ClockedInAgentCard({ agent }: { agent: PastShiftsProps }) {
                         {/* <span className="text-gray-800 text-md">
                             Pace: {userPace.toFixed(2)}
                         </span> */}
-
                     </div>
                 </div>
             ))}

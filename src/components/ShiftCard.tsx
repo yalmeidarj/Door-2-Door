@@ -64,7 +64,7 @@ export default function ShiftCard({ shift }: { shift: Shift }) {
                         </div>
                         <div className="text-center">
                             <span className="block text-xs text-gray-600">With Consent</span>
-                            <span className="block text-sm font-medium">{shift.updatedHousesFinal || '0'}</span>
+                            <span className="block text-sm font-medium">{shift.updatedHousesFinal || '0'} | {shift.updatedHousesFinalNo || '0'}</span>
                         </div>
                         <div className="text-center">
                             <span className="block text-xs text-gray-600">Pace</span>

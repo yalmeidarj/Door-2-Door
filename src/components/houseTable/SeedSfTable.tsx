@@ -370,7 +370,7 @@ const HousesTable = () => {
                 className={`max-w-fit ${rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="bg-red-500 max-w-[40px] border border-green-800">
+                  <td key={cell.id} className="max-w-[40px] border border-green-800">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}

@@ -385,6 +385,7 @@ export const getAllClockedInAgents = async () => {
             finishedDate: true,
             updatedHouses: true,
             updatedHousesFinal: true,
+            updatedHousesFinalNo: true,
             Location: {
               select: {
                 id: true,
@@ -472,6 +473,7 @@ export const getActiveShiftByAgentId = async (agentId: string) => {
         isFinished: true,
         updatedHouses: true,
         updatedHousesFinal: true,
+        updatedHousesFinalNo: true,
         pace: true,
         paceFinal: true,
       },
@@ -485,7 +487,7 @@ export const getActiveShiftByAgentId = async (agentId: string) => {
 
 export const updateActiveShiftByShiftId = async (shiftId: string, statusAttempt: string) => {
 
-  if (statusAttempt === "Consent Final Yes" || statusAttempt === "Consent Final No") {
+  if (statusAttempt === "Consent Final Yes" ) {
     try {
       const updatedShift = await db.shiftLogger.update({
         where: { id: shiftId },
@@ -498,7 +500,22 @@ export const updateActiveShiftByShiftId = async (shiftId: string, statusAttempt:
       console.error(error);
       return { status: "error", message: "Error updating shift" }; // Ensure a return statement here
     }
-  } else {
+  }
+  else if (statusAttempt === "Consent Final No") {
+        try {
+      const updatedShift = await db.shiftLogger.update({
+        where: { id: shiftId },
+        data: { updatedHousesFinalNo: { increment: 1 } },
+      });
+
+      revalidatePath(`/`);
+      return { status: "success", message: "Shift updated", shift: updatedShift };
+    } catch (error) {
+      console.error(error);
+      return { status: "error", message: "Error updating shift" }; // Ensure a return statement here
+    }
+  }
+  else {
     try {
       const updatedShift = await db.shiftLogger.update({
         where: { id: shiftId },

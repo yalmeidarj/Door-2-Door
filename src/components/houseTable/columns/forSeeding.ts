@@ -90,16 +90,6 @@ export const columns: ColumnDef<House>[] = [
     filterFn: fuzzyFilter as FilterFn<House>,
   },
   {
-    accessorKey: "notes",
-    header: "notes",
-    filterFn: fuzzyFilter as FilterFn<House>,
-  },
-  {
-    accessorKey: "salesForceNotes",
-    header: "salesForceNotes",
-    filterFn: fuzzyFilter as FilterFn<House>,
-  },
-  {
     accessorKey: "phone",
     header: "phone",
     filterFn: fuzzyFilter as FilterFn<House>,
@@ -151,19 +141,18 @@ export const columns: ColumnDef<House>[] = [
     // size: 50,
     filterFn: fuzzyFilter as FilterFn<House>,
   },
-
-  //   {
-  //     accessorKey: "internalNotes",
-  //     header: "Internal Notes",
-  //     // size: 25,
-  //     filterFn: fuzzyFilter as FilterFn<House>,
-  //   },
-  //   {
-  //     accessorKey: "externalNotes",
-  //     header: "External Notes",
-  //     // size: 25,
-  //     filterFn: fuzzyFilter as FilterFn<House>,
-  //   },
+  {
+    accessorKey: "internalNotes",
+    header: "Internal Notes",
+    // size: 25,
+    filterFn: fuzzyFilter as FilterFn<House>,
+  },
+  {
+    accessorKey: "externalNotes",
+    header: "External Notes",
+    // size: 25,
+    filterFn: fuzzyFilter as FilterFn<House>,
+  },
 
   {
     accessorKey: "Location.name",

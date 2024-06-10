@@ -8,6 +8,7 @@ export type Shift = {
   isFinished: boolean;
   updatedHouses: number;
   updatedHousesFinal: number;
+  updatedHousesFinalNo: number;
   pace: number;
   paceFinal: number;
   formattedShiftLength?: string;

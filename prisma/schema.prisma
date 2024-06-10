@@ -79,6 +79,7 @@ model ShiftLogger {
   isFinished         Boolean   @default(false)
   updatedHouses      Int? @default(0)
   updatedHousesFinal Int? @default(0)
+  updatedHousesFinalNo Int? @default(0)
   pace               Int? @default(0)
   paceFinal          Int? @default(0)
   User               User      @relation(fields: [agentId], references: [id])

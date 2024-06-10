@@ -112,6 +112,7 @@ export default async function Page() {
     }
 
     const user = await getUserById(session.user.id);
+    // const bruno = await getUserById('clvejs6d30000eod90im6uvgw');
 
     if (!user || 'error' in user) {
         return <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">Error</div>;
