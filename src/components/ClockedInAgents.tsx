@@ -104,12 +104,12 @@ async function ClockedInAgentCard({ agent }: { agent: PastShiftsProps }) {
                             
                                 </div>
                             <div className='flex flex-row items-center justify-between gap-1'>
-                                <p className='text-xs text-gray-600'>Consent</p>
-                                <p className='text-sm text-gray-800'><span className='text-xs text-white rounded-xs p-1 '>{shift.updatedHousesFinal}</span></p>
+                                <p className='text-xs text-gray-600'>"Yes"</p>
+                                <p className='text-sm text-gray-800'><span className='text-xs  rounded-xs p-1 '>{shift.updatedHousesFinal}</span></p>
                             </div>
                             <div className='flex flex-row items-center justify-between gap-1'>
-                                <p className='text-xs text-gray-600'>No</p>
-                                <p className='text-sm text-gray-800'><span className='text-xs text-white rounded-xs p-1 '>{shift.updatedHousesFinalNo}</span></p>
+                                <p className='text-xs text-gray-600'>"No"</p>
+                                <p className='text-sm text-gray-800'><span className='text-xs  rounded-xs p-1 '>{shift.updatedHousesFinalNo}</span></p>
                             </div>
                         </div>
                         <div className='flex flex-row justify-between items-center gap-1 '>
