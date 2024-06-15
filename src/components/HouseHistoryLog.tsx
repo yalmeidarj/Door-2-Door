@@ -3,19 +3,19 @@ import { format } from "date-fns";
 import { DateTime } from "luxon";
 
 interface LogEntry {
-    name: string;
-    lastName: string;
-    type: string;
-    statusAttempt: string;
-    consent: string;
-    email: string;
-    externalNotes: string;
-    internalNotes: string;
-    phone: string;
+    name: string | null;
+    lastName: string | null;
+    type: string | null;
+    statusAttempt: string | null;
+    consent: string | null;
+    email: string | null;
+    externalNotes: string | null;
+    internalNotes: string | null;
+    phone: string | null;
     timeStamp: Date;
-    userName: string;
-
+    userName: string | null;
 }
+
 
 interface HouseHistoryLogProps {
     logs: LogEntry[];
