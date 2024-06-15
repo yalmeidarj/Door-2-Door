@@ -5,6 +5,20 @@ import { useEffect, useState } from "react";
 import { LocationDropdown } from "../houseTable/columns/forSeeding";
 import  Table  from "./Table";
 
+interface LogEntry {
+    name: string | null;
+    lastName: string | null;
+    type: string | null;
+    statusAttempt: string | null;
+    consent: string | null;
+    email: string | null;
+    externalNotes: string | null;
+    internalNotes: string | null;
+    phone: string | null;
+    timeStamp: Date;
+    userName: string | null;
+}
+
 
 interface House {
     id: number;
@@ -24,6 +38,7 @@ interface House {
     internalNotes: string;
     lastUpdatedBy: string;
     lastUpdated: Date;
+    houseHistory: LogEntry[];
 }
 
 export default function CompactTable() {

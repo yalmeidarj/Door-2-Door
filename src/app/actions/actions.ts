@@ -1251,6 +1251,7 @@ export const getAllHousesInLocationSeeding = async (locationId: string, skip: nu
           externalNotes: log.externalNotes,
           internalNotes: log.internalNotes,
           phone: log.phone,
+          timeStamp: log.timestamp,
           userName: log.User.name, // Include the User name
         })),
       };
