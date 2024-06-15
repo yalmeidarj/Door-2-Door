@@ -4,6 +4,20 @@ import { db } from "@/server/db";
 import { get } from "http";
 import { revalidatePath } from "next/cache";
 
+type HouseData = {
+  name: string | null;
+  lastName: string | null;
+  type: string | null;
+  statusAttempt: string | null;
+  consent: string | null;
+  email: string | null;
+  externalNotes: string | null;
+  internalNotes: string | null;
+  phone: string | null;
+};
+
+
+
 export const updateProperty = async (formData: FormData) => {
   const updatedData = Object.fromEntries(
     Array.from(formData.entries()).filter(([key, value]) => {
@@ -19,6 +33,7 @@ export const updateProperty = async (formData: FormData) => {
   const id = Number(formData.get("id"));
   if (!id) throw new Error("No id found in form data");
 
+  const shiftId = formData.get("shiftId") as string
 
   // if phone number is provided, clean it up by removing all non-numeric characters
   if (updatedData.phone) {
@@ -35,6 +50,12 @@ export const updateProperty = async (formData: FormData) => {
   } else {
     consent = formData.get("consent") as string;
   }
+  
+  const currentHouseData: HouseData = await getHouseCurrentData(id);
+
+  if (!currentHouseData ){
+    throw new Error("Current house data not found");
+  }
 
   try {
     const updatedHouse = await db.house.update({
@@ -42,7 +63,7 @@ export const updateProperty = async (formData: FormData) => {
       data: {
         ...updatedData,
         isConcilatedInSalesForce: false,
-        consent: consent, 
+        consent: consent,
         lastUpdated: new Date(),
         lastUpdatedBy: agentName,
       },
@@ -60,6 +81,28 @@ export const updateProperty = async (formData: FormData) => {
       },
     });
 
+
+    const houseLog = await db.houseEditLog.createMany({
+      data: {
+        houseId: Number(formData.get("id")),
+        // House:
+        agentId,
+        shiftLoggerId: "shiftId",
+        // shiftLoggerId: formData.get("shiftLoggerId"),
+        name: `${currentHouseData.name} -> ${updatedHouse.name}`,
+        lastName: `${currentHouseData.lastName} -> ${updatedHouse.lastName}`,
+        type: `${currentHouseData.type} -> ${updatedHouse.type}`,
+        statusAttempt: `${currentHouseData.statusAttempt} -> ${updatedHouse.statusAttempt}`,
+        consent: `${currentHouseData.consent} -> ${updatedHouse.consent}`,
+        email: `${currentHouseData.email} -> ${updatedHouse.email}`,
+        externalNotes: `${currentHouseData.externalNotes} -> ${updatedHouse.externalNotes}`,
+        internalNotes: `${currentHouseData.internalNotes} -> ${updatedHouse.internalNotes}`,
+        phone: `${currentHouseData.phone} -> ${updatedHouse.phone}`,
+        timestamp: new Date(),
+        // include: House,
+      },
+    });
+
     revalidatePath(`/`);
 
     console.log(updatedHouse);
@@ -68,6 +111,110 @@ export const updateProperty = async (formData: FormData) => {
   } catch (error) {
     console.error(error);
     return { status: "error", message: "Error updating property" };
+  }
+};
+
+export const getHouseHistory = async (houseId: number) => {
+  try {
+    const houseHistory = await db.houseEditLog.findMany({
+      where: { houseId: houseId },
+      include: {
+        User: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    return houseHistory;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error getting House history");
+  }
+};
+
+
+export const logHouseEdit = async (
+  houseId: number,
+  agentId: string,
+  shiftLoggerId: string,
+  updatedData: Record<string, any>,
+  oldData: Record<string, any>
+) => {
+  const logEntries = Object.keys(updatedData).map((key) => ({
+    houseId,
+    agentId,
+    shiftLoggerId,
+    name:
+      key === "name"
+        ? `${oldData[key] || ""} -> ${updatedData[key] || ""}`
+        : undefined,
+    lastName:
+      key === "lastName"
+        ? `${oldData[key] || ""} -> ${updatedData[key] || ""}`
+        : undefined,
+    type:
+      key === "type"
+        ? `${oldData[key] || ""} -> ${updatedData[key] || ""}`
+        : undefined,
+    statusAttempt:
+      key === "statusAttempt"
+        ? `${oldData[key] || ""} -> ${updatedData[key] || ""}`
+        : undefined,
+    consent:
+      key === "consent"
+        ? `${oldData[key] || ""} -> ${updatedData[key] || ""}`
+        : undefined,
+    email:
+      key === "email"
+        ? `${oldData[key] || ""} -> ${updatedData[key] || ""}`
+        : undefined,
+    externalNotes:
+      key === "externalNotes"
+        ? `${oldData[key] || ""} -> ${updatedData[key] || ""}`
+        : undefined,
+    internalNotes:
+      key === "internalNotes"
+        ? `${oldData[key] || ""} -> ${updatedData[key] || ""}`
+        : undefined,
+    phone:
+      key === "phone"
+        ? `${oldData[key] || ""} -> ${updatedData[key] || ""}`
+        : undefined,
+    timestamp: new Date(),
+  }));
+
+  await db.houseEditLog.createMany({
+    data: logEntries,
+  });
+};
+
+export const getHouseCurrentData = async (
+  houseId: number
+): Promise<HouseData> => {
+  try {
+    const houseData = await db.house.findUnique({
+      where: { id: houseId },
+      select: {
+        name: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        type: true,
+        statusAttempt: true,
+        consent: true,
+        externalNotes: true,
+        internalNotes: true,
+      },
+    });
+    if (!houseData) {
+      throw new Error("House not found");
+    }
+    return houseData;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error getting House data");
   }
 };
 
@@ -227,6 +374,7 @@ export const getShiftsByAgentId = async (
         isFinished: true,
         updatedHouses: true,
         updatedHousesFinal: true,
+        updatedHousesFinalNo: true,
         pace: true,
         paceFinal: true,
       },
@@ -365,6 +513,8 @@ export const isAgentClockedIn = async (agentId: string) => {
     return { error: "Error getting shift" };
   }
 }
+
+
 
 export const getAllClockedInAgents = async () => {
   try {
@@ -1046,15 +1196,20 @@ export const getAllHousesInLocationSeeding = async (locationId: string, skip: nu
       where: {
         locationId: Number(locationId),
         isConcilatedInSalesForce: false,
-        lastUpdatedBy:{
-          not: 'SysAdmin',
-        },        
-       },
+        lastUpdatedBy: {
+          not: "SysAdmin",
+        },
+      },
       skip: skip,
       take: take,
       include: {
         Location: true,
         Street: true,
+        HouseEditLog: {
+          include: {
+            User: true, // Include the User relation
+          },
+        },
       },
       orderBy: {
         lastUpdated: "desc",
@@ -1086,6 +1241,18 @@ export const getAllHousesInLocationSeeding = async (locationId: string, skip: nu
         lastUpdated: house.lastUpdated as Date,
         lastUpdatedBy: house.lastUpdatedBy as string,
         internalNotes: house.internalNotes as string,
+        houseHistory: house.HouseEditLog.map((log) => ({
+          name: log.name,
+          lastName: log.lastName,
+          type: log.type,
+          statusAttempt: log.statusAttempt,
+          consent: log.consent,
+          email: log.email,
+          externalNotes: log.externalNotes,
+          internalNotes: log.internalNotes,
+          phone: log.phone,
+          userName: log.User.name, // Include the User name
+        })),
       };
     });
 
@@ -1526,6 +1693,7 @@ export const updateLatLonByStreetId = async ( streetId: string) => {
 };
 
 import { DateTime } from 'luxon';
+import Email from "next-auth/providers/email";
 
 type PaceData = {
   editedHouses: number;

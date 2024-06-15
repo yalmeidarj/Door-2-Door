@@ -26,28 +26,56 @@ model Account {
 }
 
 model House {
-  id            Int      @id @default(autoincrement())
-  streetNumber  Int
-  lastName      String?
-  name          String?
-  type          String?
-  streetId      Int
-  locationId    Int
-  lastUpdated   DateTime @default(now())
+  id Int @id @default(autoincrement())
+  streetNumber Int
+  lastName String?
+  name String?
+  type String?
+  streetId Int
+  locationId Int
+  lastUpdated DateTime @default(now())
   isConcilatedInSalesForce Boolean @default(false)
   lastUpdatedBy String?
   statusAttempt String?
-  consent       String?
-  email         String?
+  consent String?
+  email String?
   externalNotes String?
   internalNotes String?
-  phone         String?
-  Location      Location @relation(fields: [locationId], references: [id])
-  Street        Street   @relation(fields: [streetId], references: [id])
-  latitud       Float?
-  longitud      Float?
+  phone String?
+  HouseEditLog HouseEditLog[]
+  Location Location @relation(fields: [locationId], references: [id])
+  Street Street @relation(fields: [streetId], references: [id])
+  latitud Float?
+  longitud Float?
 
 }
+
+model HouseEditLog {
+  id Int @id @default(autoincrement())
+  houseId Int
+  agentId String
+  shiftLoggerId String
+  timestamp DateTime @default(now())
+  name String?
+  lastName String?
+  type String?
+  statusAttempt String?
+  consent String?
+  email String?
+  externalNotes String?
+  internalNotes String?
+  phone String?
+  House House @relation(fields: [houseId], references: [id])
+  User User @relation(fields: [agentId], references: [id])
+  // ShiftLogger ShiftLogger @relation(fields: [shiftLoggerId], references: [id])
+
+  @@index([houseId])
+  @@index([agentId])
+  // @@index([shiftLoggerId])
+  @@index([timestamp])
+}
+
+
 
 model Location {
   id             Int           @id @default(autoincrement())
@@ -82,6 +110,7 @@ model ShiftLogger {
   updatedHousesFinalNo Int? @default(0)
   pace               Int? @default(0)
   paceFinal          Int? @default(0)
+  // HouseEditLog HouseEditLog[]
   User               User      @relation(fields: [agentId], references: [id])
   Location           Location  @relation(fields: [locationId], references: [id])
 
@@ -109,6 +138,7 @@ model User {
   currentShiftId  String?
   role          Role          @default(USER)
   isClockedIn   Boolean       @default(false)
+  HouseEditLog HouseEditLog[]
   Account       Account[]
   Session       Session[]
   ShiftLogger   ShiftLogger[]

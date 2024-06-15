@@ -6,7 +6,7 @@ import ClockedInAgents from '@/components/ClockedInAgents';
 import { massUpdateStatusAttemptByLocationId } from '@/lib/automations/updateFromAppToSF';
 import MassUpdateStatusByLocationForm from '@/components/MassUpdateStatusByLocationForm';
 import { initiateSearch, pollJobStatus, handleSearchResults, checkJobStatus } from '@/lib/pupeteerActions';
-import HouseRecordsUploader from '@/components/HouseRecordsUploader';
+import HouseUpdateFromSF from '@/components/HouseRecordsUploader';
 import { getLocationProjectData } from '@/lib/downloadFiles/downloadFilesFromApp';
 import { promisify } from 'util';
 

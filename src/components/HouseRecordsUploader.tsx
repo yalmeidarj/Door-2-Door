@@ -13,7 +13,7 @@ interface HouseRecordsUploaderProps {
     // Define any additional props if needed
 }
 
-const HouseRecordsUploader: React.FC = () => {
+const HouseUpdateFromSF: React.FC = () => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false); // Loading state
 
@@ -99,5 +99,5 @@ const HouseRecordsUploader: React.FC = () => {
     );
 };
 
-export default HouseRecordsUploader;
+export default HouseUpdateFromSF;
 

@@ -4,8 +4,21 @@ import ConciliateWithSFButton from '../conciliateWithSFButton/ConciliateWithSFBu
 import { cn } from '@/lib/utils';
 import { format } from "date-fns";
 import ChangeHouseStatusDropdown from '../ChangeHouseStatusDropdown';
+import HouseEditLogs from '../HouseHistoryLog';
 
-
+interface LogEntry {
+    name: string;
+    lastName: string;
+    type: string;
+    statusAttempt: string;
+    consent: string;
+    email: string;
+    externalNotes: string;
+    internalNotes: string;
+    phone: string;
+    timeStamp: Date;
+    userName: string;
+}
 interface House {
     id: number;
     streetNumber: number;
@@ -24,6 +37,7 @@ interface House {
     isConcilatedInSalesForce: boolean;
     consent: string;
     location: string;
+    houseHistory: LogEntry[];
 }
 
 interface TableProps {
@@ -37,7 +51,7 @@ const Table: React.FC<TableProps> = ({ data }) => {
                 <TableHeader
                     columns={[
                         'Address',
-                        'Last Name',
+                        'Last Name',                        
                         'Name',
                         'Phone',
                         'Email',
@@ -46,14 +60,16 @@ const Table: React.FC<TableProps> = ({ data }) => {
                         // 'Consent',
                         'Last Update',
                         'Internal Notes',
+                        'Log',
                     ]}
                 />
                 <tbody>
                     {data.map((row) => (
                         <tr key={row.id} className="odd:bg-gray-100 even:bg-gray-50 hover:bg-gray-200">
-                            <TableCell className='font-semibold flex justify-between items-center' text={`${row.streetNumber} ${row.street.name}`}>
+                            <TableCell className='font-semibold flex justify-between items-center' text={`${row.streetNumber} ${row.street.name} `}>
                                 <ConciliateWithSFButton houseId={row.id.toString()} status={row.isConcilatedInSalesForce} />
                             </TableCell>
+
                             <TableCell text={row.lastName} />
                             <TableCell text={row.name} />
                             <TableCell text={row.phone} />
@@ -82,6 +98,11 @@ const Table: React.FC<TableProps> = ({ data }) => {
                                 </div>
                             </TableCell>
                             <TableCell clipboard={false} text={row.internalNotes} />
+                            <TableCell
+                                text='None'
+                                clipboard={false}>
+                                <HouseEditLogs logs={row.houseHistory} />
+                            </TableCell>
                         </tr>
                     ))}
                 </tbody>

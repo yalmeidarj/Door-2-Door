@@ -5,7 +5,7 @@ import ClockedInAgents from '@/components/ClockedInAgents';
 import { massUpdateStatusAttemptByLocationId } from '@/lib/automations/updateFromAppToSF';
 import MassUpdateStatusByLocationForm from '@/components/MassUpdateStatusByLocationForm';
 import { initiateSearch, pollJobStatus, handleSearchResults, checkJobStatus } from '@/lib/pupeteerActions';
-import HouseRecordsUploader from '@/components/HouseRecordsUploader';
+import HouseUpdateFromSF from '@/components/HouseRecordsUploader';
 
 import PastShiftsByAgentId from '@/components/PastShiftsByAgentId';
 import HouseManager from '@/components/houseManager/HouseManager';
@@ -210,24 +210,17 @@ export default async function Page() {
                         data={allActiveLocations}
                     />
                 </div>
-                {/* <div className='flex flex-row flex-wrap gap-3 max-w-full mx-auto px-6'>
-                <PastShifts
-                    agents={allAgents}
-                />
 
-            </div> */}
-                {/* <div className='flex flex-row flex-wrap max-w-full mx-auto'>
-            </div> */}
                 <div className='flex flex-col sm:flex sm:flex-row flex-wrap min-w-full mx-auto border-gray-400 border rounded-sm'>
                     <PastShiftsByAgentId />
                 </div>
                 <div className='flex flex-col sm:flex sm:flex-row flex-wrap min-w-full mx-auto border-gray-400 border rounded-sm'>
                     <ClockedInAgents />
                 </div>
-                <HouseRecordsUploader />
-                <div className=' '>
+                <HouseUpdateFromSF />
+                {/* <div className=' '>
                     <HouseManager />
-                </div>
+                </div> */}
             
             </main>
 

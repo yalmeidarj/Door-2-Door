@@ -5,6 +5,7 @@ import GoBack from "@/components/GoBack"
 import { houseCurrentStreet } from "@/lib/houses/helperFunctions"
 import HousesFeed from "@/components/HouseFeed"
 import PageHeaderInfo from "@/components/PageHeaderInfo";
+import { getActiveShiftByAgentId } from "@/app/actions/actions";
 
 export default async function Page({
     params,
@@ -19,6 +20,8 @@ export default async function Page({
     const perPage = Number(searchParams['per_page']) ?? 2
     const start = (page - 1) * perPage
     const streetId = searchParams.id
+
+    
 
     if (!streetId) {
         return <div>Invalid id...</div>

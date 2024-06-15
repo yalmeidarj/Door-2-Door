@@ -6,7 +6,7 @@ import { SalesForce } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import io from 'socket.io-client';
 import { seed } from '../actions/actions';
-import HouseRecordsUploader from '@/components/HouseRecordsUploader';
+import HouseUpdateFromSF from '@/components/HouseRecordsUploader';
 import toast from 'react-hot-toast';
 import Spinner from '@/components/Spinner';
 import { set } from 'date-fns';
@@ -201,7 +201,7 @@ export default function Page() {
                                 onClick={() => downloadJSON(downloadData, `${downloadData.name}.json`)}>
                                 Download JSON
                             </button>
-                                    <HouseRecordsUploader  />
+                                    <HouseUpdateFromSF  />
                         </div>
                     )}
                 </div>

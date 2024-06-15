@@ -57,13 +57,15 @@ export default async function ShiftManager() {
         }
         const pace = shiftId.shift.pace
         const updateHouses = shiftId.shift.updatedHouses
-        const updateHousesFinal = shiftId.shift.updatedHousesFinal
+        const housesFinal = shiftId.shift.updatedHousesFinal
+        const housesFinalNo = shiftId.shift.updatedHousesFinalNo
         const paceFinal = shiftId.shift.paceFinal
         const startingDate = shiftId.shift.startingDate
 
 
         const updatedHouses = updateHouses as number;
-        const updatedHousesFinal = updateHousesFinal as number;
+        const updatedHousesFinal = housesFinal as number;
+        const updatedHousesFinalNo = housesFinalNo as number;
         const startTime = DateTime.fromJSDate(new Date(startingDate as Date));
 
         const formattedStartTime = startTime.toLocaleString(DateTime.DATETIME_MED);
@@ -76,8 +78,11 @@ export default async function ShiftManager() {
 
         let userPace = 0;
         if (updatedHousesFinal !== 0) {
-            userPace = shiftDurationInMinutes / updatedHousesFinal; // this gives adjusted minutes per house update
+            userPace = shiftDurationInMinutes / (updatedHouses + updatedHousesFinal + updatedHousesFinalNo); // this gives adjusted minutes per house update
+        } else {
+            userPace = shiftDurationInMinutes / updatedHouses
         }
+
 
         // Ensure userPace is not NaN
         if (isNaN(userPace)) {

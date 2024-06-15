@@ -67,12 +67,15 @@ export default function Form({ houseId, info }: FormProps) {
             name: formData.get("name") ,
             phone: phoneNumber.slice(2).replace(/\D/g, ''),
             email: formData.get("email") ,
-            internalNotes: formData.get("internalNotes") ,
-        }        
+            internalNotes: formData.get("internalNotes"),
+            // shiftId: currentShift.shift.id
+        }
+        
+        
         if (statusAttempt === "Consent Final Yes") {
             const result = ConsentYesSchema.safeParse(newObject);
             if (result.success) {
-                const updateResult = await updateProperty(formData);
+                const updateResult = await updateProperty( formData);
                 toast.success(updateResult.status);
                 const shiftUpdate = await updateActiveShiftByShiftId(shiftId, statusAttempt as string);
                 if (shiftUpdate.status !== "success") {
@@ -143,6 +146,7 @@ export default function Form({ houseId, info }: FormProps) {
                 <textarea id="id" name="id" className="hidden" value={houseId} />
                 <textarea id="agentName" name="agentName" className="hidden" value={agentName ?? "No Agent Name"} />
                 <textarea id="agentId" name="agentId" className="hidden" value={agentId} />
+                
 
                 {/* External Notes Section */}
                 <div className="mb-6">

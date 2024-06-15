@@ -6,6 +6,7 @@ import { DateTime } from "luxon";
 export default function ShiftCard({ shift }: { shift: Shift }) {
     const updatedHouses = shift.updatedHouses as number
     const updatedHousesFinal = shift.updatedHousesFinal
+    const updatedHousesFinalNo = shift.updatedHousesFinalNo
     const startTime = DateTime.fromJSDate(new Date(shift.startingDate))
     const endTime = DateTime.fromJSDate(new Date(shift.finishedDate))
 
@@ -21,7 +22,7 @@ export default function ShiftCard({ shift }: { shift: Shift }) {
 
     let userPace = 0;
     if (updatedHousesFinal !== 0) {
-        userPace = shiftDurationInMinutes / (updatedHouses + updatedHousesFinal); // this gives adjusted minutes per house update
+        userPace = shiftDurationInMinutes / (updatedHouses + updatedHousesFinal + updatedHousesFinalNo); // this gives adjusted minutes per house update
     } else {
         userPace = shiftDurationInMinutes / updatedHouses
     }
