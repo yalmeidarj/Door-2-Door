@@ -21,6 +21,7 @@ type FormProps = {
         streetNumber: string;
         streetName: string;
         locationName: string;
+        currentNotes: string;
     };
 };
 
@@ -201,7 +202,7 @@ export default function Form({ houseId, info }: FormProps) {
                     </div>
                 </div>
 
-                {/* Hpme owner Info Section */}
+                {/* Home owner Info Section */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
                     {/* Name Field */}                    
                         <FormItem
@@ -235,9 +236,16 @@ export default function Form({ houseId, info }: FormProps) {
                     
                 </div>
                 {/* Internal Notes Section */}
+                <input
+                    id="currentNotes"   
+                    name="currentNotes"
+                    value={info.currentNotes}
+                    type="hidden" />
+                {/* Internal Notes Section */}
                 <div className="mb-6">
                     <Textarea
-                        placeholder="Type your message here." 
+                        // placeholder={info.currentNotes === 'null' ? 'Type message here...' : info.currentNotes} 
+                        placeholder={'Type message here...'}
                         id="internalNotes"
                         name="internalNotes"
                     />

@@ -57,11 +57,11 @@ const Table: React.FC<TableProps> = ({ data }) => {
                         'Phone',
                         'Email',
                         'Type',
-                        'Status Attempt',
-                        // 'Consent',
-                        'Last Update',
+                        'Status',
+                        // 'Status Attempt',
+                        // 'Last Update',
                         'Internal Notes',
-                        'Log',
+                        // 'Log',
                     ]}
                 />
                 <tbody>
@@ -84,24 +84,11 @@ const Table: React.FC<TableProps> = ({ data }) => {
                                     houseId={row.id.toString()}
                                     statusAttempt={row.statusAttempt}
                                 />
-                            </TableCell>
-                            {/* <TableCell
-                                clipboard={false}
-                                text={row.consent}
-                            /> */}
-                            <TableCell
-                                className="px-3 py-2 border border-gray-300 text-center"
-                                text={row.lastUpdatedBy.substring(0, 9)}
-                                clipboard={false}
-                            >                                
                                 <div className="flex justify-center ">
-                                    <span>{format(new Date(row.lastUpdated), 'MMM dd, HH:mm')}</span>
+                                    <span>{row.lastUpdatedBy.substring(0, 9)}-{format(new Date(row.lastUpdated), 'MMM dd, HH:mm')}</span>
                                 </div>
                             </TableCell>
-                            <TableCell clipboard={false} text={row.internalNotes} />
-                            <TableCell
-                                text='None'
-                                clipboard={false}>
+                            <TableCell clipboard={false} text={row.internalNotes} >
                                 <HouseEditLogs logs={row.houseHistory} />
                             </TableCell>
                         </tr>
@@ -111,6 +98,8 @@ const Table: React.FC<TableProps> = ({ data }) => {
         </div>
     );
 };
+
+
 
 function TableHeader({ columns }: { columns: string[] }) {
     return (

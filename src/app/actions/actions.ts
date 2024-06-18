@@ -22,7 +22,12 @@ export const updateProperty = async (formData: FormData) => {
   const updatedData = Object.fromEntries(
     Array.from(formData.entries()).filter(([key, value]) => {
       // Exclude 'id', agentName, and agentId
-      if (key === "id" || key === "agentName" || key === "agentId") {
+      if (
+        key === "id" ||
+        key === "agentName" ||
+        key === "agentId" ||
+        key === "currentNotes"
+      ) {
         return false;
       }
       // Check if the value is a string and not empty after trimming
@@ -44,6 +49,25 @@ export const updateProperty = async (formData: FormData) => {
   const agentId = formData.get("agentId") as string;
   const agentName = formData.get("agentName") as string;
   const status = formData.get("statusAttempt") as string
+  const currentNotes = formData.get("currentNotes") as string;
+  let newNotes = " ";
+  if (
+    currentNotes !== null &&
+    currentNotes !== "null" &&
+    currentNotes.trim() !== ""
+  ) {
+    newNotes = (currentNotes +
+      `\n${agentName}->` +
+      formData.get("internalNotes") +
+      " " +
+      "||") as string;
+  } else {
+    newNotes = (agentName +
+      "->" +
+      formData.get("internalNotes") +
+      " " +
+      "||") as string;
+  }
   let consent = " ";
   if (status === "Consent Final Yes" || status === "Consent Final No") {
     consent = status.split(" ")[2];
@@ -62,6 +86,7 @@ export const updateProperty = async (formData: FormData) => {
       where: { id: id },
       data: {
         ...updatedData,
+        internalNotes: newNotes,
         isConcilatedInSalesForce: false,
         consent: consent,
         lastUpdated: new Date(),
@@ -95,8 +120,8 @@ export const updateProperty = async (formData: FormData) => {
         statusAttempt: `${currentHouseData.statusAttempt} -> ${updatedHouse.statusAttempt}`,
         consent: `${currentHouseData.consent} -> ${updatedHouse.consent}`,
         email: `${currentHouseData.email} -> ${updatedHouse.email}`,
-        externalNotes: `${currentHouseData.externalNotes} -> ${updatedHouse.externalNotes}`,
-        internalNotes: `${currentHouseData.internalNotes} -> ${updatedHouse.internalNotes}`,
+        // externalNotes: `${currentHouseData.externalNotes} -> ${updatedHouse.externalNotes}`,
+        // internalNotes: `${currentHouseData.internalNotes} -> ${updatedHouse.internalNotes}`,
         phone: `${currentHouseData.phone} -> ${updatedHouse.phone}`,
         timestamp: new Date(),
         // include: House,
@@ -1248,8 +1273,8 @@ export const getAllHousesInLocationSeeding = async (locationId: string, skip: nu
           statusAttempt: log.statusAttempt,
           consent: log.consent,
           email: log.email,
-          externalNotes: log.externalNotes,
-          internalNotes: log.internalNotes,
+          // externalNotes: log.externalNotes,
+          // internalNotes: log.internalNotes,
           phone: log.phone,
           timeStamp: log.timestamp,
           userName: log.User.name, // Include the User name

@@ -28,7 +28,8 @@ export default function HouseItem({ house, activeShift }: HouseItemProps) {
                                     info={{
                                         streetNumber: `${house.streetNumber}`,
                                         streetName: ` ${house.Street.name}`,
-                                        locationName: `${house.Location.name}`
+                                        locationName: `${house.Location.name}`,
+                                        currentNotes: `${house.internalNotes}`,
                                     }}    
                                     houseId={house.id}
                                     />

@@ -12,8 +12,8 @@ interface LogEntry {
     statusAttempt: string | null;
     consent: string | null;
     email: string | null;
-    externalNotes: string | null;
-    internalNotes: string | null;
+    // externalNotes: string | null;
+    // internalNotes: string | null;
     phone: string | null;
     timeStamp: Date;
     userName: string | null;
