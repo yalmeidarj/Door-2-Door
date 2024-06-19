@@ -49,35 +49,42 @@ export const updateProperty = async (formData: FormData) => {
   const agentId = formData.get("agentId") as string;
   const agentName = formData.get("agentName") as string;
   const status = formData.get("statusAttempt") as string
-  const currentNotes = formData.get("currentNotes") as string;
-  let newNotes = " ";
-  if (
-    currentNotes !== null &&
-    currentNotes !== "null" &&
-    currentNotes.trim() !== ""
-  ) {
-    newNotes = (currentNotes +
-      `\n${agentName}->` +
-      formData.get("internalNotes") +
-      " " +
-      "||") as string;
+  
+// If internalNotes is valid and currentNotes is also valid, newNotes will be a concatenation of currentNotes and internalNotes.
+// If internalNotes is valid but currentNotes is not, newNotes will only contain the internalNotes with the agent's name.
+// If internalNotes is not valid, newNotes will retain the value of currentNotes if currentNotes is valid.
+// If neither internalNotes nor currentNotes are valid, newNotes remains null.
+
+const currentNotes = formData.get("currentNotes") as string;
+let newNotes = null; // Initialize newNotes as null
+const internalNotes = formData.get("internalNotes") as string;
+
+  // Check if internalNotes is not null or empty
+  if (internalNotes && internalNotes !== "null" && internalNotes.trim() !== "") {
+    // Check if currentNotes is not null or empty
+    if (currentNotes && currentNotes !== "null" && currentNotes.trim() !== "") {
+      newNotes = `${currentNotes}\n${agentName}->${internalNotes} ||`;
+    } else {
+      newNotes = `${agentName}->${internalNotes} ||`;
+    }
   } else {
-    newNotes = (agentName +
-      "->" +
-      formData.get("internalNotes") +
-      " " +
-      "||") as string;
+    // If internalNotes is null or empty, retain currentNotes
+    if (currentNotes && currentNotes !== "null" && currentNotes.trim() !== "") {
+      newNotes = currentNotes;
+    }
   }
+
+  // Set consent based on the status or formData
   let consent = " ";
   if (status === "Consent Final Yes" || status === "Consent Final No") {
     consent = status.split(" ")[2];
   } else {
     consent = formData.get("consent") as string;
   }
-  
-  const currentHouseData: HouseData = await getHouseCurrentData(id);
 
-  if (!currentHouseData ){
+  // Fetch current house data
+  const currentHouseData: HouseData = await getHouseCurrentData(id);
+  if (!currentHouseData) {
     throw new Error("Current house data not found");
   }
 
