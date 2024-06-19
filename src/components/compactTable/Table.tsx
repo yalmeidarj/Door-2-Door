@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { format } from "date-fns";
 import ChangeHouseStatusDropdown from '../ChangeHouseStatusDropdown';
 import HouseEditLogs from '../HouseHistoryLog';
+import NotesButton from '../NotesButton';
 
 interface LogEntry {
     name: string | null;
@@ -89,7 +90,13 @@ const Table: React.FC<TableProps> = ({ data }) => {
                                 </div>
                             </TableCell>
                             <TableCell clipboard={false} text={row.internalNotes} >
-                                <HouseEditLogs logs={row.houseHistory} />
+                                <div className="flex flex-row justify-between ">
+                                    <HouseEditLogs logs={row.houseHistory} />
+                                    <NotesButton
+                                        houseId={row.id}
+                                        currentNotes={row.internalNotes}
+                                    />
+                                </div>
                             </TableCell>
                         </tr>
                     ))}
