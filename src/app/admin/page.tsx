@@ -112,8 +112,7 @@ export default async function Page() {
     }
 
     const user = await getUserById(session.user.id);
-    // const bruno = await getUserById('clvejs6d30000eod90im6uvgw');
-
+    
     if (!user || 'error' in user) {
         return <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">Error</div>;
     }
@@ -145,44 +144,6 @@ export default async function Page() {
                     </Link>
                     </div>
                 <div className="flex flex-row flex-wrap gap-3 justify-between mb-4">
-                    {/* <FormWrapper
-                    title="Fetch Salesforce"
-                    description="Use this form to fetch a site from Salesforce"
-                >
-                    <form className="mt-6 max-w-md flex flex-col gap-4" action={upload}>
-                        <div>
-                            <label htmlFor="username" className="block text-sm font-medium text-gray-700">SALESFORCE Username:</label>
-                            <input
-                                required
-                                type="text" id="username" name="username"
-                                className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md hover:border-indigo-300" />
-                        </div>
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700">SALESFORCE Password:</label>
-                            <input
-                                required
-                                type="password" id="password" name="password"
-                                className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md hover:border-indigo-300" />
-                        </div>                        
-                        <div>
-                            <label htmlFor="site" className="block text-sm font-medium text-gray-700">Choose a site:</label>
-                            <select
-                                required
-                                name="site" id="site"
-                                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                <option value=""></option>
-                                {Object.entries(SalesForce.siteOptions).map(([key, value]) => (
-                                    <option key={value} value={key}>
-                                        {key}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <SubmitFormButton title="Initiate SF Fetching" />
-                    </form>
-                </FormWrapper > */}
-
                     <FormWrapper
                         title="Delete Site"
                         description="Use this form to delete a site"
@@ -218,9 +179,6 @@ export default async function Page() {
                     <ClockedInAgents />
                 </div>
                 <HouseUpdateFromSF />
-                {/* <div className=' '>
-                    <HouseManager />
-                </div> */}
             
             </main>
 

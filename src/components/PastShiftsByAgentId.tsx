@@ -24,6 +24,10 @@ export default function PastShiftsByAgentId() {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [totalHoursWorked, setTotalHoursWorked] = useState<string>('');
     const [totalTimePerLocation, setTotalTimePerLocation] = useState<{ [key: string]: string }>({});
+    const [housesNotFinal, setHousesNotFinal] = useState<number>(0);
+    const [housesYes, setHousesYes] = useState<number>(0);
+    const [housesNo, setHousesNo] = useState<number>(0);
+    const [totalHouses, setTotalHouses] = useState<number>(0);
 
 
 
@@ -54,6 +58,11 @@ export default function PastShiftsByAgentId() {
                 setFinishedShifts(result.finishedShifts);
                 setTotalHoursWorked(result.totalHoursWorked);
                 setTotalTimePerLocation(result.totalTimePerLocation);
+                setHousesNotFinal(result.housesNotFinal);
+                setHousesYes(result.housesYes);
+                setHousesNo(result.housesNo);
+                setTotalHouses(result.totalHouses);
+                
             } else {
                 console.error("Error fetching shifts");
             }
@@ -112,10 +121,16 @@ export default function PastShiftsByAgentId() {
                     ))}
                 </select>
             </div>
+
             <ShiftReportByDateRange
                 totalHoursWorked={totalHoursWorked}
                 totalTimePerLocation={totalTimePerLocation}
+                housesNotFinal={housesNotFinal}
+                housesYes={housesYes}
+                housesNo={housesNo}
+                totalHouses={totalHouses}
             />
+            
             <div className="grid grid-cols-1 w-full items-center mx-auto sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 py-4">
                 {finishedShifts.length > 0 ? (
                 
@@ -133,3 +148,4 @@ export default function PastShiftsByAgentId() {
         </div>
     );
 }
+

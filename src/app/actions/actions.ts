@@ -375,6 +375,103 @@ export const getShift = async (id: string) => {
   }
 };
 
+// export const getShiftsByAgentId = async (
+//   agentId: string,
+//   startDate: string,
+//   endDate: string
+// ) => {
+//   try {
+//     const start = new Date(startDate);
+//     const end = new Date(endDate);
+
+//     const shifts = await db.shiftLogger.findMany({
+//       where: {
+//         agentId: agentId,
+//         startingDate: {
+//           gte: start,
+//           lte: end,
+//         },
+//       },
+//       select: {
+//         Location: {
+//           select: {
+//             name: true,
+//           },
+//         },
+//         id: true,
+//         agentId: true,
+//         locationId: true,
+//         startingDate: true,
+//         finishedDate: true,
+//         isFinished: true,
+//         updatedHouses: true,
+//         updatedHousesFinal: true,
+//         updatedHousesFinalNo: true,
+//         pace: true,
+//         paceFinal: true,
+//       },
+//       orderBy: {
+//         startingDate: "desc",
+//       },
+//     });
+
+//     const activeShifts = shifts.filter((shift) => !shift.isFinished);
+//     const finishedShifts = shifts.filter((shift) => shift.isFinished);
+
+//     const totalTimePerLocation: { [key: string]: number } = {};
+
+//     const finishedShiftsWithDuration = finishedShifts.map((shift) => {
+//       if (!shift.finishedDate) {
+//         return shift;
+//       }
+//       const duration =
+//         shift.finishedDate.getTime() - shift.startingDate.getTime();
+//       const locationName = shift.Location.name;
+//       if (duration > 0) {
+//         totalTimePerLocation[locationName] =
+//           (totalTimePerLocation[locationName] || 0) + duration;
+//       }
+//       const formattedDuration = `${Math.floor(duration / 3600000)}h ${
+//         Math.floor((duration % 3600000) / 60000)
+//       }m`;
+//       return { ...shift, formattedDuration };
+//     });
+
+//     const totalHoursWorked = Object.values(totalTimePerLocation).reduce(
+//       (acc, curr) => acc + curr,
+//       0
+//     );
+
+//     // Convert totalTimePerLocation from milliseconds to a more readable format
+//     const totalTimePerLocationFormatted = Object.keys(
+//       totalTimePerLocation
+//     ).reduce((acc, locationName) => {
+//       const duration = totalTimePerLocation[locationName];
+//       const hours = Math.floor(duration / 3600000);
+//       const minutes = Math.floor((duration % 3600000) / 60000);
+//       acc[locationName] = `${hours}h ${minutes}m`;
+//       return acc;
+//     }, {} as { [key: string]: string });
+
+//     const totalHours = Math.floor(totalHoursWorked / 3600000);
+//     const totalMinutes = Math.floor((totalHoursWorked % 3600000) / 60000);
+    
+//     const data = {
+//       activeShifts,
+//       finishedShifts: finishedShiftsWithDuration,
+//       totalHoursWorked: `${totalHours}h ${totalMinutes}m`,
+//       totalTimePerLocation: totalTimePerLocationFormatted,
+//     };
+
+//     console.log(`\nTotal time worked: ${totalHours}h${totalMinutes}m\n`);
+//     console.log(`\nTotal time per location:`, totalTimePerLocationFormatted);
+//     return data;
+//   } catch (error) {
+//     console.error(error);
+//     return { error: "Error getting shifts" };
+//   }
+// };
+
 export const getShiftsByAgentId = async (
   agentId: string,
   startDate: string,
@@ -420,6 +517,10 @@ export const getShiftsByAgentId = async (
 
     const totalTimePerLocation: { [key: string]: number } = {};
 
+    let housesNotFinal = 0;
+    let housesYes = 0;
+    let housesNo = 0;
+
     const finishedShiftsWithDuration = finishedShifts.map((shift) => {
       if (!shift.finishedDate) {
         return shift;
@@ -431,11 +532,20 @@ export const getShiftsByAgentId = async (
         totalTimePerLocation[locationName] =
           (totalTimePerLocation[locationName] || 0) + duration;
       }
-      const formattedDuration = `${Math.floor(duration / 3600000)}h ${
-        Math.floor((duration % 3600000) / 60000)
-      }m`;
+      const formattedDuration = `${Math.floor(
+        duration / 3600000
+      )}h ${Math.floor((duration % 3600000) / 60000)}m`;
+
+      // Sum up the updated houses counts
+      housesNotFinal += shift.updatedHouses || 0;
+      housesYes += shift.updatedHousesFinal || 0;
+      housesNo += shift.updatedHousesFinalNo || 0;
+
       return { ...shift, formattedDuration };
     });
+
+    const totalHouses =
+      housesNotFinal + housesYes + housesNo;
 
     const totalHoursWorked = Object.values(totalTimePerLocation).reduce(
       (acc, curr) => acc + curr,
@@ -455,27 +565,24 @@ export const getShiftsByAgentId = async (
 
     const totalHours = Math.floor(totalHoursWorked / 3600000);
     const totalMinutes = Math.floor((totalHoursWorked % 3600000) / 60000);
-    
+
     const data = {
       activeShifts,
       finishedShifts: finishedShiftsWithDuration,
       totalHoursWorked: `${totalHours}h ${totalMinutes}m`,
       totalTimePerLocation: totalTimePerLocationFormatted,
+      housesNotFinal: housesNotFinal,
+      housesYes: housesYes,
+      housesNo: housesNo,
+      totalHouses: totalHouses,
     };
 
-    console.log(`\nTotal time worked: ${totalHours}h${totalMinutes}m\n`);
-    console.log(`\nTotal time per location:`, totalTimePerLocationFormatted);
     return data;
   } catch (error) {
     console.error(error);
     return { error: "Error getting shifts" };
   }
 };
-
-// // Convert totalHoursWorked to hours and minutes
-// const hours = Math.floor(totalHoursWorked / 3600000); // Convert milliseconds to hours and floor it
-// const minutes = Math.floor((totalHoursWorked % 3600000) / 60000); // Convert remainder to minutes
-// console.log(`\nTotal time worked: ${hours}h${minutes}m\n`);
 
 
 

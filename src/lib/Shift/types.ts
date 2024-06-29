@@ -25,5 +25,9 @@ export type ShiftsResponse = {
     activeShifts: Shift[];
     finishedShifts: Shift[];
     totalHoursWorked: string;
-    totalTimePerLocation: { [key: string]: string };
+  totalTimePerLocation: { [key: string]: string };
+  housesNotFinal: number;
+  housesYes: number;
+  housesNo: number;
+  totalHouses: number;
 };
