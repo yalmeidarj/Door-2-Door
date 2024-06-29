@@ -740,13 +740,16 @@ export const getAllAgents = async () => {
         id: true,
         name: true,
       },
+      orderBy: {
+        name: "asc", // Sort by name in ascending order
+      },
     });
     return agents;
   } catch (error) {
     console.error(error);
     return { error: "Error getting agents" };
   }
-}
+};
 
 // get shift by agentId and not finished
 export const getActiveShiftByAgentId = async (agentId: string) => {
