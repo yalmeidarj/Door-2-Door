@@ -1,4 +1,5 @@
 'use client'
+import { defaultValues } from '@/lib/utils';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from "react"
 import { FaEyeSlash, FaEye } from "react-icons/fa";
@@ -21,10 +22,13 @@ export default function FilterControls() {
         }
     }, [searchParams]);
 
+    const { defaultPage, defaultPerPage } = defaultValues
     const handleViewAll = () => {
         const newViewAll = viewAll === 'true' ? 'false' : 'true';
         const newSearchParams = new URLSearchParams(searchParams);
         newSearchParams.set('viewAll', newViewAll);
+        newSearchParams.set('page', defaultPage.toString());
+        newSearchParams.set('per_page', defaultPerPage.toString());
         setViewAll(newViewAll);
         setCurrentDisplay(newViewAll === 'true');
         router.push(`${pathname}?${newSearchParams.toString()}`);
