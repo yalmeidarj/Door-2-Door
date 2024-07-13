@@ -33,6 +33,7 @@ export type HousesFeedProps = {
   start: number;
   perPage: number;
   userId: string;
+  viewAll: string;
 };
 
 export type HouseFeedData = {

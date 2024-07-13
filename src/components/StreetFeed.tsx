@@ -6,7 +6,11 @@ import { getStreetsInLocation } from "@/lib/streets/helperFunctions";
 export default async function StreetFeed({ id, start, perPage }: StreetFeedProps) {
     const streetsInLocations = await getStreetsInLocation(id, start, perPage)
 
-    if (!streetsInLocations || !streetsInLocations.data) {
+    if (!streetsInLocations ||
+        !streetsInLocations.data ||
+        !streetsInLocations.metadata
+        
+    ) {
         return <div>loading...</div>
     }
 
@@ -26,7 +30,17 @@ export default async function StreetFeed({ id, start, perPage }: StreetFeedProps
                 metadata={paginationControls}
             />
             <div className="container mx-auto px-4 py-5">
-                {streets.map((street) => (
+                {streets.map((street: {
+                    id: number;
+                    name: string;
+                    totalHouses: number;
+                    totalHousesVisited: number;
+                    totalHousesWithConsentYes: number;
+                    totalHousesWithConsentNo: number;
+                    totalHousesWithVisitRequired: number;
+                    leftToVisit: number;
+                    lastVisited: Date | null;
+                }) => (
                     <>                  
                         <StreetCard key={street.id} street={street} />
                     </>                

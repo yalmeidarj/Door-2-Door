@@ -9,10 +9,10 @@ import { MdEngineering } from "react-icons/md";
 
 const StreetCard = ({ street }: StreetType) => {
 
-    const { defaultPage, defaultPerPage } = defaultValues;
+    const { defaultPage, defaultPerPage, viewAll } = defaultValues;
     return (
         <>
-            <Link key={street.id} href={`/houses/${street.name}?id=${street.id}&per_page=${defaultPerPage}&page=${defaultPage}`}
+            <Link key={street.id} href={`/houses/${street.name}?id=${street.id}&per_page=${defaultPerPage}&page=${defaultPage}&viewAll=${viewAll}`}
                 className="flex items-center justify-between bg-white hover:bg-gray-100 p-3 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition ease-in-out duration-300 mb-5 cursor-pointer">
             <div>
                 <h1 className="text-md font-semibold text-blue-800">

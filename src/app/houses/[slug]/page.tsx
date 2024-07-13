@@ -18,6 +18,7 @@ export default async function Page({
     const session = await getServerSession(authOptions);
     const page = Number(searchParams['page']) ?? 1
     const perPage = Number(searchParams['per_page']) ?? 2
+    const viewAll = searchParams['viewAll'] as string ?? 'false'
     const start = (page - 1) * perPage
     const streetId = searchParams.id
 
@@ -36,10 +37,11 @@ export default async function Page({
         id: streetId,
         start: start,
         perPage: perPage,
-        userId: session?.user.id as string
+        userId: session?.user.id as string,
+        viewAll: viewAll
     } 
 
-    const URL = `/streets/${street.Location.name}?id=${street.Location.id}&per_page=${perPage}&page=${page}`
+    const URL = `/streets/${street.Location.name}?id=${street.Location.id}&per_page=${perPage}&page=${page}&viewAll=${viewAll}`
     return (
         <main className="flex flex-col items-center bg-gray-100 p-4">
             <PageHeaderInfo 
@@ -56,5 +58,7 @@ export default async function Page({
         </main>
     )
 }
+
+
 
 
