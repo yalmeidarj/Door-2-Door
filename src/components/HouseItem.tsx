@@ -49,10 +49,8 @@ function HouseDetails({ props }: HouseDetailsProps) {
             <div className=' '>
                 <p className="text-lg text-right"><span className="font-bold">{props.lastName ?? "No last name"}, {props.name ?? "No name"}</span></p>
                 <p className="text-sm text-right font-light">{props.phone ?? "No phone"} | {props.email ?? "No email"}</p>
-            </div>
-            <h2 className="font-bold">SalesForce Notes: </h2>
-            <p className="text-md font-normal">{props.externalNotes}</p>
-            <h2 className="font-bold">Internal Notes: </h2>
+            </div>                        
+            <h2 className="font-bold">Notes: </h2>
             <p className="text-md font-thin">{props.internalNotes}</p>
         </div>
     )
