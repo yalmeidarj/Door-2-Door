@@ -13,7 +13,7 @@ export type HouseType = {
   internalNotes: string | null;
   statusAttempt: string | null;
   consent: string | null;
-  externalNotes: string | null;
+  // externalNotes: string | null;
   phone: string | null;
   email: string | null;
   Street: {
@@ -51,7 +51,7 @@ export const FormSchema = z.object({
   id: z.string(),
   agentName: z.string(),
   agentId: z.string(),
-  externalNotes: z.string().optional(),
+  // externalNotes: z.string().optional(),
   type: z.union([z.string(), z.literal(""), z.null()]).optional(),
   statusAttempt: z.string(),
 
@@ -97,7 +97,7 @@ export const ConsentYesSchema = z
     id: z.string(),
     agentName: z.string(),
     agentId: z.string(),
-    externalNotes: z.string().optional(),
+    // externalNotes: z.string().optional(),
     type: z.string({
       required_error:
         "Type must be provided if status attempt is Consent Final Yes",

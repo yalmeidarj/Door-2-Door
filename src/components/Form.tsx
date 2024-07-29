@@ -150,13 +150,13 @@ export default function Form({ houseId, info }: FormProps) {
                 
 
                 {/* External Notes Section */}
-                <div className="mb-6">
+                {/* <div className="mb-6">
                     <FormItem
                         label="SalesForce Notes"
                         input="externalNotes"
                         type="text"
                     />
-                </div>
+                </div> */}
 
                 {/* Attempt Number Section */}
                 <div className='flex flex-row justify-between '>

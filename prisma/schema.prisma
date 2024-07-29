@@ -39,7 +39,7 @@ model House {
   statusAttempt String?
   consent String?
   email String?
-  externalNotes String?
+  externalNotes String? // Deprecated? 
   internalNotes String?
   phone String?
   HouseEditLog HouseEditLog[]
