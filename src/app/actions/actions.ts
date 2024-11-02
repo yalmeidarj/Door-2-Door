@@ -1382,6 +1382,7 @@ export const getAllHousesInLocationSeeding = async (locationId: string, skip: nu
         location: house.Location.name as string,
         lastUpdated: house.lastUpdated as Date,
         lastUpdatedBy: house.lastUpdatedBy as string,
+        externalNotes: house.externalNotes as string,
         internalNotes: house.internalNotes as string,
         houseHistory: house.HouseEditLog.map((log) => ({
           name: log.name,

@@ -31,6 +31,7 @@ interface House {
     lastName: string;
     lastUpdated: Date;
     lastUpdatedBy: string;
+    externalNotes: string;
     internalNotes: string;
     type: string;
     phone: string;
@@ -89,7 +90,7 @@ const Table: React.FC<TableProps> = ({ data }) => {
                                     <span>{row.lastUpdatedBy.substring(0, 9)}-{format(new Date(row.lastUpdated), 'MMM dd, HH:mm')}</span>
                                 </div>
                             </TableCell>
-                            <TableCell clipboard={false} text={row.internalNotes} >
+                            <TableCell clipboard={false} text={`${row.internalNotes}+${row.externalNotes}`} >
                                 <div className="flex flex-row justify-between ">
                                     <HouseEditLogs logs={row.houseHistory} />
                                     <NotesButton

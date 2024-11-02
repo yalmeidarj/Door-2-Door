@@ -58,6 +58,7 @@ const HouseHistoryLog: React.FC<HouseHistoryLogProps> = ({ logs }) => {
                                     <div className="w-full mb-2"><span className='text-xs'> {log.userName} on {formatData(log.timeStamp)}</span></div>
                                 )}
                             <div className="flex flex-row">
+                                {/* {log.historyLog} */}
                                 {(Object.keys(log) as (keyof LogEntry)[]).map((key) =>
                                     key !== 'userName' && key !== 'timeStamp' && isDataValid(log[key]) && (
                                         <div key={key} className="w-1/2 mb-1 p-1 border-r-2 border-dashed border-gray-400 "><strong className="text-xs">{key}:</strong> {formatData(log[key])}</div>

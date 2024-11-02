@@ -35,6 +35,7 @@ interface House {
     statusAttempt: string;
     consent: string;
     location: string;
+    externalNotes: string;
     internalNotes: string;
     lastUpdatedBy: string;
     lastUpdated: Date;
