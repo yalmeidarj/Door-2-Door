@@ -1,4 +1,4 @@
-// "use client"
+"use client"
 
 import {
     AllLocations,
@@ -13,9 +13,9 @@ import ClockInHandler from "./ClockInHandler";
 import ClockOutHandler from "./ClockOutHandler";
 import { db } from "@/server/db";
 // import { useSession } from "next-auth/react";
-import toast from "react-hot-toast";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/server/auth";
+// import toast from "react-hot-toast";
+// import { getServerSession } from "next-auth";
+// import { authOptions } from "@/server/auth";
 import { DateTime } from 'luxon';
 
 
@@ -24,7 +24,7 @@ export default async function ShiftManager() {
     // const session = useSession();
 
     // get session from server
-    const session = await getServerSession(authOptions)
+    // const session = await getServerSession(authOptions)
 
 
     if (!session ) {
@@ -43,9 +43,17 @@ export default async function ShiftManager() {
         return <div>Error: {availableLocationsData.error}</div>;
     }
 
-    const isAgentClockedInData = await isAgentClockedIn(agentId)
+    // const isAgentClockedInData = await isAgentClockedIn(agentId)
+    const isAgentClockedInData = true
 
-    const [isClockedIn, availableLocations ] = await Promise.all([isAgentClockedInData, availableLocationsData])
+    // const [isClockedIn, availableLocations ] = await Promise.all([isAgentClockedInData, availableLocationsData])
+    const isClockedIn = true
+    const availableLocations = [
+        {
+            id: "k977bhtwcr9beqt2jbe2vsgvqs748f4m",
+            name: "SFVLON28_3508A"
+        }
+    ]
 
     if (isClockedIn){
 
@@ -168,9 +176,92 @@ function ClockInCard({ className, agentId, locations }: ClockInCardProps) {
             <div className="bg-red-500 animate-blink rounded-full w-2 h-2"></div>
         </div>
 
-            <ClockInHandler agentId={agentId} locations={locations} />
+            {/* <ClockInHandler agentId={agentId} locations={locations} /> */}
     </div>
         )
 }
 
+const ShiftCard: React.FC<ShiftCardProps> = ({
+    shift,
+    availableLocations,
+    onClockIn,
+    onClockOut,
+}) => {
+    const [selectedLocationId, setSelectedLocationId] = useState<string>('');
+    const [elapsedTime, setElapsedTime] = useState<string>('00:00:00');
 
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (shift.startingDate && !shift.isFinished) {
+            interval = setInterval(() => {
+                const now = new Date();
+                const elapsedMilliseconds = now.getTime() - new Date(shift.startingDate!).getTime();
+                const hours = Math.floor(elapsedMilliseconds / (1000 * 60 * 60));
+                const minutes = Math.floor((elapsedMilliseconds / (1000 * 60)) % 60);
+                const seconds = Math.floor((elapsedMilliseconds / 1000) % 60);
+                setElapsedTime(
+                    `${hours.toString().padStart(2, '0')}:${minutes
+                        .toString()
+                        .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`,
+                );
+            }, 1000);
+        }
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [shift.startingDate, shift.isFinished]);
+
+    const handleClockIn = () => {
+        if (selectedLocationId) {
+            onClockIn(selectedLocationId);
+        }
+    };
+
+    const handleClockOut = () => {
+        onClockOut();
+    };
+
+    if (!shift.startingDate) {
+        // User has not clocked in yet
+        return (
+            <div className="shift-card">
+                <h3>Start Shift</h3>
+                <select
+                    value={selectedLocationId}
+                    onChange={(e) => setSelectedLocationId(e.target.value)}
+                >
+                    <option value="">Select Location</option>
+                    {availableLocations.map((location) => (
+                        <option key={location.id} value={location.id}>
+                            {location.name}
+                        </option>
+                    ))}
+                </select>
+                <button onClick={handleClockIn} disabled={!selectedLocationId}>
+                    Clock In
+                </button>
+            </div>
+        );
+    } else if (!shift.isFinished) {
+        // User is clocked in
+        return (
+            <div className="shift-card">
+                <h3>Shift in Progress</h3>
+                <p>Location: {shift.Location?.name || 'N/A'}</p>
+                <p>Elapsed Time: {elapsedTime}</p>
+                <p>Pace: {shift.pace}</p>
+                <button onClick={handleClockOut}>Clock Out</button>
+            </div>
+        );
+    } else {
+        // Shift is finished
+        return (
+            <div className="shift-card">
+                <h3>Shift Completed</h3>
+                <p>Location: {shift.Location?.name || 'N/A'}</p>
+                <p>Total Duration: {shift.formattedShiftLength}</p>
+                <p>Final Pace: {shift.paceFinal}</p>
+            </div>
+        );
+    }
+};

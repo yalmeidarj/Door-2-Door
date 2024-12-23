@@ -1,19 +1,16 @@
+import { Id } from "../../../convex/_generated/dataModel";
+
 export type Shift = {
-  formattedDuration?: string;
-  id: string;
-  agentId: string;
-  locationId: string;
-  startingDate: Date;
-  finishedDate: Date;
-  isFinished: boolean;
-  updatedHouses: number;
-  updatedHousesFinal: number;
-  updatedHousesFinalNo: number;
-  pace: number;
-  paceFinal: number;
-  formattedShiftLength?: string;
-  Location: Location;
-};
+    _id: Id<"shiftLogger">;
+    _creationTime: number;
+    startingDate?: number | undefined;
+    finishedDate?: number | undefined;
+    updatedHouses?: number | undefined;
+    updatedHousesFinal?: number | undefined;
+  updatedHousesFinalNo?: number | undefined;
+    siteID: string;
+    isFinished: boolean;
+}
 
 
 export type Location = {

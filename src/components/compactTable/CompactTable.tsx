@@ -245,7 +245,6 @@ export default function CompactTable() {
                 <Table
                     data={data}
                 />
-
             </div>
         </div>
     );

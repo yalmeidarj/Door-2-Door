@@ -10,32 +10,43 @@ import {
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { useSession } from 'next-auth/react';
 import { statusOptions } from '@/lib/utils';
-import { updateProperty } from '@/app/actions/actions';
+import { useMutation } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { Id } from '../../convex/_generated/dataModel';
+import { toast } from 'sonner';
 
-export default function ChangeHouseStatusDropdown({ houseId, statusAttempt }: { houseId: string, statusAttempt: string }) {
-    const [isLoading, setIsLoading] = useState(false);
-    const [isSuccess, setIsSuccess] = useState<boolean | null>(null);
+export default function ChangeHouseStatusDropdown({ houseId,  statusAttempt }:
+    { houseId: string,  siteId: string, statusAttempt: string }) {
+    const updateProperty = useMutation(api.houseEditLog.createNewEditByHouseId);
     const [currentStatus, setCurrentStatus] = useState(statusAttempt);
-    const { data: session } = useSession();
 
-    if (!session || !session.user || !session.user.name) {
-        return <div>No user found...</div>
+    const { data: session } = useSession(); 
+    if (!session || !session.user) {
+                
+        return <div>Loading...</div>;
     }
-
-    const agentId = session.user.id;
-    const agentName = session.user.name;
+    
+    const user = session.user;
+    // const agentId = session.user.id;
+    // const agentName = session.user.name;
     const ref = useRef<HTMLFormElement>(null);
 
     async function clientAction(formData: FormData) {
+        const newObject = {
+            statusAttempt: formData.get("statusAttempt") as string,
+            houseId: formData.get("id") as Id<"house">,
+            agentId: formData.get("agentId") as Id<"users">,
+            // siteID: siteId
+            // shiftId: formData.get("shiftId") as Id<"shiftLogger"> 
+        };
         try {
-            setIsLoading(true);
-            const response = await updateProperty(formData);
-            console.log('response', response);
-            setIsLoading(false);
-            return response;
+            const response = await updateProperty(newObject);
+            if (response){
+                return true
+            }
         } catch (error) {
             console.error('Error updating property:', error);
-            setIsLoading(false);
+            
             return null;
         }
     }
@@ -48,16 +59,14 @@ export default function ChangeHouseStatusDropdown({ houseId, statusAttempt }: { 
         const formData = new FormData(ref.current!);
         formData.set("statusAttempt", option); // Set the selected statusAttempt value
         formData.set("id", houseId);
-        formData.set("agentId", agentId);
-        formData.set("agentName", agentName);
-
+        formData.set("agentId", user.id as string );
         const result = await clientAction(formData);
         if (result) {
             handleFormReset();
             setCurrentStatus(option); // Update the currentStatus state to the selected option
-            setIsSuccess(true);
+            toast.success("Status updated successfully!");
         } else {
-            setIsSuccess(false);
+            toast.error("Failed to update status.");
         }
     };
 

@@ -1,22 +1,6 @@
-// "use client"
-// // import React from "react"
-// import { SessionProvider } from "next-auth/react"
-
-// // type Props = {
-// //     children: React.ReactNode
-// // }
-    
-// // const Providers = ( props : Props) => {
-// //     return (
-// //         <SessionProvider >
-// //             {props.children}
-// //         </SessionProvider>
-// //     )
-// // }
-
-// export default SessionProvider;
 'use client'
 
+import { ConvexClientProvider } from "@/app/ConvexClientProvider"
 import { SessionProvider } from "next-auth/react"
 
 export default function Provider({
@@ -27,6 +11,8 @@ export default function Provider({
     session: any
 }): React.ReactNode {
     return <SessionProvider session={session}>
+        <ConvexClientProvider>
         {children}
+        </ConvexClientProvider>
     </SessionProvider>
 }

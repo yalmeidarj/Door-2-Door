@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export type HouseType = {
+  houseId: number;
   id: number;
   streetNumber: number;
   lastName: string | null;
@@ -48,8 +49,7 @@ export type HouseItemProps = {
 
 
 export const FormSchema = z.object({
-  id: z.string(),
-  agentName: z.string(),
+  houseId: z.string(),
   agentId: z.string(),
   // externalNotes: z.string().optional(),
   type: z.union([z.string(), z.literal(""), z.null()]).optional(),
@@ -79,14 +79,14 @@ export const FormSchema = z.object({
       z
         .string()
         .trim()
-        .min(9, "Phone number must be at least 10 digits long")
-        .max(9, "Phone number must not be longer than 10 digits")
-        .regex(/^[0-9()+\s-]+$/, "Phone number must be numeric"),
+        .min(10, "Phone number must be at least 10 digits long")
+        .max(10, "Phone number must not be longer than 10 digits"),
+        // .regex(/^[0-10()+\s-]+$/, "Phone number must be numeric"),
       z.literal(""),
     ])
     .optional(),
   email: z.union([z.string().email(), z.literal("")]).optional(),
-  internalNotes: z.string().optional(),
+  notes: z.string().optional(),
 });
 
 
@@ -94,8 +94,7 @@ export const FormSchema = z.object({
 
 export const ConsentYesSchema = z
   .object({
-    id: z.string(),
-    agentName: z.string(),
+    houseId: z.string(),
     agentId: z.string(),
     // externalNotes: z.string().optional(),
     type: z.string({
@@ -131,14 +130,14 @@ export const ConsentYesSchema = z
         z
           .string()
           .trim()
-          .min(9, "Phone number must be at least 10 digits long")
-          .max(9, "Phone number must not be longer than 10 digits")
-          .regex(/^[0-9()+\s-]+$/, "Phone number must be numeric"),
+          .min(10, "Phone number must be at least 10 digits long")
+          .max(10, "Phone number must not be longer than 10 digits"),
+          // .regex(/^[0-10()+\s-]+$/, "Phone number must be numeric"),
         z.literal(""),
       ])
       .optional(),
     email: z.union([z.string().email(), z.literal("")]).optional(),
-    internalNotes: z.string(),
+    notes: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (!data.email && !data.phone) {

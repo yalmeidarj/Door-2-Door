@@ -1,10 +1,10 @@
 "use client";
 
-import { updateProperty } from "../app/actions/actions";
+import { updateProperty } from "@/app/actions/actions";
 import toast from "react-hot-toast";
 import { useRef, useState } from "react";
 import SubmitFormButton from "./SubmitFormButton";
-import { useSession } from "next-auth/react";
+// import { useSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { LuPlusCircle } from "react-icons/lu";
 import { IoMdCloseCircleOutline } from "react-icons/io";
@@ -18,14 +18,16 @@ export default function NotesButton({ houseId, currentNotes }: NotesButtonProps)
     const [loading, setLoading] = useState(false);
     const [isFormVisible, setIsFormVisible] = useState(false);
 
-    const session = useSession();
+    // const session = useSession();
 
-    if (!session || !session.data) {
-        return <div>loading...</div>;
-    }
+    // if (!session || !session.data) {
+    //     return <div>loading...</div>;
+    // }
 
-    const agentId = session.data.user.id;
-    const agentName = session.data.user.name;
+    // const agentId = session.data.user.id;
+    // const agentName = session.data.user.name;
+    const agentId = "session.data.user.id;"
+    const agentName = "session.data.user.name;"
 
     async function clientAction(formData: FormData) {
         setLoading(true);

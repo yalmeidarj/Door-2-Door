@@ -1,65 +1,75 @@
-import { getLocationTotalHoursSpentByAllUsers } from "@/lib/sites/helperFunctions";
+"use client"
 import { SiteCardProps } from "@/lib/sites/types";
 import { defaultValues } from "@/lib/utils";
-
+import { id } from "convex-helpers/validators";
+import { useQuery } from "convex/react";
 import Link from "next/link";
+import { api } from "../../convex/_generated/api";
+import { Id } from "../../convex/_generated/dataModel";
+import { usePathname } from "next/navigation";
 
 
-export async function SiteCard({ props }: SiteCardProps) {
+export function SiteCard({ siteId }: { siteId: string }) {
+  const site = useQuery(api.site.getActiveSiteById, { id: siteId });
 
-  const {defaultPage: page, defaultPerPage: perPage} = defaultValues
-
-  // Convert BigInt to String for rendering
-  const totalHousesString = props.totalHouses.toString();
-
-  const housesTotal = Number(props.totalHouses);
-
-  const totalHoursSpent = await getLocationTotalHoursSpentByAllUsers(props.id);
-
-  if (typeof totalHoursSpent !== 'number' ) {
-    return 'No Hours for this site...';
-  } 
-
-  // Extracting active user names from the ShiftLogger array
-  const activeUsers = props.ShiftLogger
-    .filter(logger => !logger.isFinished)
-    .map(logger => logger.User.name);
+  const pathName = usePathname();
+  const orgName = pathName.split("/")[2].replace("%20", " ").replace("-", " ");
+  const orgUrlFormat = pathName.split("/")[2].replace("%20", " ");
+  // const orgId = site.neighborhood;
+  const organization = useQuery(api.organization.getOrgByName, { name: orgName });
+  const allHouses = useQuery(api.house.getHousesBySiteId, { siteId: siteId })
+  const getVisitedHousesByStatusAttempt = useQuery(api.house.getVisitedHousesByStatusAttempt, { siteId: siteId });
+  const toBeVisited = Number(allHouses?.length) - Number(getVisitedHousesByStatusAttempt?.length);
+  const visitRequired = useQuery(api.house.getHousesVisitRequestBySiteId, { siteId: siteId });
+  const housesWithConsentYes = useQuery(api.house.getHousesConsentYesBySiteId, { siteId: siteId });
+  const housesWithConsentNo = useQuery(api.house.getHousesConsentNoBySiteId, { siteId: siteId });
+  const totalHoursSpent =useQuery(api.shiftLogger.calculateTotalHoursPerLocationBySiteId, { siteId: siteId as Id<"site"> });
 
 
   return (
-    <>
-      
-      <div className="bg-white rounded-lg shadow-lg p-4 w-sm m-4 max-w-sm">
+    <>      
+      {site?.map((site) => (
+               
+        <div
+          key={site._id}
+        className="bg-white rounded-lg shadow-lg p-4 w-sm m-4 
+      cursor-pointer
+                 w-screen
+                 max-w-[320px]
+                 mx-2
+                 md:max-w-[380px]
+      ">
         <Link
-          href={`/streets/${props.name}?id=${props.id}&per_page=${perPage}&page=${page}`}
+          href={`/org/${orgUrlFormat}/streets/${site.name}?site=${site._id}`}
+          // href={`/streets/${props.name}?id=${props.id}&per_page=${perPage}&page=${page}`}
           className="hover:text-blue-700 text-sm font-semibold"
-          aria-label={`Visit ${props.name}`}
+          // aria-label={`Visit ${props.name}`}
         >
         <div className='flex flex-row justify-between items-center mb-2 gap-2 '>
         <div className=' '>
         
-          <header className="text-lg font-semibold">{props.name}</header>
-        {/* <p className="text-gray-500 text-sm mb-2">
-          {props.neighborhood === 'to be verified' ? 'Neighborhood' : props.neighborhood}
-          </p> */}
+                 <header className="text-lg font-semibold">{site.name}</header>
+        <p className="text-gray-500 text-sm mb-2">
+          {site.neighborhood === 'to be verified' ? 'Neighborhood' : site.neighborhood}
+          </p>
         </div>
           <div className="flex flex-col border-dotted px-2 border-gray-300 border-2 text-blue-500 text-md font-semibold rounded-sm">
-              {Number(totalHoursSpent / 2).toFixed(2)}
-            <p className="text-gray-500 text-xs">Hours</p>
-            </div>
-        
+                {totalHoursSpent &&
+                  Number(totalHoursSpent / 2).toFixed(2)}
+                <p className="text-gray-500 text-xs">Hours</p>
+          </div>        
         </div>
         
         <div className="flex flex-row justify-between mb-2">
           <div className="text-center">
             <div className="text-green-500 text-md font-semibold">
-              {totalHousesString}
+                {allHouses?.length}
             </div>
             <p className="text-gray-500 text-xs">Houses</p>
           </div>
           <div className="text-center">
             <div className="text-blue-500 text-md font-semibold">
-              {props.leftToVisit}
+                {toBeVisited}
             </div>
             <p className="text-gray-500 text-xs">To be visited</p>
           </div>
@@ -74,21 +84,20 @@ export async function SiteCard({ props }: SiteCardProps) {
         <div className="flex flex-row justify-between my-2">
           <div className="text-center">
             <div className="text-green-500 text-md font-semibold">
-              {props.totalHousesWithConsentYes}
+                {housesWithConsentYes?.length}
             </div>
               <p className="text-gray-500 text-xs">Yes</p>
-
 
           </div>
           <div className="text-center">
             <div className="text-blue-500 text-md font-semibold">
-              {props.totalHousesWithConsentNo}
+                {housesWithConsentNo?.length}
             </div>
             <p className="text-gray-500 text-xs">No</p>
           </div>
           <div className="text-center">
             <div className="text-blue-500 text-md font-semibold">
-              {props.totalHousesWithToBeVisited}
+                {visitRequired?.length}
             </div>
             <p className="text-gray-500 text-xs">Visit required</p>
           </div>
@@ -96,16 +105,15 @@ export async function SiteCard({ props }: SiteCardProps) {
         <hr className="border-gray-200 my-2" />
         <div className="mt-3">
           <h3 className="text-md font-semibold text-gray-700">Active Users</h3>
-          <ul className="text-sm text-gray-600">
+          {/* <ul className="text-sm text-gray-600">
             {activeUsers.map((user, index) => (
               <li key={index}>{user?.split(' ')[0]}</li>
             ))}
-          </ul>
+          </ul> */}
         </div>
       </Link>
       </div>
-
-
-    </>
+      ))}
+          </>
   );
 }

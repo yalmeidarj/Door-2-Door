@@ -1,34 +1,50 @@
-import { getLocations } from "@/lib/sites/helperFunctions";
-import PaginationControls from "./PaginationControls";
+'use client'
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import { SiteCard } from "./SiteCard";
+import { usePathname } from 'next/navigation'
 
-export default async function SiteFeed({ start, perPage }: any) {
-    const data = await getLocations(start, perPage)
+export default function SiteFeed() {
 
-    if (data.metadata === undefined) {
+    const pathname = usePathname()
+    const orgName = pathname.split("/")[2]
+        .replace("%20", " ")
+        .replace("-", " ")
+        ;
 
-        return <div>loading...</div>;
+    const data = useQuery(api.site.getActiveSitesByOrgName, { orgName: orgName });
+
+    if (!Array.isArray(data)) {
+        return <div>An issue occurred when fetching sites for this organization</div>;
+    }
+    if (data.length === 0) {
+        return (
+            <div className=" flex flex-col w-full items-center justify-center h-screen">
+                <h1 className="text-2xl font-semibold  mb-4">
+                No active sites found for this organization
+                </h1>
+                <h2 className="text-gray-600 font-bold">Check the name of the organization in the url:{" "}
+                    <span className="text-gray-800">
+                    {orgName}
+                    </span>
+                </h2>
+            </div>
+        );
     }
 
-    const paginationControls = {
-        state: {
-            perPage: perPage,
-            currentPage: start,
-        },
-        data:
-            data.metadata
-    }
     return (
         <div className="flex flex-col w-md  justify-center text-gray-600">
-            <PaginationControls
+            {/* <PaginationControls
                 metadata={paginationControls}
-            />
+            /> */}
             <div className='flex flex-col md:flex-row md:flex-wrap md:justify-center '>
-            
-            {data.data.map((location) => (
-                <SiteCard key={location.id} props={location} />
+                {data.map((location) => (
+                    <SiteCard
+                        key={location._id}                    
+                        siteId={location._id}
+                    />
                 ))}
-                </div>
+                </div> 
         </div>
     );
 }

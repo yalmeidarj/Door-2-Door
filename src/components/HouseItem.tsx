@@ -1,57 +1,50 @@
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/components/ui/accordion";
-import { HouseDetailsProps, HouseItemProps } from "@/lib/houses/types";
+
 import Form from "./Form";
 import HouseCard from "./HouseCard";
+import HouseDetails from "./HouseDetails";
 import NotClockedIn from "./NotLoggedIn";
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogOverlay, DialogPortal } from "@/components/ui/dialog"
 
-export default function HouseItem({ house, activeShift }: HouseItemProps) {
-    
+export default function HouseItem({ house, activeShift, userId, shiftId }: { house: any, activeShift: boolean, userId:string, shiftId: string }) {
     return (
-        <>
-            <Accordion
-                className="flex flex-col justify-center"
-                type="single" collapsible >
-                <div key={house.id}>
-                    <AccordionItem value={`${house.id}`} className="w-full">
-                        <AccordionTrigger>
-                            <HouseCard house={house} />
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <HouseDetails props={house} />
-                            {activeShift
-                                ? <Form
-                                    info={{
-                                        streetNumber: `${house.streetNumber}`,
-                                        streetName: ` ${house.Street.name}`,
-                                        locationName: `${house.Location.name}`,
-                                        currentNotes: `${house.internalNotes}`,
-                                    }}    
-                                    houseId={house.id}
-                                    />
-                                : <NotClockedIn />
-                            }
-                        </AccordionContent>
-                    </AccordionItem>
+        <Dialog>
+            <DialogTrigger className="w-full m-4 z-40" >
+                    <HouseCard house={house} />
+            </DialogTrigger>
+                    <DialogContent                    
+                className="h-full max-w-2xl "
+                    >
+                <ScrollArea className="h-full w-full m-3 pr-2 z-40">                                                    
+                <DialogHeader>
+                        <DialogTitle>{house.streetNumber} {house.streetName}</DialogTitle>
+                    <DialogDescription>
+                        {house.streetNumber} {house.streetName}
+                    </DialogDescription>
+                            </DialogHeader>
+                            
+                <div className="mt-1">
+                    <HouseDetails props={house} />
                 </div>
-            </Accordion>
-        </>
+                <div className="mt-2">
+                    {activeShift ? (
+                        <Form
+                        info={{
+                            streetNumber: `${house.streetNumber}`,
+                            streetName: ` ${house.streetName}`,
+                            locationName: `${house.locationName}`,
+                                notes: `${house.notes}`,
+                            }}
+                            houseId={house._id}
+                                userId={userId}
+                                shiftId={shiftId}
+                        />
+                    ) : (
+                        <NotClockedIn />
+                    )}
+                </div>
+                    </ScrollArea>
+                    </DialogContent>
+        </Dialog>
     );
-}
-
-function HouseDetails({ props }: HouseDetailsProps) {
-    return (
-        <div className='p-4 mx-auto max-w-md '>
-            <div className=' '>
-                <p className="text-lg text-right"><span className="font-bold">{props.lastName ?? "No last name"}, {props.name ?? "No name"}</span></p>
-                <p className="text-sm text-right font-light">{props.phone ?? "No phone"} | {props.email ?? "No email"}</p>
-            </div>                        
-            <h2 className="font-bold">Notes: </h2>
-            <p className="text-md font-thin">{props.internalNotes}</p>
-        </div>
-    )
 }

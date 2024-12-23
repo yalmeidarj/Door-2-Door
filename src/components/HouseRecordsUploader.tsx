@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useSession } from "next-auth/react";
 import toast, { Toaster } from "react-hot-toast";
 import SubmitFormButton from "./SubmitFormButton";
-import { updateHouseRecordsAsAdmin } from "../app/actions/actions";
+import { updateHouseRecordsAsAdmin } from "@/app/actions/actions";
 import { revalidatePath } from 'next/cache';
 import Spinner from './Spinner';
 
@@ -17,12 +17,12 @@ const HouseUpdateFromSF: React.FC = () => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false); // Loading state
 
-    const session = useSession();
+    // const session = useSession();
     const formRef = useRef<HTMLFormElement>(null);
 
-    if (!session || !session.data) {
-        return <div>loading...</div>;
-    }
+    // if (!session || !session.data) {
+    //     return <div>loading...</div>;
+    // }
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {

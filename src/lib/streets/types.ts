@@ -6,7 +6,7 @@ export type StreetFeedProps = {
 
 export type StreetType = {
   street: {
-    id: number;
+    id: string;
     name: string;
     totalHouses: number;
     totalHousesVisited: number;
@@ -14,7 +14,7 @@ export type StreetType = {
     totalHousesWithConsentNo: number;
     totalHousesWithVisitRequired: number;
     leftToVisit: number;
-    lastVisited: Date | null;
+    lastVisited: string;
   };
 };
 

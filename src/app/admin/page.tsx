@@ -10,8 +10,8 @@ import HouseUpdateFromSF from '@/components/HouseRecordsUploader';
 import PastShiftsByAgentId from '@/components/PastShiftsByAgentId';
 import HouseManager from '@/components/houseManager/HouseManager';
 
-import { getServerSession } from 'next-auth';
-import { authOptions } from "@/server/auth";
+// import { getServerSession } from 'next-auth';
+// import { authOptions } from "@/server/auth";
 import Link from 'next/link';
 
 
@@ -99,35 +99,35 @@ export default async function Page() {
         return <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">Error: {allActiveLocations.error}</div>;
     }
 
-    const session = await getServerSession(authOptions);
+    // const session = await getServerSession(authOptions);
 
-    if (!session || !session.user || !session.user.id) {
-        return (
-            <div className="flex items-center justify-center">
-                <div className="bg-sky-700 text-slate-100 p-2 rounded shadow grid grid-cols-2 mt-9">
-                    <p>You are not logged in</p>
-                </div>
-            </div>
-        );
-    }
+    // if (!session || !session.user || !session.user.id) {
+    //     return (
+    //         <div className="flex items-center justify-center">
+    //             <div className="bg-sky-700 text-slate-100 p-2 rounded shadow grid grid-cols-2 mt-9">
+    //                 <p>You are not logged in</p>
+    //             </div>
+    //         </div>
+    //     );
+    // }
 
-    const user = await getUserById(session.user.id);
+    // const user = await getUserById(session.user.id);
     
-    if (!user || 'error' in user) {
-        return <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">Error</div>;
-    }
+    // if (!user || 'error' in user) {
+    //     return <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">Error</div>;
+    // }
 
-    console.log(`USER ID: ${session.user.id}`)
-    if (user.role !== 'ADMIN') {
-        console.log(`USER OBJECT: ${user.role}`);
-        return (
-            <div className="flex items-center justify-center">
-                <div className="bg-sky-700 text-slate-100 p-2 rounded shadow grid grid-cols-2 mt-9">
-                    <p>You are not authorized to view this page</p>
-                </div>
-            </div>
-        );
-    }
+    
+    // if (user.role !== 'ADMIN') {
+    //     console.log(`USER OBJECT: ${user.role}`);
+    //     return (
+    //         <div className="flex items-center justify-center">
+    //             <div className="bg-sky-700 text-slate-100 p-2 rounded shadow grid grid-cols-2 mt-9">
+    //                 <p>You are not authorized to view this page</p>
+    //             </div>
+    //         </div>
+    //     );
+    // }
     
 
         return (

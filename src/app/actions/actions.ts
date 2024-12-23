@@ -16,8 +16,6 @@ type HouseData = {
   phone: string | null;
 };
 
-
-
 export const updateProperty = async (formData: FormData) => {
   const updatedData = Object.fromEntries(
     Array.from(formData.entries()).filter(([key, value]) => {
@@ -32,13 +30,13 @@ export const updateProperty = async (formData: FormData) => {
       }
       // Check if the value is a string and not empty after trimming
       return typeof value === "string" ? value.trim() !== "" : true;
-    }),
+    })
   );
 
   const id = Number(formData.get("id"));
   if (!id) throw new Error("No id found in form data");
 
-  const shiftId = formData.get("shiftId") as string
+  const shiftId = formData.get("shiftId") as string;
 
   // if phone number is provided, clean it up by removing all non-numeric characters
   if (updatedData.phone) {
@@ -48,19 +46,23 @@ export const updateProperty = async (formData: FormData) => {
   }
   const agentId = formData.get("agentId") as string;
   const agentName = formData.get("agentName") as string;
-  const status = formData.get("statusAttempt") as string
-  
-// If internalNotes is valid and currentNotes is also valid, newNotes will be a concatenation of currentNotes and internalNotes.
-// If internalNotes is valid but currentNotes is not, newNotes will only contain the internalNotes with the agent's name.
-// If internalNotes is not valid, newNotes will retain the value of currentNotes if currentNotes is valid.
-// If neither internalNotes nor currentNotes are valid, newNotes remains null.
+  const status = formData.get("statusAttempt") as string;
 
-const currentNotes = formData.get("currentNotes") as string;
-let newNotes = null; // Initialize newNotes as null
-const internalNotes = formData.get("internalNotes") as string;
+  // If internalNotes is valid and currentNotes is also valid, newNotes will be a concatenation of currentNotes and internalNotes.
+  // If internalNotes is valid but currentNotes is not, newNotes will only contain the internalNotes with the agent's name.
+  // If internalNotes is not valid, newNotes will retain the value of currentNotes if currentNotes is valid.
+  // If neither internalNotes nor currentNotes are valid, newNotes remains null.
+
+  const currentNotes = formData.get("currentNotes") as string;
+  let newNotes = null; // Initialize newNotes as null
+  const internalNotes = formData.get("internalNotes") as string;
 
   // Check if internalNotes is not null or empty
-  if (internalNotes && internalNotes !== "null" && internalNotes.trim() !== "") {
+  if (
+    internalNotes &&
+    internalNotes !== "null" &&
+    internalNotes.trim() !== ""
+  ) {
     // Check if currentNotes is not null or empty
     if (currentNotes && currentNotes !== "null" && currentNotes.trim() !== "") {
       newNotes = `${currentNotes}\n${agentName}->${internalNotes} ||`;
@@ -113,7 +115,6 @@ const internalNotes = formData.get("internalNotes") as string;
       },
     });
 
-
     const houseLog = await db.houseEditLog.createMany({
       data: {
         houseId: Number(formData.get("id")),
@@ -165,7 +166,6 @@ export const getHouseHistory = async (houseId: number) => {
     throw new Error("Error getting House history");
   }
 };
-
 
 export const logHouseEdit = async (
   houseId: number,
@@ -265,7 +265,6 @@ type UpdatePropertyFormData = {
   // shiftLoggerId: string; // Added field for ShiftLogger id
 };
 
-
 type shiftData = {
   id: number;
   agentId: string;
@@ -279,16 +278,13 @@ type shiftData = {
   paceFinal: number;
 };
 
-
 export const ClockOut = async (formData: FormData) => {
   const shiftId = formData.get("id") as string;
-
 
   const data = formData as object;
   try {
     const shift = await db.shiftLogger.update({
-      where: {id: shiftId
-      },
+      where: { id: shiftId },
       data: {
         isFinished: true,
         finishedDate: new Date(),
@@ -339,19 +335,17 @@ export const ClockIn = async (formData: FormData) => {
 
     await db.user.update({
       where: { id: data.agentId },
-      data: { isClockedIn: true,  currentShiftId: newShift.id },
+      data: { isClockedIn: true, currentShiftId: newShift.id },
     });
 
     revalidatePath(`/`);
-    
+
     return { status: "success", message: "Successfully clocked in" };
   } catch (error) {
     console.error(error);
     return { status: "error", message: "Error clocking in" };
   }
 };
-
-
 
 export const getShifts = async () => {
   try {
@@ -366,7 +360,7 @@ export const getShifts = async () => {
 export const getShift = async (id: string) => {
   try {
     const shift = await db.shiftLogger.findUnique({
-      where: {id: id}
+      where: { id: id },
     });
     return shift;
   } catch (error) {
@@ -455,7 +449,7 @@ export const getShift = async (id: string) => {
 
 //     const totalHours = Math.floor(totalHoursWorked / 3600000);
 //     const totalMinutes = Math.floor((totalHoursWorked % 3600000) / 60000);
-    
+
 //     const data = {
 //       activeShifts,
 //       finishedShifts: finishedShiftsWithDuration,
@@ -544,8 +538,7 @@ export const getShiftsByAgentId = async (
       return { ...shift, formattedDuration };
     });
 
-    const totalHouses =
-      housesNotFinal + housesYes + housesNo;
+    const totalHouses = housesNotFinal + housesYes + housesNo;
 
     const totalHoursWorked = Object.values(totalTimePerLocation).reduce(
       (acc, curr) => acc + curr,
@@ -555,13 +548,16 @@ export const getShiftsByAgentId = async (
     // Convert totalTimePerLocation from milliseconds to a more readable format
     const totalTimePerLocationFormatted = Object.keys(
       totalTimePerLocation
-    ).reduce((acc, locationName) => {
-      const duration = totalTimePerLocation[locationName];
-      const hours = Math.floor(duration / 3600000);
-      const minutes = Math.floor((duration % 3600000) / 60000);
-      acc[locationName] = `${hours}h ${minutes}m`;
-      return acc;
-    }, {} as { [key: string]: string });
+    ).reduce(
+      (acc, locationName) => {
+        const duration = totalTimePerLocation[locationName];
+        const hours = Math.floor(duration / 3600000);
+        const minutes = Math.floor((duration % 3600000) / 60000);
+        acc[locationName] = `${hours}h ${minutes}m`;
+        return acc;
+      },
+      {} as { [key: string]: string }
+    );
 
     const totalHours = Math.floor(totalHoursWorked / 3600000);
     const totalMinutes = Math.floor((totalHoursWorked % 3600000) / 60000);
@@ -583,8 +579,6 @@ export const getShiftsByAgentId = async (
     return { error: "Error getting shifts" };
   }
 };
-
-
 
 export const getUserById = async (id: string) => {
   try {
@@ -609,13 +603,12 @@ export const getAllUsers = async () => {
     console.error(error);
     return { error: "Error getting users" };
   }
-}
-
+};
 
 export const getShiftsByLocationId = async (locationId: number) => {
   try {
     const shifts = await db.shiftLogger.findMany({
-      where: {locationId: locationId}
+      where: { locationId: locationId },
     });
     return shifts;
   } catch (error) {
@@ -628,7 +621,7 @@ export const getShiftsByLocationId = async (locationId: number) => {
 export const getShiftByLocationId = async (locationId: number) => {
   try {
     const shift = await db.shiftLogger.findFirst({
-      where: {locationId: locationId, isFinished: false}
+      where: { locationId: locationId, isFinished: false },
     });
     return shift;
   } catch (error) {
@@ -640,7 +633,7 @@ export const getShiftByLocationId = async (locationId: number) => {
 export const isAgentClockedIn = async (agentId: string) => {
   try {
     const shift = await db.shiftLogger.findFirst({
-      where: {agentId: agentId, isFinished: false}
+      where: { agentId: agentId, isFinished: false },
     });
     if (shift) {
       return true;
@@ -651,9 +644,7 @@ export const isAgentClockedIn = async (agentId: string) => {
     console.error(error);
     return { error: "Error getting shift" };
   }
-}
-
-
+};
 
 export const getAllClockedInAgents = async () => {
   try {
@@ -666,7 +657,7 @@ export const getAllClockedInAgents = async () => {
         name: true,
         ShiftLogger: {
           where: {
-            isFinished: false, 
+            isFinished: false,
           },
           select: {
             id: true,
@@ -692,7 +683,7 @@ export const getAllClockedInAgents = async () => {
         return acc + (shift.updatedHouses ?? 0);
       }, 0);
 
-      const shiftLength:number = agent.ShiftLogger.reduce((acc, shift) => {
+      const shiftLength: number = agent.ShiftLogger.reduce((acc, shift) => {
         const start = shift.startingDate?.getTime();
         // const end should be current time
         const end = new Date().getTime();
@@ -731,7 +722,7 @@ export const getAllClockedInAgents = async () => {
     console.error(error);
     return { error: "Error getting agents" };
   }
-}
+};
 
 export const getAllAgents = async () => {
   try {
@@ -777,9 +768,11 @@ export const getActiveShiftByAgentId = async (agentId: string) => {
   }
 };
 
-export const updateActiveShiftByShiftId = async (shiftId: string, statusAttempt: string) => {
-
-  if (statusAttempt === "Consent Final Yes" ) {
+export const updateActiveShiftByShiftId = async (
+  shiftId: string,
+  statusAttempt: string
+) => {
+  if (statusAttempt === "Consent Final Yes") {
     try {
       const updatedShift = await db.shiftLogger.update({
         where: { id: shiftId },
@@ -787,27 +780,33 @@ export const updateActiveShiftByShiftId = async (shiftId: string, statusAttempt:
       });
 
       revalidatePath(`/`);
-      return { status: "success", message: "Shift updated", shift: updatedShift };
+      return {
+        status: "success",
+        message: "Shift updated",
+        shift: updatedShift,
+      };
     } catch (error) {
       console.error(error);
       return { status: "error", message: "Error updating shift" }; // Ensure a return statement here
     }
-  }
-  else if (statusAttempt === "Consent Final No") {
-        try {
+  } else if (statusAttempt === "Consent Final No") {
+    try {
       const updatedShift = await db.shiftLogger.update({
         where: { id: shiftId },
         data: { updatedHousesFinalNo: { increment: 1 } },
       });
 
       revalidatePath(`/`);
-      return { status: "success", message: "Shift updated", shift: updatedShift };
+      return {
+        status: "success",
+        message: "Shift updated",
+        shift: updatedShift,
+      };
     } catch (error) {
       console.error(error);
       return { status: "error", message: "Error updating shift" }; // Ensure a return statement here
     }
-  }
-  else {
+  } else {
     try {
       const updatedShift = await db.shiftLogger.update({
         where: { id: shiftId },
@@ -815,7 +814,11 @@ export const updateActiveShiftByShiftId = async (shiftId: string, statusAttempt:
       });
 
       revalidatePath(`/`);
-      return { status: "success", message: "Shift updated", shift: updatedShift };
+      return {
+        status: "success",
+        message: "Shift updated",
+        shift: updatedShift,
+      };
     } catch (error) {
       console.error(error);
       return { status: "error", message: "Error updating shift" }; // Ensure a return statement here
@@ -829,8 +832,8 @@ export const getShiftsByAgentIdFinished = async (agentId: string) => {
     const shifts = await db.shiftLogger.findMany({
       where: { agentId: agentId, isFinished: true },
       orderBy: {
-        startingDate: "desc"
-      }
+        startingDate: "desc",
+      },
     });
     return shifts;
   } catch (error) {
@@ -844,10 +847,10 @@ export const getActiveLocations = async () => {
   try {
     const locations = await db.location.findMany({
       where: { isDeleted: false },
-            select: {
+      select: {
         name: true,
         id: true,
-      }
+      },
     });
     return locations;
   } catch (error) {
@@ -860,14 +863,14 @@ export const getActiveLocations = async () => {
 export const getInactiveLocations = async () => {
   try {
     const locations = await db.location.findMany({
-      where: {isDeleted: true}
+      where: { isDeleted: true },
     });
     return locations;
   } catch (error) {
     console.error(error);
     return { error: "Error getting locations" };
   }
-};  
+};
 
 type HouseCount = {
   locationId: number;
@@ -887,7 +890,7 @@ export const getAllLocationsDropDown = async () => {
     console.error(error);
     return { error: "Error getting locations" };
   }
-}
+};
 
 export const getLocations = async (skip: number, take: number) => {
   try {
@@ -1038,41 +1041,38 @@ export const getLocations = async (skip: number, take: number) => {
   }
 };
 
-
 // Soft delete a location
 export const softDeleteLocation = async (locationId: string) => {
   await db.location.update({
-  where: { id: Number(locationId) },
-  data: { isDeleted: true }
+    where: { id: Number(locationId) },
+    data: { isDeleted: true },
   });
   revalidatePath(`/`);
   return { status: "success", message: "Location deleted" };
-}
+};
 
 export const hardDeleteLocation = async (locationId: string) => {
   try {
-      // to delete location, delete all houses, streets, and shiftLoggers associated with location
-  await db.shiftLogger.deleteMany({
-    where: { locationId: Number(locationId) }
-  });
-  await db.house.deleteMany({
-    where: { locationId: Number(locationId) }
-  });
-  await db.street.deleteMany({
-    where: { locationId: Number(locationId) }
-  });
-  await db.location.delete({
-    where: { id: Number(locationId) }
-  });
+    // to delete location, delete all houses, streets, and shiftLoggers associated with location
+    await db.shiftLogger.deleteMany({
+      where: { locationId: Number(locationId) },
+    });
+    await db.house.deleteMany({
+      where: { locationId: Number(locationId) },
+    });
+    await db.street.deleteMany({
+      where: { locationId: Number(locationId) },
+    });
+    await db.location.delete({
+      where: { id: Number(locationId) },
+    });
     revalidatePath(`/`);
     return { status: "success", message: "Location deleted" };
-  }
-  catch (error) {
+  } catch (error) {
     console.error(error);
     return { status: "error", message: "Error deleting location" };
   }
-
-}
+};
 
 // Define an interface for the query result
 interface TotalHousesResult {
@@ -1186,7 +1186,6 @@ export const getLocationsStats = async (locationId: number) => {
     //   toBeVisited.find((house: unknown) => house.streetId === house.id)
     //     ?.totalHouses || 0;
 
-
     // Total number of houses with consent
     const totalHousesWithConsent =
       Number(totalHousesWithConsentYes) + Number(totalHousesWithConsentNo);
@@ -1207,7 +1206,7 @@ export const getLocationsStats = async (locationId: number) => {
     );
 
     const name = location?.name ?? "";
-    const isDeleted =  false;
+    const isDeleted = false;
 
     // const toBeVisited = totalHouses - totalHousesVisited;
 
@@ -1225,7 +1224,6 @@ export const getLocationsStats = async (locationId: number) => {
       percentageHousesVisited: Number(percentageHousesVisited),
       totalHousesVisitRequired: Number(totalHousesVisitRequired),
       toBeVisited: Number(toBeVisited),
-
     };
 
     console.log(data);
@@ -1268,7 +1266,6 @@ export const AllLocations = async () => {
   }
 };
 
-
 export const getAllHouses = async (skip: number, take: number) => {
   try {
     const houses = await db.house.findMany({
@@ -1298,9 +1295,13 @@ export const getAllHouses = async (skip: number, take: number) => {
     console.error(error);
     return { error: "Error getting houses" };
   }
-}
+};
 // get all houses by locationId
-export const getAllHousesInLocation = async (locationId: string, skip: number, take: number) => {
+export const getAllHousesInLocation = async (
+  locationId: string,
+  skip: number,
+  take: number
+) => {
   try {
     const houses = await db.house.findMany({
       where: { locationId: Number(locationId) },
@@ -1314,7 +1315,9 @@ export const getAllHousesInLocation = async (locationId: string, skip: number, t
         lastUpdated: "desc",
       },
     });
-    const total = await db.house.count({ where: { locationId: Number(locationId) } });
+    const total = await db.house.count({
+      where: { locationId: Number(locationId) },
+    });
     const metadata = {
       totalRecords: total,
       hasNextPage: skip + take < total,
@@ -1326,13 +1329,17 @@ export const getAllHousesInLocation = async (locationId: string, skip: number, t
       metadata: metadata,
     };
   } catch (error) {
-	    console.error(error);
-      return { error: "Error getting houses" };
+    console.error(error);
+    return { error: "Error getting houses" };
   }
-}
+};
 
 // get all houses by locationId
-export const getAllHousesInLocationSeeding = async (locationId: string, skip: number, take: number) => {
+export const getAllHousesInLocationSeeding = async (
+  locationId: string,
+  skip: number,
+  take: number
+) => {
   try {
     const houses = await db.house.findMany({
       where: {
@@ -1358,7 +1365,9 @@ export const getAllHousesInLocationSeeding = async (locationId: string, skip: nu
       },
     });
 
-    const total = await db.house.count({ where: { locationId: Number(locationId) } });
+    const total = await db.house.count({
+      where: { locationId: Number(locationId) },
+    });
     const metadata = {
       totalRecords: total,
       hasNextPage: skip + take < total,
@@ -1382,7 +1391,6 @@ export const getAllHousesInLocationSeeding = async (locationId: string, skip: nu
         location: house.Location.name as string,
         lastUpdated: house.lastUpdated as Date,
         lastUpdatedBy: house.lastUpdatedBy as string,
-        externalNotes: house.externalNotes as string,
         internalNotes: house.internalNotes as string,
         houseHistory: house.HouseEditLog.map((log) => ({
           name: log.name,
@@ -1408,8 +1416,7 @@ export const getAllHousesInLocationSeeding = async (locationId: string, skip: nu
     console.error(error);
     return { error: "Error getting houses" };
   }
-}
-
+};
 
 export const getHousesInStreet = async (
   street: string | string[] | undefined,
@@ -1445,7 +1452,7 @@ export const getHousesInStreet = async (
           },
         },
       },
-  
+
       // order by street number
       orderBy: {
         streetNumber: "asc",
@@ -1470,10 +1477,9 @@ export const getHousesInStreet = async (
         },
       },
     });
-    
-    const response = { houses,  totalHousesVisited}
-    
-    
+
+    const response = { houses, totalHousesVisited };
+
     // Count the total number of houses on the street
     const total = await db.house.count({
       where: { streetId: Number(street) },
@@ -1595,9 +1601,9 @@ export async function seed(data: SeedData) {
 //           email: house.email,
 //           externalNotes: house.notes, // Assuming 'notes' maps to 'externalNotes'
 //           phone: house.phone,
-//           isConcilatedInSalesForce: true, 
+//           isConcilatedInSalesForce: true,
 //           // Add other fields as necessary
-          
+
 //         },
 //       });
 //     }
@@ -1664,10 +1670,9 @@ export async function createLocationAndHouses(jsonData: SeedData) {
     return { status: "success", message: "Location and houses created" };
   } catch (error) {
     console.error(error);
-return { status: "error", message: "Error creating location and houses" };
+    return { status: "error", message: "Error creating location and houses" };
   }
 }
-
 
 export async function updateHouseRecordsAsAdmin(jsonData: SeedData) {
   try {
@@ -1675,7 +1680,9 @@ export async function updateHouseRecordsAsAdmin(jsonData: SeedData) {
       const streetNumberInt = Number(house.streetNumber);
 
       if (isNaN(streetNumberInt)) {
-        console.log(`Invalid street number for ${house.name}: ${house.streetNumber}`);
+        console.log(
+          `Invalid street number for ${house.name}: ${house.streetNumber}`
+        );
         continue;
       }
 
@@ -1699,9 +1706,9 @@ export async function updateHouseRecordsAsAdmin(jsonData: SeedData) {
           },
         });
       } else {
-        console.log(`House not found for ${house.name}, ${house.streetNumber} ${house.street}`);
-
-
+        console.log(
+          `House not found for ${house.name}, ${house.streetNumber} ${house.street}`
+        );
       }
     }
 
@@ -1735,7 +1742,6 @@ export async function getHouseSFStatus(houseId: string) {
   }
 }
 
-
 export const switchSFStatus = async (houseId: string, status: boolean) => {
   try {
     const updatedHouse = await db.house.update({
@@ -1743,7 +1749,11 @@ export const switchSFStatus = async (houseId: string, status: boolean) => {
       data: { isConcilatedInSalesForce: status },
     });
 
-    return { status: "success", message: "Property updated", house: updatedHouse };
+    return {
+      status: "success",
+      message: "Property updated",
+      house: updatedHouse,
+    };
   } catch (error) {
     console.error(error);
     return { status: "error", message: "Error updating property" };
@@ -1756,8 +1766,6 @@ export async function deleteRecords() {
   const tomorrow = new Date(2024, 0, 14);
 
   try {
-    
-  
     const result = await db.house.deleteMany({
       where: {
         AND: [
@@ -1786,9 +1794,7 @@ export async function deleteRecords() {
   }
 }
 
-
-
-export const updateLatLonByStreetId = async ( streetId: string) => {
+export const updateLatLonByStreetId = async (streetId: string) => {
   const houses = await db.house.findMany({
     where: {
       // locationId: 7,
@@ -1828,15 +1834,12 @@ export const updateLatLonByStreetId = async ( streetId: string) => {
     });
     allData.push({ lat: lat, lon: lon });
 
-
-
-
     console.log(`Updated lat and lon for ${address}`);
   }
   return allData;
 };
 
-import { DateTime } from 'luxon';
+import { DateTime } from "luxon";
 import Email from "next-auth/providers/email";
 
 type PaceData = {
@@ -1845,10 +1848,13 @@ type PaceData = {
   shiftStart: Date;
   shiftEnd: Date;
 };
-  
 
-
-export async function calculatePace({ editedHouses, editedHousesFinal, shiftStart, shiftEnd }: PaceData) {
+export async function calculatePace({
+  editedHouses,
+  editedHousesFinal,
+  shiftStart,
+  shiftEnd,
+}: PaceData) {
   // Convert to number
   const updatedHouses = editedHouses as number;
   const updatedHousesFinal = editedHousesFinal as number;
