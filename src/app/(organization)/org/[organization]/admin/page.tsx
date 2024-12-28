@@ -9,6 +9,7 @@ import { FaUserAlt, FaSalesforce } from "react-icons/fa";
 import AccordionItems from "./admin-ui/adminOptions";
 import PermissionProvider from "./permissionsProvider";
 import { auth } from "@/auth";
+import UpdateActiveSite from "@/components/dashboard-management/UpdateActiveSite";
 
 
 type Params = Promise<{ organization: string }>
@@ -62,7 +63,7 @@ export default async function Page(props: {
         {
             id: 2,
             name: "Update Current Site",
-            component: <div>Update Current Site</div>
+            component: <UpdateActiveSite orgName={orgName} />
         },
         {
             id: 3,

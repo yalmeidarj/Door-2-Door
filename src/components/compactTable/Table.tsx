@@ -125,7 +125,7 @@ const Table: React.FC<TableProps> = ({ data, siteId }) => {
                                         <DialogContent>
                                             <DialogHeader>                                                
                                                     <DialogTitle>All House History</DialogTitle>
-                                                <ScrollArea className="h-[90vh] ">                                                    
+                                                    <ScrollArea className="h-[90vh] ">                                                    
                                                 <HouseEditLog
                                                     houseId={row._id as string}
                                                     />
@@ -164,7 +164,7 @@ const conciliatorProps = {
 }
 
 const CornerNoteButton = ({ houseId }: { houseId?: string }) => {
-    const updateProperty = useMutation(api.houseEditLog.createNewEditByHouseId);
+    const updateProperty = useMutation(api.house.conciliateHouse);
     const {data: session} = useSession();
     if (!session || !session.user) {
         return (
@@ -175,39 +175,34 @@ const CornerNoteButton = ({ houseId }: { houseId?: string }) => {
     }
     const user = session.user;   
     
-
+    const ref = useRef<HTMLFormElement>(null);
     async function clientAction(formData: FormData) {
        
         const newObject = {
-            isConcilatedInSalesForce: true,
-            houseId: formData.get("id") as Id<"house">,
-            agentId: formData.get("agentId") as Id<"users">,
-            };
-        try {
-            const response = await updateProperty(newObject);
-            if (response){
-                return true
-            }
-        } catch (error) {
-            console.error('Error updating property:', error);
-            
+            houseID: formData.get("id") as Id<"house">,
+        };
+        const response = await updateProperty(newObject);
+        if (!response || response === null) {            
             return null;
+        } else {
+            return true            
         }
     }
 
-
-    const ref = useRef<HTMLFormElement>(null);
-
+    const handleFormReset = () => {
+        ref.current?.reset();
+    };
+    
     const handleSubmit = async () => { 
         const formData = new FormData(ref.current!);
-        // formData.set("isConcilatedInSalesForce", true); 
         formData.set("id", houseId as string);
-        formData.set("agentId", user.id as string);
         const result = await clientAction(formData);
         if (result) {            
             toast.success("Status updated successfully!");
+            handleFormReset();
         } else {
             toast.error("Failed to update status.");
+            console.log(formData.get("id"))
         }
     }
 
@@ -215,7 +210,9 @@ const CornerNoteButton = ({ houseId }: { houseId?: string }) => {
         <form ref={ref}>
 
         <button
-            
+                id='id'
+                name='id'
+                type="button"
             onClick={() => handleSubmit()}
             className=" top-0 left-0 h-full px-3 bg-blue-500 hover:bg-blue-600 transition-all duration-300 ease-in-out group flex items-center justify-center shadow-md"
         >

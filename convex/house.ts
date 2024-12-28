@@ -369,6 +369,24 @@ export const createNewHouse = mutation({
   },
 });
 
+export const conciliateHouse = mutation({
+  args: {
+    houseID: v.id("house"),
+
+  },
+  handler: async (ctx, { houseID }) => {
+    try {
+      
+      const house = await ctx.db.patch(houseID, {
+        isConcilatedInSalesForce: true,
+      });
+      return true;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  },
+})
 
 export const updateProperty = mutation({
   args: {

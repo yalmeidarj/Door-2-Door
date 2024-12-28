@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CalendarDays, User, Home, Mail, Phone, FileText, AlertCircle } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
 
 interface HouseEditLogEntry {
     agentId?: string
@@ -49,8 +50,16 @@ const HouseEditLogEntry: React.FC<HouseEditLogEntryProps> = ({ entry }) => {
     ]
 
     const formatTimestamp = (timestamp: number): string => {
-        return new Date(timestamp).toLocaleString()
-    }
+        const options: Intl.DateTimeFormatOptions = {
+            year: '2-digit',       // Short year
+            month: 'short',        // Abbreviated month
+            day: '2-digit',        // Day with leading zero if needed
+            hour: '2-digit',       // 24-hour format
+            minute: '2-digit',     // Include minutes
+            hour12: false          // Disable 12-hour format
+        };
+        return new Intl.DateTimeFormat('en-US', options).format(new Date(timestamp));
+    };
 
     return (
         <Card className="w-full max-w-xl">
@@ -60,11 +69,11 @@ const HouseEditLogEntry: React.FC<HouseEditLogEntryProps> = ({ entry }) => {
                         {formatTimestamp(entry._creationTime)}
                     </p>
                 )}
-                {entry.agentId && (
                     <div className="">
-                        <AgentName agentId={entry.agentId} />
+                        <AgentName agentId={entry.agentId } />
                     </div>
-                )}
+                {/* {entry.agentId && (
+                )} */}
             </CardHeader>
             <CardContent>
                 <div className="pt-4">
@@ -86,24 +95,28 @@ const HouseEditLogEntry: React.FC<HouseEditLogEntryProps> = ({ entry }) => {
 }
 
 interface AgentNameProps {
-    agentId: string
+    agentId: string | undefined
 }
 
-
 export function AgentName({ agentId }: AgentNameProps) {
-    const agent = useQuery(api.users.getUserById, { id: agentId as Id<"users"> }); 
+    const [id, setAgentId] = useState<string>("");
 
-    if (!agent) {
+    if (!agentId || agentId === undefined) {
         return (<Skeleton className="h-4 w-24" />)
     }
 
-    const agentName = `${agent.name}`
-    
+    useEffect(() => {
+        setAgentId(agentId);
+    }, [agentId]);
+
+    const agent = useQuery(api.users.getUserById, { id: id as Id<"users"> }); 
+
+    // const agentName = `${agent?.name}`    
 
     return (
         <div className="flex items-center ">
             {/* <User className="text-muted-foreground" /> */}
-            <span>{agentName}</span>
+            <span>{agent?.name}</span>
         </div>
     )
 }
@@ -117,10 +130,11 @@ const HouseEditLog = ({ houseId }: { houseId: string }) => {
     if (!HouselogHistory) {
         return <div>Loading...</div>;
     }
+
     return (
         <div className="w-full mt-4">
             {/* <h2 className="text-xl font-semibold mb-4">Edit History</h2> */}
-            {HouselogHistory.map((log, index) => (
+            {HouselogHistory?.map((log, index) => (
                 <div className="w-full" key={index}>
                     <HouseEditLogEntry  entry={log} />
                 </div>

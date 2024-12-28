@@ -17,14 +17,14 @@ import { toast } from 'sonner';
 
 export default function ChangeHouseStatusDropdown({ houseId,  statusAttempt }:
     { houseId: string,  siteId: string, statusAttempt: string }) {
-    const updateProperty = useMutation(api.houseEditLog.createNewEditByHouseId);
-    const [currentStatus, setCurrentStatus] = useState(statusAttempt);
-
     const { data: session } = useSession(); 
     if (!session || !session.user) {
                 
         return <div>Loading...</div>;
     }
+    const updateProperty = useMutation(api.houseEditLog.createNewEditByHouseId);
+    const [currentStatus, setCurrentStatus] = useState(statusAttempt);
+
     
     const user = session.user;
     // const agentId = session.user.id;
@@ -35,7 +35,7 @@ export default function ChangeHouseStatusDropdown({ houseId,  statusAttempt }:
         const newObject = {
             statusAttempt: formData.get("statusAttempt") as string,
             houseId: formData.get("id") as Id<"house">,
-            agentId: formData.get("agentId") as Id<"users">,
+            agentId: user.id as Id<"users">,
             // siteID: siteId
             // shiftId: formData.get("shiftId") as Id<"shiftLogger"> 
         };
@@ -59,7 +59,6 @@ export default function ChangeHouseStatusDropdown({ houseId,  statusAttempt }:
         const formData = new FormData(ref.current!);
         formData.set("statusAttempt", option); // Set the selected statusAttempt value
         formData.set("id", houseId);
-        formData.set("agentId", user.id as string );
         const result = await clientAction(formData);
         if (result) {
             handleFormReset();
