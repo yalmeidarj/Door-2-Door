@@ -1,17 +1,15 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import SigninButton from "./SigninButton";
-import { cn } from "@/lib/utils";
+
 import {
     NavigationMenu,
     NavigationMenuContent,
     NavigationMenuItem,
-    NavigationMenuLink,
+    // NavigationMenuLink,
     NavigationMenuList,
     NavigationMenuTrigger,
-    navigationMenuTriggerStyle,
+    // navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import UserMenu from "./UserMenu";
 import ListItem from "./ListItem";

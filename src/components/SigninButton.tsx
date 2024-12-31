@@ -5,8 +5,18 @@ import Image from "next/image"
 const SigninButton = () => {
     const { data: session } = useSession();
     
-    if (session) {
+    if (!session || !session.user) {
+        
         return (
+            <button
+            onClick={() => signIn()}
+            className="bg-blue-500 px-4 py-2 text-black rounded-md flex flex-col">
+            Sign in
+        </button>
+        )
+    }
+
+    return (
             <div className="flex w-full ">
                 <button onClick={() => signOut()} className="text-red-600   flex-row flex-wrap w-full bg-blue-50 ">
                 {/* <Image
@@ -22,16 +32,9 @@ const SigninButton = () => {
                     </div>
                     
                 </button>
-            </div>
-        )
-    }
-    return (
-        <button
-            onClick={() => signIn()}
-            className="bg-blue-500 px-4 py-2 text-black rounded-md flex flex-col">
-            Sign in
-        </button>
+        </div>
     )
 }
 
-export default SigninButton;
+export default SigninButton
+    

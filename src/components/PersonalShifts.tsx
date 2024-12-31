@@ -1,6 +1,5 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { getAllAgents, getShiftsByAgentId } from '@/app/actions/actions';
 import { format, subDays } from 'date-fns';
 import { DatePickerWithRange } from '@/components/DatePickerWithRange';
 import { DateRange } from 'react-day-picker';
@@ -12,7 +11,8 @@ import { useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-const ShiftDurationDisplay = ({ shifts }) => {
+const ShiftDurationDisplay = ({ shifts }: { shifts: any[] | undefined }) => {
+    
     // Guard clause for when shifts is undefined or empty
     if (!shifts || shifts.length === 0) {
         return (
