@@ -79,9 +79,9 @@ export default function Form({ userId, houseId, info, shiftId  }: FormProps) {
         };
 
         // Filter out empty values and create final object
-        const newObject = Object.entries(optionalFields).reduce((acc, [key, value]) => {
+        const newObject = Object.entries(optionalFields).reduce<typeof baseObject>((acc, [key, value]) => {
             if (value && value !== " ") {
-                acc[key ] = value ;
+                (acc as any)[key] = value;
             }
             return acc;
         }, baseObject);
