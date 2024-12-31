@@ -1,8 +1,5 @@
 "use client"
 import StreetCard from "./StreetCard";
-import PaginationControls from "./PaginationControls";
-import { StreetFeedProps } from "@/lib/streets/types";
-import { getStreetsInLocation } from "@/lib/streets/helperFunctions";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import Link from "next/link";

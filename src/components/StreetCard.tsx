@@ -1,11 +1,9 @@
 "use client"
-import { BsPersonWalking } from "react-icons/bs";
+
 import { FaHome, FaCheck, FaTimes } from "react-icons/fa";
 import { IoIosCheckmarkCircleOutline } from "react-icons/io";
 import { RiForbidLine } from "react-icons/ri";
 import { defaultValues } from "@/lib/utils";
-import Link from "next/link";
-import { StreetType } from "@/lib/streets/types";
 import { MdEngineering } from "react-icons/md";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
