@@ -3,13 +3,7 @@ import PageHeader from "@/components/PageHeader";
 import PersonalShifts from "@/components/PersonalShifts";
 
 
-export default async function Page({
-    params,
-    searchParams,
-}: {
-    params: { id: string }
-    searchParams: { [id: string]: string | string[] | undefined, org: string | undefined }
-}) {
+export default async function Page() {
 
     const session = await auth();
 
