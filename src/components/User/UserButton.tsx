@@ -6,7 +6,7 @@ import SignIn from "../auth-components/SignIn"
 export default async function UserButton() {
     const session = await auth()
 
-    if (!session) {
+    if (!session || !session.user) {        
         return (
             <>
              <SignIn />
