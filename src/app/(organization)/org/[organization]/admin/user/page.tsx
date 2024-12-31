@@ -8,13 +8,7 @@ import { auth } from "@/auth";
 import UserManager from "./userManager";
 import NewUserRequests from "./newUser";
 
-export default async function Page({
-    params,
-    searchParams,
-}: {
-    params: { id: string }
-    searchParams: { [id: string]: string | string[] | undefined, org: string | undefined }
-}) {
+export default async function Page() {
 
     const session = await auth()
 
