@@ -1,13 +1,7 @@
 import AdminNavigation from "@/components/AdminNavigation ";
 import PageHeader from "@/components/PageHeader";
 
-export default async function Page({
-    params,
-    searchParams,
-}: {
-    params: { id: string }
-    searchParams: { [id: string]: string | string[] | undefined, org: string | undefined }
-}) {
+export default function Page() {
 
     const routeLinks = [
         // {
