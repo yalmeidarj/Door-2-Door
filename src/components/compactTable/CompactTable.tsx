@@ -1,8 +1,8 @@
 'use client'
-import { getActiveLocations, getAllHousesInLocationSeeding, getAllLocationsDropDown } from "@/app/actions/actions";
+
 import { useEffect, useState } from "react";
 // import { House } from "@prisma/client";
-import { LocationDropdown } from "../houseTable/columns/forSeeding";
+
 import  Table  from "./Table";
 
 interface LogEntry {

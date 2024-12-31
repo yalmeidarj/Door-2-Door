@@ -1,7 +1,5 @@
 "use client"
 import SubmitFormButton from "./SubmitFormButton";
-import { ClockOut } from "@/app/actions/actions";
-
 type ClockInProps = {
     props: string;
 };

@@ -1,6 +1,5 @@
 import { format } from "date-fns";
 import { Shift } from "@/lib/Shift/types";
-import { calculatePace, getAllHouses } from "@/app/actions/actions";
 import { DateTime } from "luxon";
 
 export default function ShiftCard({ shift, diplayFinishedCard = true }: { shift: Shift, diplayFinishedCard: boolean   }) {

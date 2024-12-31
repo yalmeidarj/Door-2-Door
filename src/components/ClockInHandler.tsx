@@ -1,5 +1,4 @@
 "use client";
-import { ClockIn } from "@/app/actions/actions";
 import SubmitFormButton from "./SubmitFormButton";
 
 type ClockInProps = {

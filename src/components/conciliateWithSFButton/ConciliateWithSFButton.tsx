@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react';
 import { FaCheck, FaTimes, FaSpinner } from 'react-icons/fa';
-import { switchSFStatus } from "@/app/actions/actions";
 import { RiForbid2Fill } from "react-icons/ri";
 
 export default function ConciliateWithSFButton({ houseId, status }: { houseId: string, status: boolean }) {

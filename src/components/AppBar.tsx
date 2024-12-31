@@ -13,7 +13,6 @@ import {
     NavigationMenuTrigger,
     navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { getActiveShiftByAgentId } from "@/app/actions/actions";
 import UserMenu from "./UserMenu";
 import ListItem from "./ListItem";
 
