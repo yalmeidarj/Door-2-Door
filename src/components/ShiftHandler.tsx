@@ -122,7 +122,7 @@ function ClockOut({ clockOutProps }: { clockOutProps: ClockOutProps }) {
     const clockOut = useMutation(api.shiftLogger.clockOut);
     const { shiftId } = clockOutProps;
 
-    const shift = useQuery(api.shiftLogger.getShiftById, { id: shiftId });
+    const shift = useQuery(api.shiftLogger.getShiftById, { id: shiftId as Id<"shiftLogger"> });
     
     if (!shift) {
         return <div>Loading shift...</div>;
