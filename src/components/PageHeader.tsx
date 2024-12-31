@@ -43,10 +43,6 @@ export default async function PageHeader({ routes = [] }: PageHeaderProps) {
                         </div>
                     ))}
                 </div>
-                {/* <Separator
-                    className=""
-                    orientation="vertical"
-                /> */}
                 <ShiftHandler
                     userId={user.id as string}
                 />
