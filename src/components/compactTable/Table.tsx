@@ -4,8 +4,7 @@ import ConciliateWithSFButton from '../conciliateWithSFButton/ConciliateWithSFBu
 import { cn } from '@/lib/utils';
 import { format } from "date-fns";
 import ChangeHouseStatusDropdown from '../ChangeHouseStatusDropdown';
-import HouseEditLogs from '../HouseHistoryLog';
-import NotesButton from '../NotesButton';
+
 import { string } from 'zod';
 import { Button } from '../ui/button';
 import { FaSalesforce } from "react-icons/fa6";
