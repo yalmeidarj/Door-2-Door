@@ -10,10 +10,6 @@ import HouseUpdateFromSF from '@/components/HouseRecordsUploader';
 import { getLocationProjectData } from '@/lib/downloadFiles/downloadFilesFromApp';
 import { promisify } from 'util';
 
-import fs from 'fs';
-import SeedSfTable from '@/components/houseTable/SeedSfTable';
-
-
 type ProjectData = {
     success: boolean;
     data: {
@@ -155,7 +151,7 @@ export default async function Page() {
                     </form>
                 
                 </div>
-                <SeedSfTable />
+                {/* <SeedSfTable /> */}
             </div>
     </>
 )
