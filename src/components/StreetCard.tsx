@@ -23,10 +23,7 @@ const StreetCard = ({ streetId, name }: { streetId: string, name: string }) => {
     
     return (
         <>
-            {/* <Link
-                // key={id}
-                // href={`/houses/${name}?id=${id}&per_page=${defaultPerPage}&page=${defaultPage}&viewAll=${viewAll}`}
-                href="#"*/}
+
                 <div
                 className="flex items-center justify-between
                  bg-white hover:bg-gray-100 p-3 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition ease-in-out duration-300
