@@ -3,7 +3,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useSession } from "next-auth/react";
-import toast, { Toaster } from "react-hot-toast";
 import SubmitFormButton from "./SubmitFormButton";
 import { createLocationAndHouses } from "../app/actions/actions";
 import { revalidatePath } from 'next/cache';
@@ -48,25 +47,25 @@ const NewSiteCreator: React.FC = () => {
                     // toast.success("success");
                     const result = await createLocationAndHouses(jsonData);
                     if (result.status === "success") {
-                        toast.success(result.message);
+                        // toast.success(result.message);
                     } else {
-                        toast.error(result.message);
+                        // toast.error(result.message);
                     }
                 } catch (error) {
-                    toast.error("Error parsing JSON file");
+                    // toast.error("Error parsing JSON file");
                 }
                 setIsLoading(false); // Stop loading
                 handleClearFile();
             };
             reader.readAsText(selectedFile);
         } else {
-            toast.error("Please select a file before submitting");
+            // toast.error("Please select a file before submitting");
         }
     };
 
     return (
         <>
-            <Toaster />
+          
             {isLoading ? (
                 <Spinner />
             ) : (

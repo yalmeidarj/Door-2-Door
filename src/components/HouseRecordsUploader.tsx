@@ -2,8 +2,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
-import { useSession } from "next-auth/react";
-import toast, { Toaster } from "react-hot-toast";
+import { useSession } from "next-auth/react";                                                           
 import SubmitFormButton from "./SubmitFormButton";
 import { updateHouseRecordsAsAdmin } from "@/app/actions/actions";
 import { revalidatePath } from 'next/cache';
@@ -67,7 +66,6 @@ const HouseUpdateFromSF: React.FC = () => {
 
     return (
         <>
-            <Toaster />
             {isLoading ? (
             <Spinner />
             ): (

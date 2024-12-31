@@ -3,7 +3,7 @@ import { getAllLocationsDropDown } from "@/app/actions/actions";
 import { FormWrapper } from "./FormWrapper";
 import SubmitFormButton from "./SubmitFormButton";
 import { massUpdateStatusAttemptByLocationId } from "@/lib/automations/updateFromAppToSF";
-import toast from "react-hot-toast";
+
 import { useRef } from "react";
 
 
@@ -44,16 +44,16 @@ export default function MassUpdateStatusByLocationForm({ data }: Props) {
         const chosenSite = formData.get("site");
         const result = await massUpdateStatusAttemptByLocationId(chosenSite as string, currentStatusAttempt as string, newStatusAttempt as string);
 
-        if (!result) {
-            toast.error("Something went wrong");
-            return;
-        }
-        if (result.status === "success") {
-            toast.success(result.statusMessage as string);
-        }
-        if (result.status === "error") {
-            toast.error(result.error as string);
-        }
+        // if (!result) {
+        //     toast.error("Something went wrong");
+        //     return;
+        // }
+        // if (result.status === "success") {
+        //     toast.success(result.statusMessage as string);
+        // }
+        // if (result.status === "error") {
+        //     toast.error(result.error as string);
+        // }
     }
 
        
