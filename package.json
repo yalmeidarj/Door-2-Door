@@ -8,7 +8,6 @@
   "scripts": {
     "seed": "ts-node src/seed.ts",
     "dev": "next dev --turbopack",
-    "install": "npm install --legacy-peer-deps",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
