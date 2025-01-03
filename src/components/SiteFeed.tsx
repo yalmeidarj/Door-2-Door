@@ -33,7 +33,7 @@ export default function SiteFeed() {
     }
 
     return (
-        <div className="flex flex-col w-md  justify-center text-gray-600">
+        <div className="flex flex-col w-md h-screen items-center text-gray-600">
             {/* <PaginationControls
                 metadata={paginationControls}
             /> */}

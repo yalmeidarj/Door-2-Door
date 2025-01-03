@@ -29,15 +29,12 @@ export default function ShiftHandler({ userId }: { userId: string }) {
         );
     }
 
-
     return (
-        <div className="max-w-auto h-auto ">
-            <ClockOut
-                clockOutProps={{
-                    shiftId: shifts._id
-                }}
-            />
-        </div>
+        <ClockOut
+            clockOutProps={{
+                shiftId: shifts._id
+            }}
+        />
     )
 }
 
@@ -83,11 +80,11 @@ function ClockIn({ clockInProps }: { clockInProps: ClockInProps }) {
     };
 
     return (
-        <div className="">
+        <div className="mt-2">
             <div className="flex justify-between items-center gap-2 mb-2">
                 <FaClock className="text-night" />
                 <Select onValueChange={handleSiteSelect}>
-                    <SelectTrigger className="bg-night text-white w-[180px] h-[25px] text-sm hover:bg-slate-200 hover:text-night">
+                    <SelectTrigger className="bg-night text-white w-[120px] h-[25px] text-sm hover:bg-slate-200 hover:text-night">
                         <SelectValue placeholder="Clock In" />
                     </SelectTrigger>
                     <SelectContent className="bg-night text-white">
@@ -177,7 +174,8 @@ function ClockOut({ clockOutProps }: { clockOutProps: ClockOutProps }) {
 
 
     return (
-        <div className=" w-full flex flex-col mb-6 pt-5 h-full">
+        <div className="max-w-auto  ">
+        <div className=" w-full flex flex-col mb-6 pt-6 h-full ">
                 <div
                     className="text-sm flex justify-between w-full items-center"
                 >
@@ -210,6 +208,7 @@ function ClockOut({ clockOutProps }: { clockOutProps: ClockOutProps }) {
                 Clock Out
             </Button>
                 </div>
+        </div>
         </div>
     )
 }

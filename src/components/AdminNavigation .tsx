@@ -11,7 +11,7 @@ export default function AdminNavigation({children}: {children?: React.ReactNode}
     
 
     return (
-        <div className="container flex flex-col " >
+        <div className="w-full flex flex-col " >
             <div className={`self-end md:pl-14 md:pr-2 pl-4 pr-1 md:max-w-none max-w-xs w-full flex justify-end items-center mt-4 max-w-auto`}>
             <Link
                 href={`/org/${orgPathName}/admin`}

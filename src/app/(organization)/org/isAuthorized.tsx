@@ -148,29 +148,19 @@ const MobileSideBar: React.FC<MobileSideBarProps> = ({ orgName }) => {
     }, [lastScrollY]);
 
     return (
-        <div
-            className={`md:invisible visible text-xl fixed top-0 left-0 w-full bg-night text-white shadow-md transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'
-                }`}
-        >
+        <div className="text-xl fixed top-0 left-0 w-full bg-night text-white shadow-md">
             <div className="flex items-center justify-between p-4">
                 <div className="logo">
                     <Link
                         href="/logo"
                         aria-label="Logo"
                     >
-                        {/* <Image
-                            className="border-2 border-white rounded-full"
-                            src={logo}
-                            alt="Logo"
-                            width={50}
-                            height={50}
-                            /> */}
                         <h1 className="text-2xl text-white font-bold">
-                        {orgName.toUpperCase()}</h1>
+                            {orgName.toUpperCase()}
+                        </h1>
                     </Link>
                 </div>
-                <SidebarTrigger                
-                />
+                <SidebarTrigger />
             </div>
         </div>
     );

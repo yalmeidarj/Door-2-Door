@@ -179,7 +179,7 @@ export default function Form({ userId, houseId, info, shiftId  }: FormProps) {
         <>
             <form
                 onSubmit={handleSubmit}
-                className="p-4 mx-auto w-full sm:p-6 md:p-8 bg-gray-100 shadow-lg rounded-lg"
+                className="py-4  w-full sm:p-6 md:p-8 bg-gray-100 shadow-lg rounded-lg"
             >
                 {/* Hidden Inputs */}
                 <input type="hidden" id="id" name="id" value={propertyId} readOnly />
@@ -206,9 +206,9 @@ export default function Form({ userId, houseId, info, shiftId  }: FormProps) {
                                 value={typeValue}
                                 onValueChange={(val) => setTypeValue(val)}
                             >
-                                <div className="flex flex-row items-center gap-8 sm-w-full justify-between">
+                                <div className="flex flex-row items-center mx-3 sm-w-full justify-between">
                                     {constructionTypes.map((option) => (
-                                        <div key={option} className="flex flex-col  items-center  px-1">
+                                        <div key={option} className="flex flex-col  items-center">
                                             <Label htmlFor={option}>{option.slice(0, 4)}</Label>
                                             <RadioGroupItem value={option} id={option} />
                                         </div>
@@ -217,7 +217,7 @@ export default function Form({ userId, houseId, info, shiftId  }: FormProps) {
                             </RadioGroup>
                         </div>
                         <Separator orientation="horizontal" />
-                        <div className="w-full">
+                        <div className="w-full ">
                             <Select
                                 value={selectedStatus}
                                 onValueChange={(value) => setSelectedStatus(value)}

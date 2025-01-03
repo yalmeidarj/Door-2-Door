@@ -35,7 +35,7 @@ export default async function Page(props: {
    
     const routeLinks = [
         {
-            name: "Organization",
+            name: "Org",
             link: "/org"
             // link: `/org/site?id=${searchParams.id}`            
         },
@@ -44,12 +44,11 @@ export default async function Page(props: {
         },
     ]
     return (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center h-full">
             <PageHeader
                 routes={routeLinks}
             />
-            <SiteFeed />
-    
+            <SiteFeed />    
         </div>
     );
 }

@@ -45,10 +45,7 @@ export default async function Page(props: {
     const user = session.user
     
     const routeLinks = [
-        // {
-        //     name: "Sites",
-        //     link: `/org/site?id=${searchParams.id as string}`
-        // },
+
         {
             name: "Site Management",
         },

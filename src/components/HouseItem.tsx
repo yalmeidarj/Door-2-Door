@@ -13,20 +13,20 @@ export default function HouseItem({ house, activeShift, userId, shiftId }: { hou
                     <HouseCard house={house} />
             </DialogTrigger>
                     <DialogContent                    
-                className="h-full max-w-2xl "
+                className="h-full max-w-2xl bg-blue-100 p-0 m-0"
                     >
-                <ScrollArea className="h-full w-full m-3 pr-2 z-40">                                                    
-                <DialogHeader>
+                <ScrollArea className="h-full w-full p-0 m-0  pr-1 z-40">                                                    
+                    <DialogHeader className="m-4 p-4">
                         <DialogTitle>{house.streetNumber} {house.streetName}</DialogTitle>
-                    <DialogDescription>
+                        <DialogDescription >
                         {house.streetNumber} {house.streetName}
                     </DialogDescription>
                             </DialogHeader>
                             
-                <div className="mt-1">
+                    <div className="m-4 p-4">
                     <HouseDetails props={house} />
                 </div>
-                <div className="mt-2">
+                    <div className="w-full p-0 m-0">
                     {activeShift ? (
                         <Form
                         info={{
