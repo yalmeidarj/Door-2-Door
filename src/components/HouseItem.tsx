@@ -15,7 +15,7 @@ export default function HouseItem({ house, activeShift, userId, shiftId }: { hou
                     <DialogContent                    
                 className="h-full max-w-2xl bg-blue-100 p-0 m-0"
                     >
-                <ScrollArea className="h-full w-full p-0 m-0  pr-1 z-40">                                                    
+                <ScrollArea className="">                                                    
                     <DialogHeader className="m-4 p-4">
                         <DialogTitle>{house.streetNumber} {house.streetName}</DialogTitle>
                         <DialogDescription >

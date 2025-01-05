@@ -148,7 +148,7 @@ const MobileSideBar: React.FC<MobileSideBarProps> = ({ orgName }) => {
     }, [lastScrollY]);
 
     return (
-        <div className="text-xl fixed top-0 left-0 w-full bg-night text-white shadow-md">
+        <div className="text-xl fixed top-0 left-0 w-full bg-night text-white shadow-md md:hidden">
             <div className="flex items-center justify-between p-4">
                 <div className="logo">
                     <Link

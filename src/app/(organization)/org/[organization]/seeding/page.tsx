@@ -17,19 +17,17 @@ export default  function Page() {
         },
     ]
     return (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center h-screen">
             <PageHeader
                 routes={routeLinks}
             />
-        <div className="w-full container items-center justify-center">
-                <div className="container">                    
+        <div className="w-full  items-center justify-center">
+                   
                     <HousesNotInSalesForce />
                 {/* <HouseEditLog /> */}
-                </div>
                 
                 {/* <HouseLog /> */}
-        </div>
-        
+        </div>       
         </div>
     )
 }

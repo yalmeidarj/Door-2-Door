@@ -28,7 +28,7 @@ export default function HouseCard({ house }: HouseCardProps) {
     )
 
     return (
-        <Card className={`w-[300px] ${statusClass}`}>
+        <Card className={`w-full ${statusClass}`}>
             <CardHeader className="pb-2">
                 <div className="flex justify-between items-center">
                     <div className="flex items-center space-x-2">
