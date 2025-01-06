@@ -4,7 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 
-export default function AgentName({ id }: { id: string }) {
+export default function AgentName({ id }: { id: string | undefined }) {
     if (!id) {
         return <></>;
     }
