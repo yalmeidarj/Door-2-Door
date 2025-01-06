@@ -163,6 +163,7 @@ export default function PersonalShifts({ agentId }: { agentId: string }) {
                             shift={{
                                 _id: shift._id,                                
                                 siteID: shift.siteID,
+                                // userID: shift.userID,
                                 startingDate: shift.startingDate,
                                 finishedDate: shift.finishedDate,
                                 isFinished: shift.isFinished,

@@ -76,21 +76,21 @@ export default async function Page(props: {
 
     const secret = process.env.CONVEX_AUTH_ADAPTER_SECRET!;
     return (
-        <div className="w-full   ">
+        <div className="w-full min-h-[95vh]">
             <PageHeader
                 routes={routeLinks}
             />
-            <div className="container   "> 
+            <div className="container  "> 
                 <PermissionProvider
                     id={user.id as string}
                     secret={secret}
                 >                    
-                <AdminNavigation>
-                    <AccordionItems
-                        data={adminOptions}
-                        />
-                </AdminNavigation>
-                        </PermissionProvider>
+                    <AdminNavigation>
+                        <AccordionItems
+                            data={adminOptions}
+                            />
+                    </AdminNavigation>
+                </PermissionProvider>
             </div>
         </div>
     );

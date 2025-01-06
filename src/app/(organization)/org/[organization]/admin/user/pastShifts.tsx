@@ -18,38 +18,6 @@ import {
 import { useState } from "react";
 import PersonalShifts from "@/components/PersonalShifts";
 
-
-
-    
-
-function Shifts({ userId }: { userId: string }) {
-    // const [id, setId] = useState<string>("");
-    const shifts = useQuery(api.shiftLogger.getfinishedShiftsByAgentId, { agentId: userId });
-    
-    if (!shifts) {
-        return <div>Looking for Past Shifts...</div>;
-    }
-    if (shifts.length === 0) {
-        return <div>No Past Shifts...</div>;
-    }
-    return (
-        <form className="">
-            {/* {orgUsers?.map((user: any) => (
-                <>
-                    {user.name}
-                </>
-            ))} */}
-            {/* <PastShifts /> */}
-            {shifts.map((shift: Shift) => (
-                <ShiftCard
-                    shift={shift}
-                    diplayFinishedCard={true}
-                />
-            ))}
-        </form>
-    )
-}
-
 export default function PastShifts(
 ) {
     const [selectedAgent, setSelectedAgent] = useState<string>("");

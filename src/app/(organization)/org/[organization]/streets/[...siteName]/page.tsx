@@ -40,18 +40,12 @@ export default async function Page(props: {
     const routes = routeLinks(orgName);
     return (
         <div className="w-full ">
-            <div className="w-full flex flex-col items-center ">
+            <div className="w-full flex flex-col items-center md:min-h-[95vh]">
                 <PageHeader
                     routes={routes}
                 />
-                {orgName}
-                
-                <StreetFeed
-                    
+                <StreetFeed                    
                     id={searchParams.site as string}
-                    // orgId={searchParams.org as string}
-                // start={0}
-                // perPage={20}      
                 />
             </div>
         </div>

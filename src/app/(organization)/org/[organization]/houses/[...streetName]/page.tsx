@@ -57,7 +57,7 @@ export default async function Page(props: {
                 routes={routes}
             />
 
-            <div className="flex flex-col items-center p-4 text-black">                
+            <div className="flex flex-col items-center p-4 text-black md:min-h-[95vh]">                
                 <HousesFeed
                     streetId={searchParams.street as string}
                     userId={session.user.id as string}

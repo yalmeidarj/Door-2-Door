@@ -1,6 +1,8 @@
+
 import { format } from "date-fns";
 import { Shift } from "@/lib/Shift/types";
 import { DateTime } from "luxon";
+import AgentName from "./AgentName";
 
 export default function ShiftCard({ shift, diplayFinishedCard = true }: { shift: Shift, diplayFinishedCard: boolean   }) {
     const updatedHouses = shift.updatedHouses as number
@@ -41,6 +43,7 @@ export default function ShiftCard({ shift, diplayFinishedCard = true }: { shift:
           flex flex-col justify-between rounded-lg overflow-hidden border border-gray-600">
             <div className="flex flex-row justify-between items-center px-4 py-2 bg-gray-800 text-white">
                 {/* <div className="text-sm uppercase tracking-wide">{shift.Location.name}</div> */}
+                <AgentName id={shift.userID} />
                 <div className="text-sm text-gray-200 uppercase tracking-wide">
                     {format(new Date(shift.startingDate), 'MMM do')}
                 </div>

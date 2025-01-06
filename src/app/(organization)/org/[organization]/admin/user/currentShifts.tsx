@@ -19,7 +19,7 @@ export default function CurrentShifts() {
     }
     if (shifts.length === 0) {
         return <div>No Active Shifts for {orgName}</div>;
-    }
+    }    
     return (
         <form className="">
             {shifts.map((shift: Shift) => (

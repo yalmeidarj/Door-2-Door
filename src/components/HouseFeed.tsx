@@ -159,7 +159,7 @@ function HousesToBeVisited({
 
     if (houses?.length === 0) {        
         return (
-            <NoHouses />
+            <NoHouses />        
         );
     }
 
@@ -273,11 +273,13 @@ function HousesCustomStatus({
 
 function NoHouses() {
     return (
-        <div className="flex flex-col items-center">
+        <div className="w-full h-[60vh] ml-4">
+            <div className="flex flex-col items-center justify-center h-full">
             <h1 className="text-2xl font-bold mb-4">No Houses Found</h1>
             <p className="text-gray-600 text-center">
                 No houses found for the selected status.
             </p>
+        </div>
         </div>
     );
 }
