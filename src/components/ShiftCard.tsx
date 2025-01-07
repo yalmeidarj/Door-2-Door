@@ -24,15 +24,51 @@ export default function ShiftCard({ shift, diplayFinishedCard = true }: { shift:
     const endTime = DateTime.fromJSDate(new Date(shift.finishedDate ? shift.finishedDate : shift.startingDate));
 
 
-    const startTime = DateTime.fromJSDate(new Date(shift.startingDate));
+    // const startTime = DateTime.fromJSDate(new Date(shift.startingDate));
 
-    const shiftDurationInMilliseconds = endTime.diff(
-        startTime,
-        "milliseconds"
-    ).milliseconds;
-    let shiftDurationInMinutes = shiftDurationInMilliseconds / 1000 / 60; // convert from ms to minutes
+    const formatElapsedTime = (totalHours: number) => {
+        const hours = Math.floor(totalHours);
+        const minutes = Math.round((totalHours - hours) * 60);
 
-    let shiftDurationInHours = shiftDurationInMilliseconds / 1000 / 60 / 60; // convert from ms to hours
+        // Handle different display cases
+        if (hours > 0 && minutes > 0) {
+            return `${hours}:${minutes}h`;
+        } else if (hours > 0) {
+            return `${hours}h`;
+        } else if (minutes > 0) {
+            return `${minutes}m`;
+        } else {
+            return '0m';
+        }
+    };
+
+
+
+    const startTime = new Date(shift.startingDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const elapsedTimeInHours = shift.startingDate
+        ? (Date.now() - new Date(shift.startingDate).getTime()) / 3600000
+        : 0; // Ensure elapsed time is in hours
+
+    const elapsedTimeInMinutes = shift.startingDate
+        ? (Date.now() - new Date(shift.startingDate).getTime()) / 60000
+        : 0; // Ensure elapsed time is in minutes.
+
+    const houseYes = shift.updatedHousesFinal ?? 0
+    const housesOthers = shift.updatedHouses ?? 0
+    const housesNo = shift.updatedHousesFinalNo ?? 0
+
+    // Calculate pace
+    const totalHouses = houseYes + housesOthers + housesNo;
+    const pace = totalHouses / elapsedTimeInMinutes;
+
+    const formattedElapsedTime = formatElapsedTime(elapsedTimeInHours);
+    // const shiftDurationInMilliseconds = endTime.diff(
+    //     startTime,
+    //     "milliseconds"
+    // ).milliseconds;
+    // let shiftDurationInMinutes = shiftDurationInMilliseconds / 1000 / 60; // convert from ms to minutes
+
+    // let shiftDurationInHours = shiftDurationInMilliseconds / 1000 / 60 / 60; // convert from ms to hours
 
     return (
         <div className="bg-white shadow-md
@@ -49,7 +85,8 @@ export default function ShiftCard({ shift, diplayFinishedCard = true }: { shift:
                 </div>
                 <span>
                     <strong>
-                        {Math.floor(shiftDurationInHours)}h: {shiftDurationInMinutes.toFixed(0)}
+                        {/* {Math.floor(shiftDurationInHours)}h: {shiftDurationInMinutes.toFixed(0)} */}
+                        {formattedElapsedTime}
                     </strong>
                 </span>
             </div>
@@ -85,8 +122,9 @@ export default function ShiftCard({ shift, diplayFinishedCard = true }: { shift:
                         </div>
                         <div className="text-center">
                             <span className="block text-xs text-gray-600">Pace</span>
-                            <span className="block text-sm font-medium">{(allHouses/shiftDurationInMinutes).toFixed(2)}</span>
-                            {/* <span className="block text-sm font-medium">{shift.paceFinal || '0'}</span> */}
+                            {/* <span className="block text-sm font-medium">{(allHouses/shiftDurationInMinutes).toFixed(2)}</span> */}
+                            <span className="block text-sm font-medium">{pace.toFixed(1)}</span>
+                            
                         </div>
                     </div>
                 </div>
