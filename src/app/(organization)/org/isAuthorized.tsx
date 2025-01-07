@@ -16,6 +16,7 @@ export default function Authorized(
     const userId = id as Id<"users">;
     const pathname = usePathname()
 
+
     
     const user = useQuery(api.authAdapter.getUser, {
         id: userId,
@@ -152,7 +153,7 @@ const MobileSideBar: React.FC<MobileSideBarProps> = ({ orgName }) => {
             <div className="flex items-center justify-between p-4">
                 <div className="logo">
                     <Link
-                        href="/logo"
+                        href={`/org/${orgName}`}
                         aria-label="Logo"
                     >
                         <h1 className="text-2xl text-white font-bold">
