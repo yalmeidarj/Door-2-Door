@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "./ui/badge";
 import MapDialog from "./maps/MapDialog";
-import { sampleResultsData } from "@/lib/sampleData";
 import dynamic from "next/dynamic";
 
 
