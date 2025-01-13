@@ -30,7 +30,7 @@ export default function Page() {
                 <h1 className="text-2xl font-bold text-center my-8">
                 Batch Address Geocoder
             </h1>
-                <AddressGeocoder orgName={"tdx"} />
+                <AddressGeocoder  />
             </div>
         </div>
     )
