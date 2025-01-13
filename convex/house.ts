@@ -414,3 +414,19 @@ export const changeStatus = mutation({
     })
   },
 });
+
+export const editHouseCoordinate = mutation({
+  args: {
+    id: v.id("house"),
+    lat: v.number(),
+    lng: v.number(),
+  },
+  handler: async (ctx, { id, lat, lng }) => {
+    const latitude = lat.toString();
+    const longitude = lng.toString();
+    return await ctx.db.patch(id, {
+      latitude: latitude,
+      longitude: longitude,
+    });
+  },
+});

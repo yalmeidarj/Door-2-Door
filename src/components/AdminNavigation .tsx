@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BsReverseLayoutTextWindowReverse } from 'react-icons/bs';
-import { FaUserAlt, FaSalesforce } from 'react-icons/fa';
+import { FaUserAlt } from 'react-icons/fa';
 
 export default function AdminNavigation({children}: {children?: React.ReactNode}) {
     
@@ -35,15 +35,7 @@ export default function AdminNavigation({children}: {children?: React.ReactNode}
                 <span className="hidden sm:inline">User Management</span>
                 <span className="sm:hidden">Users</span>
             </Link>
-            {/* <Link
-                href={`/org/${orgPathName}/admin/sf-conciliation`}
-                className={`flex items-center justify-center gap-2 px-6 py-0.5 ${pathname === '/org/admin/sf-conciliation' ? 'bg-white' : 'bg-night'
-                    } rounded-t-lg`}
-            >
-                <FaSalesforce className="w-4 h-4" />
-                <span className="hidden sm:inline">SalesForce Conciliation</span>
-                <span className="sm:hidden">SF</span>
-            </Link> */}
+
             </div>
             <div className='w-full    rounded-sm'>            
             {children}

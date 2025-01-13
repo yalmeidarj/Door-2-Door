@@ -14,6 +14,19 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "./ui/badge";
+import MapDialog from "./maps/MapDialog";
+import { sampleResultsData } from "@/lib/sampleData";
+import dynamic from "next/dynamic";
+
+
+// Place this dynamic import outside of your component, at the top level
+const AddressMap = dynamic(
+    () => import('./maps/AddressMap'),
+    {
+        ssr: false,
+        loading: () => <div className="h-96 w-full bg-gray-100 animate-pulse rounded-lg" />
+    }
+);
 
 export default function HousesFeed({
     streetId,
@@ -55,6 +68,7 @@ export default function HousesFeed({
                     status={selectedFilter}
                 />
             )}
+            {/* <MapDialog results={sampleResultsData} /> */}
         </div>
     );
 }
@@ -150,29 +164,36 @@ function HousesToBeVisited({
     streetId: string;
     userId: string;
 }) {
-
     const activeShift = useQuery(api.shiftLogger.getActiveShiftByAgentId, { agentId: userId as Id<"users"> });
     const houses = useQuery(
         api.house.getActiveHousesByStreetId,
         { streetId: streetId as Id<"street"> }
     );
 
-    if (houses?.length === 0) {        
-        return (
-            <NoHouses />        
-        );
+    if (!houses || houses.length === 0) {
+        return <NoHouses />;
     }
-
 
     let currentShift = false;
-    if (activeShift?.siteID === houses?.[0].siteID) {
-        currentShift = true
+    if (activeShift?.siteID === houses[0].siteID) {
+        currentShift = true;
     }
 
-    
+    // Create mapsData with proper typing and handle undefined case
+    const mapsData = houses.map((house: any) => ({
+        address: `${house.streetName} ${house.streetNumber}`,
+        position: [
+            parseFloat(house.latitude),
+            parseFloat(house.longitude)
+        ] as [number, number],
+    })).filter(data =>
+        !isNaN(data.position[0]) &&
+        !isNaN(data.position[1])
+    );
+
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-1 sm:gap-y-1 sm:gap-8 justify-items-center">
-            {houses?.map((house: any) => (
+            {houses.map((house: any) => (
                 <div key={house._id} className="w-full max-w-sm">
                     <HouseItem
                         house={house}
@@ -182,6 +203,9 @@ function HousesToBeVisited({
                     />
                 </div>
             ))}
+            <MapDialog>
+                <AddressMap data={mapsData} />
+            </MapDialog>
         </div>
     );
 }
@@ -199,20 +223,29 @@ function HousesConsentFinal({
         { streetId: streetId as Id<"street"> }
     );
 
-    if (houses?.length === 0) {
-        return (
-            <NoHouses />
-        );
+    if (!houses || houses.length === 0) {
+        return <NoHouses />;
     }
 
     let currentShift = false;
-    if (activeShift?.siteID === houses?.[0].siteID) {
-        currentShift = true
+    if (activeShift?.siteID === houses[0].siteID) {
+        currentShift = true;
     }
+
+    const mapsData = houses.map((house: any) => ({
+        address: `${house.streetName} ${house.streetNumber}`,
+        position: [
+            parseFloat(house.latitude),
+            parseFloat(house.longitude)
+        ] as [number, number],
+    })).filter(data =>
+        !isNaN(data.position[0]) &&
+        !isNaN(data.position[1])
+    );
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-1 sm:gap-y-1 sm:gap-8 justify-items-center">
-            {houses?.map((house: any) => (
+            {houses.map((house: any) => (
                 <div key={house._id} className="w-full max-w-sm">
                     <HouseItem
                         house={house}
@@ -222,6 +255,9 @@ function HousesConsentFinal({
                     />
                 </div>
             ))}
+            <MapDialog>
+                <AddressMap data={mapsData} />
+            </MapDialog>
         </div>
     );
 }
@@ -233,41 +269,50 @@ function HousesCustomStatus({
 }: {
     streetId: string;
     userId: string;
-    status: string;        
-    }) {
-    
+    status: string;
+}) {
     const activeShift = useQuery(api.shiftLogger.getActiveShiftByAgentId, { agentId: userId as Id<"users"> });
     const houses = useQuery(
         api.house.getHousesByStreetIdAndStatus,
         { streetId: streetId as Id<"street">, status }
     );
 
-    if (houses?.length === 0) {
-        return (
-            <NoHouses />
-        );
+    if (!houses || houses.length === 0) {
+        return <NoHouses />;
     }
 
     let currentShift = false;
-    if (activeShift?.siteID === houses?.[0].siteID) {
-        currentShift = true
+    if (activeShift?.siteID === houses[0].siteID) {
+        currentShift = true;
     }
 
+    const mapsData = houses.map((house: any) => ({
+        address: `${house.streetName} ${house.streetNumber}`,
+        position: [
+            parseFloat(house.latitude),
+            parseFloat(house.longitude)
+        ] as [number, number],
+    })).filter(data =>
+        !isNaN(data.position[0]) &&
+        !isNaN(data.position[1])
+    );
+
     return (
-        <>            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-1 sm:gap-y-1 sm:gap-8 justify-items-center">
-                {houses?.map((house: any) => (
-                    <div key={house._id} className="w-full max-w-sm">
-                        <HouseItem
-                            house={house}
-                            activeShift={currentShift}
-                            userId={userId}
-                            shiftId={activeShift?._id as Id<"shiftLogger">}
-                        />
-                    </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-1 sm:gap-y-1 sm:gap-8 justify-items-center">
+            {houses.map((house: any) => (
+                <div key={house._id} className="w-full max-w-sm">
+                    <HouseItem
+                        house={house}
+                        activeShift={currentShift}
+                        userId={userId}
+                        shiftId={activeShift?._id as Id<"shiftLogger">}
+                    />
+                </div>
             ))}
-            </div>
-        </>
+            <MapDialog>
+                <AddressMap data={mapsData} />
+            </MapDialog>
+        </div>
     );
 }
 
