@@ -1,12 +1,13 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import type { LatLngExpression, LatLngBounds, LatLng } from 'leaflet';
+import type { LatLngExpression} from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
 interface AddressMarkerProps {
     position: [number, number];
     address: string;
+    statusAttempt?: string;
 }
 
 interface MapProps {
@@ -14,40 +15,55 @@ interface MapProps {
 }
 
 const AddressMap: React.FC<MapProps> = ({ data = [] }) => {
-    useEffect(() => {
-        // Fix for default markers in react-leaflet
-        (async function init() {
-            // @ts-ignore
-            delete L.Icon.Default.prototype._getIconUrl;
-            L.Icon.Default.mergeOptions({
-                iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-                iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-            });
-        })();
-    }, []);
+    // Function to determine marker color based on status
+    const getMarkerColor = (status?: string): string => {
+        switch (status) {
+            case 'Consent Final Yes':
+                return '#16a34a'; // Tailwind green-600
+            case 'Consent Final No':
+                return '#dc2626'; // Tailwind red-600
+            default:
+                return '#4f46e5'; // Tailwind indigo-600
+        }
+    };
+
+    // Create custom icon function
+    const createCustomIcon = (status?: string) => {
+        const color = getMarkerColor(status);
+        const iconSVG = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32">
+            <path d="M12 0C7.58 0 4 3.58 4 8c0 5.52 8 14.94 8 14.94s8-9.42 8-14.94c0-4.42-3.58-8-8-8z" fill="${color}" />
+            <circle cx="12" cy="8" r="4" fill="white" />
+        </svg>
+    `;
+
+        return new L.Icon({
+            iconUrl: `data:image/svg+xml;base64,${btoa(iconSVG)}`,
+            iconSize: [32, 32], // Icon size
+            iconAnchor: [16, 32], // Anchor point for the pin tip
+            popupAnchor: [0, -32], // Popup position relative to the marker
+        });
+    };
+
 
     // Default center (approximate center of Ontario) for empty state
     const defaultCenter: LatLngExpression = [49.5, -85];
     let center: LatLngExpression = defaultCenter;
-    let zoom =5;
+    let zoom = 5;
 
     // Calculate center and bounds if we have data
     if (data.length > 0) {
-        // Create bounds object to calculate center and zoom
         const bounds = new L.LatLngBounds(
             data.map(marker => L.latLng(marker.position[0], marker.position[1]))
         );
 
-        // Get center from bounds
         const boundsCenter = bounds.getCenter();
         center = [boundsCenter.lat, boundsCenter.lng];
 
-        // Adjust zoom based on bounds
         if (data.length === 1) {
-            zoom = 15; // Closer zoom for single marker
+            zoom = 15;
         } else {
-            zoom = 13; // Default zoom for multiple markers
+            zoom = 20;
         }
     }
 
@@ -75,9 +91,16 @@ const AddressMap: React.FC<MapProps> = ({ data = [] }) => {
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
                     {validMarkers.map((marker, idx) => (
-                        <Marker key={idx} position={marker.position}>
+                        <Marker
+                            key={idx}
+                            position={marker.position}
+                            icon={createCustomIcon(marker.statusAttempt)}
+                        >
                             <Popup>
                                 <p className="font-medium">{marker.address}</p>
+                                {marker.statusAttempt && (
+                                    <p className="text-sm text-gray-600">{marker.statusAttempt}</p>
+                                )}
                             </Popup>
                         </Marker>
                     ))}

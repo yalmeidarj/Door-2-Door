@@ -185,6 +185,7 @@ function HousesToBeVisited({
             parseFloat(house.latitude),
             parseFloat(house.longitude)
         ] as [number, number],
+        statusAttempt: house.statusAttempt,
     })).filter(data =>
         !isNaN(data.position[0]) &&
         !isNaN(data.position[1])
@@ -203,7 +204,8 @@ function HousesToBeVisited({
                 </div>
             ))}
             <MapDialog>
-                <AddressMap data={mapsData} />
+                <AddressMap
+                    data={mapsData} />
             </MapDialog>
         </div>
     );
@@ -237,6 +239,7 @@ function HousesConsentFinal({
             parseFloat(house.latitude),
             parseFloat(house.longitude)
         ] as [number, number],
+        statusAttempt: house.statusAttempt,
     })).filter(data =>
         !isNaN(data.position[0]) &&
         !isNaN(data.position[1])
@@ -291,6 +294,7 @@ function HousesCustomStatus({
             parseFloat(house.latitude),
             parseFloat(house.longitude)
         ] as [number, number],
+        statusAttempt: house.statusAttempt,
     })).filter(data =>
         !isNaN(data.position[0]) &&
         !isNaN(data.position[1])

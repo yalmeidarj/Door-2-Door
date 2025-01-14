@@ -4,6 +4,9 @@ import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import AddressMap from "./maps/AddressMap";
+import { Id } from "../../convex/_generated/dataModel";
+import MapDialog from "./maps/MapDialog";
 
 
 
@@ -15,9 +18,11 @@ export default function StreetFeed({ id }: {id: string, }) {
     const streetsInLocations = useQuery(api.street.getStreetsBySiteId, { siteID: id })
 
     
+    
     return (
         <>
-                <div className="container flex flex-row justify-center items-center flex-wrap justify gap-4  py-5">
+            <div className="container flex flex-col">
+            <div className="w-full flex flex-row justify-center items-center flex-wrap justify gap-4  py-5">
                 {streetsInLocations?.map((street) => (
                     <Link                        
                         href={`/org/${orgUrlFormat}/houses/${street.name}?street=${street._id}&site=${street.siteID}`}
@@ -31,14 +36,41 @@ export default function StreetFeed({ id }: {id: string, }) {
                         />
                     </Link >
                 ))}
-                <div>
-                    {/* {getVisitedHousesByStatusAttempt?.map((house) => (
-                        <div key={house._id}>
-                            {house.statusAttempt}
-                        </div>  
-                    ))} */}
+            </div>
+                    <div>
+                        
+                    {<SiteMap siteId={id} />}
+
                 </div>
             </div>
+        </>
+    )
+}
+
+function SiteMap({ siteId }: { siteId: string}) {
+    const allHousesInSite = useQuery(api.house.getHousesBySiteId, { siteId: siteId as Id<"site"> });
+
+    if (!allHousesInSite || !Array.isArray(allHousesInSite) || allHousesInSite.length === 0) {
+        
+        return <div>Loading...</div>;
+    }
+    // map through all houses in site, create addresses from street name and street number, latitude and longitude as lat and lng, and statusAttempt
+    const mapsData = allHousesInSite.map((house: any) => ({
+        address: `${house.streetName} ${house.streetNumber}`,
+        position: [
+            parseFloat(house.latitude),
+            parseFloat(house.longitude)
+        ] as [number, number],
+        statusAttempt: house.statusAttempt
+    }))
+
+    return (
+        <>
+            <MapDialog>
+                <AddressMap
+                    data={mapsData}
+                />
+            </MapDialog>
         </>
     )
 }
