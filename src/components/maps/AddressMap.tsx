@@ -20,6 +20,8 @@ const AddressMap: React.FC<MapProps> = ({ data = [] }) => {
         switch (status) {
             case 'Consent Final Yes':
                 return '#16a34a'; // Tailwind green-600
+            case 'Drop Type Unverified':
+                return '#fde047'; // Tailwind green-600
             case 'Consent Final No':
                 return '#dc2626'; // Tailwind red-600
             default:

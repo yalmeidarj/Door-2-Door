@@ -28,11 +28,11 @@ export const createNavItems = (orgName: string) => ({
             icon: <FaGear />,
             link: `/org/${orgName.replace(" ", "-") }/admin`
         },
-        {
-            name: `${splitCapitalize(orgName)}`,
-            icon: <FaMapLocationDot />,
-            link: `/org/${orgName.replace(" ", "-") }`
-        }
+        // {
+        //     name: `${splitCapitalize(orgName)}`,
+        //     icon: <FaMapLocationDot />,
+        //     link: `/org/${orgName.replace(" ", "-") }`
+        // }
     ],
     footer: [
         {

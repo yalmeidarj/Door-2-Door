@@ -16,6 +16,7 @@ import {
 import { Badge } from "./ui/badge";
 import MapDialog from "./maps/MapDialog";
 import dynamic from "next/dynamic";
+import SiteName from "@/app/(organization)/org/[organization]/houses/[...streetName]/siteName";
 
 
 // Place this dynamic import outside of your component, at the top level
@@ -45,7 +46,11 @@ export default function HousesFeed({
     return (
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Header Section */}
-            <Filters selectedFilter={selectedFilter} onFilterSelect={handleFilterSelect} />
+            <Filters
+                siteId={streetId}
+                selectedFilter={selectedFilter}
+                onFilterSelect={handleFilterSelect}
+            />
             {/* Grid Section */}
             {selectedFilter === "To be visited" && (
                 <HousesToBeVisited
@@ -95,9 +100,11 @@ const STATUS_ATTEMPTS = [
 function Filters({
     selectedFilter,
     onFilterSelect,
+    siteId,
 }: {
     selectedFilter: string;
-    onFilterSelect: (filter: string) => void;
+        onFilterSelect: (filter: string) => void;
+        siteId: string;
 }) {
     // selectedFilter is a single string representing the currently selected status
     // Allow user to choose from PREDEFINED_STATUSES or from STATUS_ATTEMPTS (custom)
@@ -107,7 +114,7 @@ function Filters({
     };
 
     return (
-        <div className="container rounded-md bg-night text-white mx-auto ml-4 flex flex-row-wrap items-center justify-between py-2">
+        <div className="container relative rounded-md min-h-[45px] bg-night text-white mx-auto ml-4 flex flex-row-wrap items-center justify-between py-2">
             <div className="w-full flex gap-2 items-center">
                 <DropdownMenu>
                     <DropdownMenuTrigger className="group flex items-center gap-2 text-xs text-muted-foreground hover:text-white">
@@ -139,18 +146,29 @@ function Filters({
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-
-            <div className="flex gap-2 w-full items-center justify-end p-2">
+            <div className="max-w-max absolute top-0 right-0 ">
+                <div className="relative w-full   flex flex-col justify-end">
                 {selectedFilter && (
-                    <Badge
-                        variant="secondary"
-                        className={`text-xs mr-2 cursor-pointer transition-colors ${PREDEFINED_STATUSES.includes(selectedFilter) ? "bg-yellow-200" : "bg-gray-200"
-                            }`}
-                        onClick={() => onFilterSelect(selectedFilter)} 
+                    <span
+                            className={`text-xs self-end text-night rounded-bl-md pr-2 pl-1 rounded-tr-sm p-0.5 relative top-0 right-0 transition-colors ${PREDEFINED_STATUSES.includes(selectedFilter) ? "bg-yellow-300" : "bg-gray-200"
+                                }`}
                     >
-                        {selectedFilter}
-                    </Badge>
+                    {selectedFilter}
+                    </span>
+                    // <Badge
+                    //     variant="secondary"
+                    //     className={`text-xs mr-2 cursor-pointer transition-colors ${PREDEFINED_STATUSES.includes(selectedFilter) ? "bg-yellow-200" : "bg-gray-200"
+                    //         }`}
+                    //     onClick={() => onFilterSelect(selectedFilter)} 
+                    // >
+                    // </Badge>
                 )}
+                <SiteName
+                    id={siteId}
+                    byStreetId={true}
+                        className="text-white mr-2"
+                />
+            </div>
             </div>
         </div>
     );

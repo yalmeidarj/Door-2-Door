@@ -43,7 +43,23 @@ export const getSiteById = query({
     return await ctx.db
       .query("site")
       .filter((q) => q.eq(q.field("_id"), id))
-      .collect();
+      .first();
+  },
+});
+export const getSiteByStreetId = query({
+  args: { id: v.string() },
+  handler: async (ctx, { id }) => {
+    const street = await ctx.db
+      .query("street")
+      .filter((q) => q.eq(q.field("_id"), id))
+      .first();
+    if (!street) {
+      return null;
+    }
+    return await ctx.db
+      .query("site")
+      .filter((q) => q.eq(q.field("_id"), street.siteID))
+      .first();
   },
 });
 export const getActiveSiteById = query({
