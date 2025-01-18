@@ -43,4 +43,6 @@ authWithJwt.ts
 
 /ignore
 
+new-env.txt
+
 railway.session.sql

@@ -1,5 +1,5 @@
 "use client";
-import {  useState } from "react";
+import { useState } from "react";
 import SubmitFormButton from "./SubmitFormButton";
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -34,19 +34,19 @@ type FormProps = {
     };
 };
 
-export default function Form({ userId, houseId, info, shiftId  }: FormProps) {    
+export default function Form({ userId, houseId, info, shiftId }: FormProps) {
 
     const constructionTypes = ["Easy", "Moderate", "Hard"];
     const createNewEditByHouseId = useMutation(api.houseEditLog.createNewEditByHouseId)
     const updateShift = useMutation(api.shiftLogger.incrementShiftCounter)
     const incrementUpdatedHouses = useMutation(api.shiftLogger.incrementUpdatedHouses)
-    const incrementUpdatedHousesFinal  = useMutation(api.shiftLogger.incrementUpdatedHousesFinal)
+    const incrementUpdatedHousesFinal = useMutation(api.shiftLogger.incrementUpdatedHousesFinal)
     const incrementUpdatedHousesFinalNo = useMutation(api.shiftLogger.incrementUpdatedHousesFinalNo)
     // State for all fields
     const [propertyId, setPropertyId] = useState(houseId.toString());
     const [agentId] = useState(userId);
     const [agent, setAgentName] = useState("No Agent Name");
-    
+
     const [currentShiftId, setCurrentShiftId] = useState<string>(shiftId);
 
     const [typeValue, setTypeValue] = useState<string>(" ");
@@ -88,7 +88,7 @@ export default function Form({ userId, houseId, info, shiftId  }: FormProps) {
 
         if (selectedStatus === "Consent Final Yes") {
             const result = ConsentYesSchema.safeParse(newObject);
-            if (result.success) {                
+            if (result.success) {
                 const houseUpdate = await createNewEditByHouseId(newObject);
                 if (houseUpdate) {
                     toast.success("House Updated Successfully");
@@ -120,7 +120,7 @@ export default function Form({ userId, houseId, info, shiftId  }: FormProps) {
                     toast.success("House Updated Successfully");
                     let shift = null
                     if (selectedStatus === "Consent Final No") {
-                        
+
                         shift = await incrementUpdatedHousesFinalNo({
                             id: shiftId as Id<"shiftLogger">
                         })
@@ -163,7 +163,7 @@ export default function Form({ userId, houseId, info, shiftId  }: FormProps) {
         setNotes("");
     };
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {        
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         if (selectedStatus === "Consent Final Yes") {
             setField("updatedHousesFinal");
         } else if (selectedStatus === "Consent Final No") {
@@ -324,6 +324,3 @@ function FormItem({
         />
     );
 }
-
-
-

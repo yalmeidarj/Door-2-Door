@@ -74,10 +74,7 @@ const Table: React.FC<TableProps> = ({ data, siteId }) => {
                         'Email',
                         'Type',
                         'Status',
-                        // 'Status Attempt',
-                        // 'Last Update',
                         'Notes',
-                        // 'Log',
                     ]}
                 />
                 <tbody>
@@ -87,8 +84,7 @@ const Table: React.FC<TableProps> = ({ data, siteId }) => {
                                 <CornerNoteButton
                                     houseId={row._id}
                                 />
-                            </TableCell>
-                                {/* <ConciliateWithSFButton houseId={row._id} status={row.isConcilatedInSalesForce} /> */}
+                            </TableCell>                                
 
                             <TableCell text={row.lastName} />
                             <TableCell text={row.name} />
@@ -116,7 +112,9 @@ const Table: React.FC<TableProps> = ({ data, siteId }) => {
                                 <div className="flex flex-col justify-between ">
                                     
                                     <Dialog>
-                                        <DialogTrigger>View House History</DialogTrigger>
+                                        <DialogTrigger
+                                            className="text-sm text-gray-200 bg-night hover:text-gray-900 hover:bg-sun py-1 px-2 rounded-md"
+                                        >View House History</DialogTrigger>
                                         <DialogContent>
                                             <DialogHeader>                                                
                                                     <DialogTitle>All House History</DialogTitle>

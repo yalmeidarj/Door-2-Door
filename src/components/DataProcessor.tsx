@@ -217,6 +217,11 @@ const DataProcessor: React.FC<DataProcessorProps> = ({ update = false }) => {
                     )}
                 </CardContent>
             </Card>
+            {processedData && (
+                <>
+                { JSON.stringify(processedData, null, 2) }
+                </>
+            )}
         </div>
     );
 };
