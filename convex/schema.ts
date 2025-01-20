@@ -133,7 +133,7 @@ export default defineSchema({
     streetID: v.string(), // Street ID the house belongs to
     siteID: v.string(), // Location ID the house belongs to
     streetNumber: v.string(), // Street number
-    // TODO [HIGH]:MAKE NOT AN OPTIONAL VALUE
+    // TODO [LOW]:MAKE NOT AN OPTIONAL VALUE
     streetName: v.optional(v.string()), // Street number
     lastName: v.optional(v.string()),
     name: v.optional(v.string()),

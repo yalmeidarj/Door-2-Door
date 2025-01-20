@@ -1,7 +1,8 @@
 import { v } from "convex/values";
-import { query } from "./_generated/server";
+import { query, QueryCtx } from "./_generated/server";
 import { mutation } from "./_generated/server";
 import { paginationOptsValidator } from "convex/server";
+import { Id } from "./_generated/dataModel";
 
 
 export const getHousesByStreetIdAndStatus = query({
@@ -332,6 +333,156 @@ export const getVisitedHousesByStatusAttempt = query({
       .collect();
   },
 });
+//------------ ------------//
+
+//------------ Stats by org ID ------------//
+
+const HOUSE_STATUS = {
+  CONSENT_FINAL_YES: "Consent Final Yes",
+  CONSENT_FINAL_NO: "Consent Final No",
+  SITE_VISIT_REQUIRED: "Site Visit Required",
+  VISITED_STATUSES: [
+    "Door Knock Attempt 1",
+    "Door Knock Attempt 2",
+    "Door Knock Attempt 3",
+    "Door Knock Attempt 4",
+    "Door Knock Attempt 5",
+    "Door Knock Attempt 6",
+    "Site Visit Required",
+    "Drop Type Unverified",
+    "Home Does Not Exist",
+  ],
+} as const;
+
+// Helper function to get houses by site ID and status
+export async function getHousesByStatus(
+  ctx: QueryCtx,
+  siteId: string,
+  status: string | string[]
+) {
+  const query = ctx.db
+    .query("house")
+    .filter((q) => q.eq(q.field("siteID"), siteId));
+
+  if (Array.isArray(status)) {
+    return await query
+      .filter((q) =>
+        q.or(...status.map((s) => q.eq(q.field("statusAttempt"), s)))
+      )
+      .collect();
+  }
+
+  return await query
+    .filter((q) => q.eq(q.field("statusAttempt"), status))
+    .collect();
+}
+
+// Get all houses for a site
+// export const getHousesBySiteId = query({
+//   args: { siteId: v.string() },
+//   handler: async (ctx, { siteId }) => {
+//     return await ctx.db
+//       .query("house")
+//       .filter((q) => q.eq(q.field("siteID"), siteId))
+//       .collect();
+//   },
+// });
+
+//TODO[HIGH]: Use this function for SiteCard.tsx for better performance
+// Get house statistics for a site
+export const getHouseStatsBySiteId = query({
+  args: { siteId: v.string() },
+  handler: async (ctx, { siteId }) => {
+    // Use Promise.all to run queries concurrently
+    const [finalYes, finalNo, visitRequest] = await Promise.all([
+      getHousesByStatus(ctx, siteId, HOUSE_STATUS.CONSENT_FINAL_YES),
+      getHousesByStatus(ctx, siteId, HOUSE_STATUS.CONSENT_FINAL_NO),
+      getHousesByStatus(ctx, siteId, HOUSE_STATUS.SITE_VISIT_REQUIRED),
+      // getHousesByStatus(ctx, siteId, HOUSE_STATUS.VISITED_STATUSES),
+    ]);
+
+    return {
+      totalHouses:
+        finalYes.length + finalNo.length + visitRequest.length ,
+      consentYes: finalYes.length,
+      consentNo: finalNo.length,
+      visitRequired: visitRequest.length,
+      // visited: visited.length,
+    };
+  },
+});
+
+// Get aggregated statistics for an organization
+export const getHouseStatsByOrgId = query({
+  args: {
+    orgId: v.string(),
+    orgName: v.string(),
+  },
+  handler: async (ctx, { orgId }) => {
+    // Get all sites for the organization
+    const sites = await ctx.db
+      .query("site")
+      .filter((q) =>
+        q.or(q.eq(q.field("orgID"), orgId), q.eq(q.field("orgID"), orgId)))
+      .collect();
+
+    // Get statistics for each site concurrently
+    const siteStats = await Promise.all(
+      sites.map(async (site) => {
+        const stats = await getHouseStatsBySiteId(ctx, { siteId: site._id });
+        return {
+          siteId: site._id,
+          siteName: site.name,
+          ...stats,
+        };
+      })
+    );
+
+    // Calculate organization-wide totals
+    const orgTotals = siteStats.reduce(
+      (acc, site) => ({
+        totalHouses: acc.totalHouses + site.totalHouses,
+        consentYes: acc.consentYes + site.consentYes,
+        consentNo: acc.consentNo + site.consentNo,
+        visitRequired: acc.visitRequired + site.visitRequired,
+        // visited: acc.visited + site.visited,
+      }),
+      {
+        totalHouses: 0,
+        consentYes: 0,
+        consentNo: 0,
+        visitRequired: 0,
+        // visited: 0,
+      }
+    );
+
+    return {
+      orgTotals,
+      siteStats,
+    };
+  },
+});
+
+// export const getHouseStatsByOrgId = query({
+//   args: { orgId: v.string() }, // Use v.string() for userId
+//   handler: async (ctx, { orgId }) => {
+//     const orgSites = await ctx.db
+//       .query("site")
+//       .filter((q) => q.eq(q.field("orgID"), orgId))
+//       .collect();
+//     const siteIds = orgSites.map((site) => site._id);
+//     // get all houses by siteIds, using getHousesBySiteId
+//     const houses = siteIds.map(async (siteId) => {
+//       const finalYes = await getHousesConsentYesBySiteId(ctx, { siteId });
+//       const finalNo = await getHousesConsentNoBySiteId(ctx, { siteId });
+//       const visitRequest = await getHousesVisitRequestBySiteId(ctx, { siteId });
+//       const visited = await getVisitedHousesByStatusAttempt(ctx, { siteId });
+//       return { siteId, finalYes, finalNo, visitRequest, visited };
+//     })
+//     return houses;
+//   },
+// });
+
 //------------ ------------//
 
 const houseArgs = {

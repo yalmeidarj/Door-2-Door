@@ -12,6 +12,7 @@ import { auth } from "@/auth";
 import UpdateActiveSite from "@/components/dashboard-management/UpdateActiveSite";
 import DataProcessor from "@/components/DataProcessor";
 import AddressGeocoder from "@/components/AddressGeocoder";
+import InfoFeed from "@/components/info-feed/infoFeed";
 
 
 type Params = Promise<{ organization: string }>
@@ -78,6 +79,11 @@ export default async function Page(props: {
         },
         {
             id: 5,
+            name: "View Site Info",
+            component: <InfoFeed  />
+        },
+        {
+            id: 6,
             name: "Delete Site",
             component: <div>Delete Site</div>
         }

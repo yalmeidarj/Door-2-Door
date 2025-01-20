@@ -37,6 +37,15 @@ export const getActiveSitesByOrgId = query({
       .collect();
   },
 });
+export const getAllSitesByOrgId = query({
+  args: { orgID: v.string() }, 
+  handler: async (ctx, { orgID }) => {
+    return await ctx.db
+      .query("site")
+      .filter((q) => q.eq(q.field("orgID"), orgID))      
+      .collect();
+  },
+});
 export const getSiteById = query({
   args: { id: v.string() },
   handler: async (ctx, { id }) => {
