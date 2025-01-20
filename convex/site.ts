@@ -12,6 +12,26 @@ export const getActiveSitesByUserId = query({
       .collect();
   },
 });
+
+export const switchSiteStatus = mutation({
+  args: { siteID: v.string() },
+  handler: async (ctx, { siteID }) => {
+    const site =  await ctx.db
+      .query("site")
+      .filter((q) => q.eq(q.field("_id"), siteID))
+      .first();
+
+    if (!site) {
+      return;
+    }
+    const updatedSite = await ctx.db.patch(site._id, {
+      isActive: !site.isActive,
+    });
+
+    return updatedSite;
+  },
+});
+
 export const getActiveSitesByOrgName = query({
   args: { orgName: v.string() }, 
   handler: async (ctx, { orgName }) => {
@@ -23,6 +43,26 @@ export const getActiveSitesByOrgName = query({
       return [];
     }
     return await getActiveSitesByOrgId(ctx, { orgID: org._id });
+  },
+})
+export const getAllSitesByOrgName = query({
+  args: { orgName: v.string() }, 
+  handler: async (ctx, { orgName }) => {
+    const org = await ctx.db
+      .query("organization")
+      .filter((q) => q.eq(q.field("name"), orgName))
+      .first();
+    if (!org) {
+      return
+    }
+    const sites = await ctx.db.query("site")
+      .filter((q) => q.eq(q.field("orgID"), org._id))
+      .collect();
+
+    // const sites = awaitorg.map((o) =>
+    //   getActiveSitesByOrgId(ctx, { orgID: o._id })
+    // );
+    return sites;
   },
 })
 

@@ -13,6 +13,7 @@ import UpdateActiveSite from "@/components/dashboard-management/UpdateActiveSite
 import DataProcessor from "@/components/DataProcessor";
 import AddressGeocoder from "@/components/AddressGeocoder";
 import InfoFeed from "@/components/info-feed/infoFeed";
+import SiteSwitch from "@/components/SiteSwitch";
 
 
 type Params = Promise<{ organization: string }>
@@ -67,11 +68,11 @@ export default async function Page(props: {
             // component: <UpdateActiveSite orgName={orgName} />
             component: <DataProcessor update/>
         },
-        {
-            id: 3,
-            name: "Switch Site Status (active/inactive)",
-            component: <div>Switch Site Status (active/inactive)</div>
-        },
+        // {
+        //     id: 3,
+        //     name: "Switch Site Status (active/inactive)",
+        //     component: <SiteSwitch />
+        // },
         {
             id: 4,
             name: "Get lat/long from address",
@@ -82,11 +83,11 @@ export default async function Page(props: {
             name: "View Site Info",
             component: <InfoFeed  />
         },
-        {
-            id: 6,
-            name: "Delete Site",
-            component: <div>Delete Site</div>
-        }
+        // {
+        //     id: 6,
+        //     name: "Delete Site",
+        //     component: <div>Delete Site</div>
+        // }
     ] 
 
     const secret = process.env.CONVEX_AUTH_ADAPTER_SECRET!;

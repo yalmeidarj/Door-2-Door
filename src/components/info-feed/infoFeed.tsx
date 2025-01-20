@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { usePathname } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import LoadingSpinner from "../LoadingSpinner";
+import SiteSwitchButton from "../SiteSwitch";
 
 // Assuming this is the type of your successful response
 type LocationStats = {
@@ -40,9 +41,6 @@ export default function InfoFeed() {
     const sites = useQuery(api.site.getAllSitesByOrgId, { orgID: orgId });
 
 
-
-
-
     // const allStats = await Promise.all(fetchStatsPromises);
 
     function getCardClassName(number: number) {
@@ -58,12 +56,15 @@ export default function InfoFeed() {
 
 
     return (
+            <>
+            <InfoConditionalFormat />
         <div className='flex flex-wrap w-full gap-2.5 mx-auto items-center '>
             {sites?.map((site) => (
                 <InfoLocationCard key={site._id} siteId={site._id} />
             ))
-            }
+        }
         </div>
+        </>
     );
 }
 function calculatePercentage(portion: number, total: number): number {
@@ -100,12 +101,23 @@ function InfoLocationCard({ siteId }: { siteId: string }) {
 
     return (
         <div className="p-3 mb-6 bg-white shadow rounded-lg text-sm border border-gray-200 ">
+            
+            
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold">{site.name}</h2>
-                {site.isActive && (
-                    <span className="flex items-center text-xs text-red-500">
-                        <span className="h-2 w-2 bg-red-500 rounded-full mr-0.5"></span>
-                        Not Active
+                {site.isActive === true ? (
+                    <span className="flex items-center text-xs text-green-500">
+                        {/* <span className="h-2 w-2 bg-green-500 rounded-full mr-0.5"></span> */}
+                        <SiteSwitchButton
+                            className="data-[state=checked]:bg-green-700"
+                            site={site} />
+                    </span>
+                ): (
+                    <span className="flex items-center text-xs text-red-700">
+                        {/* <span className="h-2 w-2 bg-red-500 rounded-full mr-0.5"></span> */}
+                            <SiteSwitchButton
+                                className="data-[state=unchecked]:bg-red-400"
+                                site={site} />                        
                     </span>
                 )}
             </div>
@@ -139,10 +151,15 @@ function InfoLocationCard({ siteId }: { siteId: string }) {
                     <p className="font-medium text-gray-900">{location.totalHousesVisited} | {location.percentageHousesVisited}%</p>
                 </div> */}
 
-                {/* <div className="flex justify-between">
+                <div className="flex justify-between">
                     <p>Left to Visit:</p>
-                    <p className="font-medium text-gray-900">{siteStats.toBeVisited}</p>
-                </div> */}
+                    <p className="font-medium text-gray-900">{siteStats.totalHouses - siteStats.visited }</p>
+                    {/* <p className="font-medium text-gray-900">{siteStats.totalHouses} - {siteStats.visited}</p> */}
+                </div>
+                <div className="flex justify-between">
+                    <p>Visited:</p>
+                    <p className="font-medium text-gray-900">{siteStats.visited ?? 0}</p>
+                </div>
 
                 <div className="flex justify-between">
                     <p>Visit Required:</p>
@@ -162,16 +179,15 @@ function InfoLocationCard({ siteId }: { siteId: string }) {
 
 function InfoConditionalFormat() {
     return (
-        <div className="p-2 mb-4 bg-gray-100 shadow rounded-lg text-xs">
-            <h3 className="text-md font-semibold mb-2">Conditional Format Rules</h3>
+        <div className="p-2 mb-4 flex max-w-max justify-center gap-4 bg-gray-100 shadow rounded-lg text-xs">
             <div className="flex items-center mb-1">
                 <span className="inline-block w-4 h-4 bg-green-500 rounded mr-2"></span>
                 <span className="text-gray-700">{'>'} 83%</span>
-            </div>
+            </div> |
             <div className="flex items-center mb-1">
                 <span className="inline-block w-4 h-4 bg-yellow-500 rounded mr-2"></span>
                 <span className="text-gray-700">70% - 83%</span>
-            </div>
+            </div> |
             <div className="flex items-center">
                 <span className="inline-block w-4 h-4 bg-red-500 rounded mr-2"></span>
                 <span className="text-gray-700">{'<'} 70%</span>
