@@ -1,8 +1,16 @@
+"use client";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { RiDeleteBack2Fill } from "react-icons/ri";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
 import { Textarea } from "./ui/textarea";
+
+// 1) Import the convex mutations
+import { useMutation, useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { usePathname } from "next/navigation";
+
+/** Types */
 
 interface House {
     streetNumber: string;
@@ -26,46 +34,177 @@ interface ProcessedData {
 }
 
 type DataProcessorProps = {
-    /** 
-     * Switches the component between two modes 
-     * (for example, "Data Processor" vs "Update Data Processor"). 
+    /**
+     * Switches the component between two modes
+     * (for example, "Data Processor" vs "Update Data Processor").
      */
     update?: boolean;
+
 };
 
 const DataProcessor: React.FC<DataProcessorProps> = ({ update = false }) => {
-    const [inputText, setInputText] = useState('');
+    const pathName = usePathname();
+    const orgName = pathName?.split("/")[2]?.replace("%20", " ").replace("-", " ");
+    // get org using orgName
+    const org = useQuery(api.organization.getOrgByName, { name: orgName });
+    if (!org) {
+        return (<div>Loading...</div>)
+    }
+    const orgId = org._id;
+    const [inputText, setInputText] = useState("");
     const [processedData, setProcessedData] = useState<ProcessedData | null>(null);
 
-    // Stubbed-out: define your own create or update functionality
-    const createNewSite = () => {
-        console.log('Creating new site with processed data:', processedData);
-        // TODO[HIGH] Add logic to create a new site
-        // ... custom logic here
+    // 2) States for UI feedback
+    const [uploadError, setUploadError] = useState<string | null>(null);
+    const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
+    const [isUploading, setIsUploading] = useState<boolean>(false);
+
+    // 3) Create our mutations
+    const createNewSiteMutation = useMutation(api.site.createNewSite);
+    const createNewStreetMutation = useMutation(api.street.createNewStreet);
+    const createNewHouseMutation = useMutation(api.house.createNewHouse);
+
+    const updateSite = async () => {
+        console.log("Updating site with processed data:", processedData);
+        // TODO: Add your update logic
+        if (!processedData) return;
+
+        setIsUploading(true);
+        setUploadError(null);
+        setLoadingMessage("Starting update process...");
+
+        try {
+            if (!orgId) {
+                throw new Error("No orgId provided. Please supply an orgId as a prop or fetch it.");
+            }
+
+            // 1) Update the Site
+            setLoadingMessage("Updating site...");
+            // await updateSiteMutation({
+            //     name: processedData.name,
+            //     orgID: orgId,
+            // });
+            setLoadingMessage(`Site "${processedData.name}" updated successfully.`);
+        } catch (err: any) {
+            console.error(err);
+            setUploadError(err.message || "An error occurred during upload.");
+        } finally {
+            setIsUploading(false);
+        }
+    }
+
+
+    /**
+     * Create a new site, with streets & houses, following the same pattern
+     */
+    const createNewSite = async () => {
+        if (!processedData) return;
+
+        setIsUploading(true);
+        setUploadError(null);
+        setLoadingMessage("Starting creation process...");
+
+        try {
+            if (!orgId) {
+                throw new Error("No orgId provided. Please supply an orgId as a prop or fetch it.");
+            }
+
+            // 1) Create the Site
+            setLoadingMessage("Creating site...");
+            const newSiteId = await createNewSiteMutation({
+                name: processedData.name,
+                orgID: orgId,
+            });
+            setLoadingMessage(`Site "${processedData.name}" created successfully.`);
+
+            // 2) Create all Streets in parallel
+            setLoadingMessage("Creating streets...");
+            const streetPromises = processedData.streets.map(async (streetName) => {
+                setLoadingMessage(`Creating street: ${streetName}`);
+                const streetId = await createNewStreetMutation({
+                    name: streetName,
+                    siteId: newSiteId.toString(),
+                });
+                return { streetName, streetId };
+            });
+
+            const streetResults = await Promise.all(streetPromises);
+
+            // 3) Build a map from streetName -> streetId
+            const streetNameToIdMap = new Map<string, string>();
+            streetResults.forEach(({ streetName, streetId }) => {
+                streetNameToIdMap.set(streetName, streetId);
+            });
+            setLoadingMessage("All streets created successfully.");
+
+            // 4) Create Houses in parallel
+            setLoadingMessage("Creating houses...");
+            const housePromises = processedData.houses.map(async (house) => {
+                const streetId = streetNameToIdMap.get(house.street);
+                if (!streetId) {
+                    throw new Error(`Street not found for name: ${house.street}`);
+                }
+                setLoadingMessage(
+                    `Creating house at ${house.streetNumber} ${house.street}...`
+                );
+
+                let status = house.statusAttempt;
+                if(house.statusAttempt === "Consent Final"){
+                    status = house.statusAttempt + " " + house.consent;
+                }
+
+                await createNewHouseMutation({
+                    streetID: streetId,
+                    siteID: newSiteId,
+                    streetName: house.street,
+                    streetNumber: house.streetNumber,
+                    name: house.name,
+                    lastName: house.lastName,
+                    phone: house.phone,
+                    email: house.email,
+                    type: house.type,
+                    notes: house.notes,
+                    statusAttempt: status,
+                    consent: house.consent,
+                    isConcilatedInSalesForce: true,
+                    latitude: "",
+                    longitude: "",
+                    lastUpdatedBy: "",
+                });
+            });
+
+            await Promise.all(housePromises);
+
+            setLoadingMessage("All data uploaded successfully.");
+            console.log("All data uploaded successfully.");
+        } catch (err: any) {
+            console.error(err);
+            setUploadError(err.message || "An error occurred during upload.");
+        } finally {
+            setIsUploading(false);
+        }
     };
 
-    const updateSite = () => {
-        console.log('Updating site with processed data:', processedData);
-        // TODO[HIGH] Add logic to update an existing site
-        // ... custom logic here
-    };
-
+    /**
+     * Processes the raw text input to produce a "processedData" object,
+     * the same way you had it before.
+     */
     const processData = () => {
         const lines = inputText
             .trim()
-            .split('\n')
-            .filter(line => line.trim());
+            .split("\n")
+            .filter((line) => line.trim());
 
         const houses: House[] = [];
         const streetsSet = new Set<string>();
 
-        let siteName = '';
+        let siteName = "";
 
-        lines.forEach(line => {
+        lines.forEach((line) => {
             // Handle both tab and pipe delimited data
-            const parts = line.includes('|')
-                ? line.split('|').filter(part => part.trim())
-                : line.split('\t').filter(part => part.trim());
+            const parts = line.includes("|")
+                ? line.split("|").filter((part) => part.trim())
+                : line.split("\t").filter((part) => part.trim());
 
             if (parts.length >= 4) {
                 const fullAddress = parts[0].trim();
@@ -80,26 +219,25 @@ const DataProcessor: React.FC<DataProcessorProps> = ({ update = false }) => {
 
                 if (addressMatch) {
                     const [, streetNumber, streetName] = addressMatch;
-
                     streetsSet.add(streetName);
 
-                    let newConsent = '';
-                    if (consent === 'Go To   Follow Up') {
-                        newConsent = '';
+                    let newConsent = "";
+                    if (consent === "Go To   Follow Up") {
+                        newConsent = "";
                     } else {
                         newConsent = consent;
                     }
 
                     houses.push({
                         streetNumber,
-                        lastName: '',
-                        name: '',
-                        phone: '',
-                        email: '',
-                        notes: '',
+                        lastName: "",
+                        name: "",
+                        phone: "",
+                        email: "",
+                        notes: "",
                         statusAttempt: status,
                         consent: newConsent,
-                        type: '',
+                        type: "",
                         street: streetName,
                     });
                 }
@@ -118,43 +256,43 @@ const DataProcessor: React.FC<DataProcessorProps> = ({ update = false }) => {
 
         setProcessedData({
             name: siteName,
-            neighborhood: 'n/a',
+            neighborhood: "n/a",
             priorityStatus: 1,
             houses: sortedHouses,
             streets: sortedStreets,
         });
     };
 
+    /**
+     * Start over method: clears out everything.
+     */
     const startOver = () => {
-        setInputText('');
+        setInputText("");
         setProcessedData(null);
+        setUploadError(null);
+        setLoadingMessage(null);
+        setIsUploading(false);
     };
 
     return (
         <div className="space-y-4 max-w-4xl mx-auto p-4">
             <Card>
-                {/* 
-          Header: Title on the left, 
-          and Start Over (destructive button) on the right if data processed.
-        */}
                 <CardHeader className="w-full flex flex-row justify-between bg-blu items-center">
                     <CardTitle>
-                        {/* {update ? 'Update Data Processor' : 'Data Processor'} */}
                         Site Data Manager
-                        <CardDescription>{
-                            update ?
+                        <CardDescription>
+                            {update ? (
                                 <p>
-                                    Copy and paste the data from SF table her to
-                                    <span className='font-bold uppercase'>
-                                        {' '}update an existing Site
-                                    </span>
+                                    Copy and paste the data from SF table here to
+                                    <span className="font-bold uppercase"> update an existing Site</span>
                                 </p>
-                                :
-                                'Copy and paste the data from SF table here to create a new Site'
-                        }
+                            ) : (
+                                "Copy and paste the data from SF table here to create a new Site"
+                            )}
                         </CardDescription>
                     </CardTitle>
 
+                    {/* Show 'Start Over' button only if processedData is set */}
                     {processedData && (
                         <Button variant="destructive" onClick={startOver}>
                             <RiDeleteBack2Fill />
@@ -165,14 +303,14 @@ const DataProcessor: React.FC<DataProcessorProps> = ({ update = false }) => {
                 <CardContent className="space-y-4">
                     {/* If data is NOT processed, show the Textarea and "Process Data" button */}
                     {!processedData && (
-                        <div className="">
+                        <div>
                             <Textarea
                                 placeholder="Paste your data here..."
                                 className="min-h-[200px]"
                                 value={inputText}
                                 onChange={(e) => setInputText(e.target.value)}
                             />
-                            <Button onClick={processData}>
+                            <Button onClick={processData} className="mt-2">
                                 Process Data
                             </Button>
                         </div>
@@ -195,21 +333,37 @@ const DataProcessor: React.FC<DataProcessorProps> = ({ update = false }) => {
                                     </span>
                                     Streets:
                                 </h4>
-                                <p className="text-sm">{processedData.streets.join(', ')}</p>
+                                <p className="text-sm">{processedData.streets.join(", ")}</p>
                             </div>
 
                             {/* 
                 Bottom-right corner: 
-                Show "Create New Site" or "Update Site" ONLY after data has been processed.
+                Show "Create New Site" or "Update Site" after data is processed.
               */}
-                            <div className="flex justify-end">
+                            <div className="flex flex-col items-end space-y-2">
+                                {uploadError && (
+                                    <div className="text-red-600 font-medium text-sm">
+                                        {uploadError}
+                                    </div>
+                                )}
+
+                                {isUploading && loadingMessage && (
+                                    <div className="text-gray-800 font-medium text-sm">
+                                        {loadingMessage}
+                                    </div>
+                                )}
+
                                 {update ? (
-                                    <Button onClick={updateSite}>
-                                        Update {processedData.name}
+                                    <Button onClick={updateSite} disabled={isUploading}>
+                                        {isUploading
+                                            ? `Working on ${processedData.name}...`
+                                            : `Update ${processedData.name}`}
                                     </Button>
                                 ) : (
-                                    <Button onClick={createNewSite}>
-                                        Create New Site
+                                    <Button onClick={createNewSite} disabled={isUploading}>
+                                        {isUploading
+                                            ? `Working on ${processedData.name}...`
+                                            : "Create New Site"}
                                     </Button>
                                 )}
                             </div>
@@ -217,10 +371,12 @@ const DataProcessor: React.FC<DataProcessorProps> = ({ update = false }) => {
                     )}
                 </CardContent>
             </Card>
+
+            {/* If processed, you can show the JSON for debugging */}
             {processedData && (
-                <>
-                { JSON.stringify(processedData, null, 2) }
-                </>
+                <pre className="bg-gray-100 p-4 rounded-md text-sm">
+                    {JSON.stringify(processedData, null, 2)}
+                </pre>
             )}
         </div>
     );

@@ -10,6 +10,8 @@ import AccordionItems from "./admin-ui/adminOptions";
 import PermissionProvider from "./permissionsProvider";
 import { auth } from "@/auth";
 import UpdateActiveSite from "@/components/dashboard-management/UpdateActiveSite";
+import DataProcessor from "@/components/DataProcessor";
+import AddressGeocoder from "@/components/AddressGeocoder";
 
 
 type Params = Promise<{ organization: string }>
@@ -55,12 +57,14 @@ export default async function Page(props: {
         {
             id: 1,
             name: "Create New Site",
-            component: <DocumentUploader orgName={orgName} />
+            // component: <DocumentUploader orgName={orgName} />
+            component: <DataProcessor />
         },
         {
             id: 2,
-            name: "Update Current Site",
-            component: <UpdateActiveSite orgName={orgName} />
+            name: "Update a Site  (FETCHING)",
+            // component: <UpdateActiveSite orgName={orgName} />
+            component: <DataProcessor update/>
         },
         {
             id: 3,
@@ -69,6 +73,11 @@ export default async function Page(props: {
         },
         {
             id: 4,
+            name: "Get lat/long from address",
+            component: <AddressGeocoder  />
+        },
+        {
+            id: 5,
             name: "Delete Site",
             component: <div>Delete Site</div>
         }

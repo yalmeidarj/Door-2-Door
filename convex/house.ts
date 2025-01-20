@@ -52,7 +52,8 @@ export const getHousesConsentFinalByStreetId = query({
       .filter((q) => q.eq(q.field("streetID"), streetId))
       .filter((q) => q.or(
         q.eq(q.field("statusAttempt"), "Consent Final Yes"),
-        q.eq(q.field("statusAttempt"), "Consent Final No")
+        q.eq(q.field("statusAttempt"), "Consent Final No"),
+        q.eq(q.field("statusAttempt"), "Consent Final")
       ))
       .collect();
     
@@ -96,7 +97,7 @@ export const getActiveHousesByStreetId = query({
         q.and(
           q.neq(q.field("statusAttempt"), "Consent Final Yes"),
           q.neq(q.field("statusAttempt"), "Engineer Visit Required"),
-          // q.neq(q.field("statusAttempt"), "Site Visit Required"),
+          q.neq(q.field("statusAttempt"), "Consent Final"),
           q.neq(q.field("statusAttempt"), "Home Does Not Exist"),
           q.neq(q.field("statusAttempt"), "Consent Final No")
         )

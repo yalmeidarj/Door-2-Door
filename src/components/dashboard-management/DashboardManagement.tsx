@@ -94,7 +94,6 @@ export default function DocumentUploader({ orgName }: { orgName: string } ) {
                     const jsonData = JSON.parse(fileContent as string);
                     if (isCreateType(jsonData)) {
                         const siteName = jsonData.name;
-                        // TODO[HIGH]: GET orgId from pathName
                         const orgId = organization?._id as string;
                         try {
                             // Create Site

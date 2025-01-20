@@ -54,23 +54,73 @@ function SiteMap({ siteId }: { siteId: string}) {
         
         return <div>Loading...</div>;
     }
-    // map through all houses in site, create addresses from street name and street number, latitude and longitude as lat and lng, and statusAttempt
-    const mapsData = allHousesInSite.map((house: any) => ({
+
+    // 1) Separate houses that have valid lat/lng from those that do not
+    const validHouses = allHousesInSite.filter((house) => {
+        return (
+            house.latitude &&
+            house.longitude &&
+            !isNaN(parseFloat(house.latitude)) &&
+            !isNaN(parseFloat(house.longitude))
+        );
+    });
+
+    const invalidHouses = allHousesInSite.filter((house) => {
+        // Invalid if missing latitude or longitude,
+        // or parseFloat(...) is NaN
+        return (
+            !house.latitude ||
+            !house.longitude ||
+            isNaN(parseFloat(house.latitude)) ||
+            isNaN(parseFloat(house.longitude))
+        );
+    });
+
+    // 2) Create the data array for the AddressMap
+    const mapsData = validHouses.map((house) => ({
         address: `${house.streetName} ${house.streetNumber}`,
-        position: [
-            parseFloat(house.latitude),
-            parseFloat(house.longitude)
-        ] as [number, number],
+        position: [parseFloat(house.latitude as string), parseFloat(house.longitude as string)] as [number, number],
         statusAttempt: house.statusAttempt
-    }))
+    }));
 
     return (
         <>
             <MapDialog>
-                <AddressMap
-                    data={mapsData}
-                />
+                <AddressMap data={mapsData} />
             </MapDialog>
+
+            {/* 3) Display any houses that do not have valid lat/lng */}
+            {invalidHouses.length > 0 && (
+                <div className="mt-4 p-2 border rounded flex flex-col">
+                    <h2 className="font-semibold text-lg mb-2">Houses Missing Coordinates</h2>
+                    <span>
+                    Valid Houses: {validHouses.length}
+                    </span>
+                    <span>
+                    Total Houses:{allHousesInSite.length}
+                    </span>
+                    <span>
+                    Invalid Houses: {invalidHouses.length}
+                    </span>
+                    <ul className="list-disc list-inside">
+                        {invalidHouses.map((house, idx) => (
+                            <li key={idx}>
+                                {house.streetName} {house.streetNumber} — Latitude{" "}
+                                {house.latitude }, Longitude {house.longitude}
+                            </li>
+                        ))}
+                    </ul>
+                    -----------
+                    <ul className="list-disc list-inside">
+                        {validHouses.map((house, idx) => (
+                            <li key={idx}>
+                                {house.streetName} {house.streetNumber} — Latitude{" "}
+                                {house.latitude }, Longitude {house.longitude}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </>
-    )
+    );
 }
