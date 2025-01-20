@@ -66,6 +66,13 @@ export default function InfoFeed() {
         </div>
     );
 }
+function calculatePercentage(portion: number, total: number): number {
+    if (!total) {
+        return 0;
+    }
+    const percentage = (portion / total) * 100;
+    return parseFloat(percentage.toFixed(2));
+}
 
 function InfoLocationCard({ siteId }: { siteId: string }) {
     const site = useQuery(api.site.getSiteById, { id: siteId });
@@ -76,6 +83,11 @@ function InfoLocationCard({ siteId }: { siteId: string }) {
             <LoadingSpinner />
         );
     }
+
+    // Use the helper function to compute percentages
+    const consentYesPercent = calculatePercentage(siteStats.consentYes, siteStats.totalHouses);
+    const consentNoPercent = calculatePercentage(siteStats.consentNo, siteStats.totalHouses);
+
     const getConsentYesColor = (percentage: number) => {
         if (percentage > 83) {
             return 'bg-green-500 text-white';
@@ -104,17 +116,17 @@ function InfoLocationCard({ siteId }: { siteId: string }) {
                         <p>Total Houses:</p>
                         <p className="font-medium text-gray-900">{siteStats.totalHouses}</p>
                     </div>
-                    <div className={`${getConsentYesColor(siteStats.consentYes)} flex justify-between items-center w-full`}>
+                    <div className={`${getConsentYesColor(consentYesPercent)} flex justify-between items-center w-full`}>
                         <p className={`px-2 py-1 rounded font-semibold`}>
                             Consent Yes:
                         </p>
                         <p className={` px-2 py-1 rounded text-center font-semibold`}>
-                            {siteStats.consentYes} | {siteStats.consentYes}%
+                            {siteStats.consentYes} | {consentYesPercent}%
                         </p>
                     </div>
                     <div className="flex justify-between">
                         <p>Consent No:</p>
-                        <p className="font-medium text-gray-900">{siteStats.consentNo} | {siteStats.consentNo}%</p>
+                        <p className="font-medium text-gray-900">{siteStats.consentNo} | {consentNoPercent}%</p>
                     </div>
                 </div>
                 {/* <div className="flex justify-between">
