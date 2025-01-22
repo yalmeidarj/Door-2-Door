@@ -9,6 +9,7 @@ import { Textarea } from "./ui/textarea";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { usePathname } from "next/navigation";
+import { Id } from "../../convex/_generated/dataModel";
 
 /** Types */
 
@@ -154,8 +155,8 @@ const DataProcessor: React.FC<DataProcessorProps> = ({ update = false }) => {
                 }
 
                 await createNewHouseMutation({
-                    streetID: streetId,
-                    siteID: newSiteId,
+                    streetID: streetId as Id<"street">,
+                    siteID: newSiteId as Id<"site">,
                     streetName: house.street,
                     streetNumber: house.streetNumber,
                     name: house.name,
