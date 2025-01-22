@@ -14,6 +14,7 @@ export const userSchema = {
     v.union(v.literal("dev"), v.literal("admin"), v.literal("user"))
   ),
   organizationId: v.optional(v.string()),
+  shiftMaxInactiveTime: v.optional(v.number()),
 };
 
 export const sessionSchema = {
@@ -110,18 +111,18 @@ export default defineSchema({
     .index("orgs", ["orgID"]),
 
   site: defineTable({
-    orgID: v.string(), // Organization ID the site belongs to
+    orgID: v.id("organization"),
     name: v.string(),
     isActive: v.boolean(), // Status of the site (e.g., "Active", "Inactive")
     priorityStatus: v.optional(v.number()), // Status of the site (e.g., "Active", "Inactive")
     neighborhood: v.optional(v.string()),
-    maxInactiveDuration: v.optional(v.number()),
+    shiftMaxInactiveTime: v.optional(v.number()),
   })
     .index("orgID", ["orgID"])
     .index("name", ["name"]),
 
   street: defineTable({
-    siteID: v.string(), // Site ID the street belongs to
+    siteID: v.id("site"),
     name: v.string(),
     lastVisited: v.optional(v.number()),
     lastVisitedBy: v.optional(v.string()),
@@ -130,8 +131,8 @@ export default defineSchema({
     .index("name", ["name"]),
 
   house: defineTable({
-    streetID: v.string(), // Street ID the house belongs to
-    siteID: v.string(), // Location ID the house belongs to
+    streetID: v.id("street"), // Street ID the house belongs to
+    siteID: v.id("site"), // Location ID the house belongs to
     streetNumber: v.string(), // Street number
     // TODO [LOW]:MAKE NOT AN OPTIONAL VALUE
     streetName: v.optional(v.string()), // Street number
@@ -157,8 +158,8 @@ export default defineSchema({
   // shiftLoggerID: v.string(), // ShiftLogger ID for the shift that made the edit
   // shiftLoggerId: v.optional(v.string()),
   houseEditLog: defineTable({
-    houseId: v.optional(v.string()),
-    agentId: v.optional(v.string()),
+    houseId: v.optional(v.id("house")),
+    agentId: v.optional(v.id("user")),
     name: v.optional(v.string()),
     lastName: v.optional(v.string()),
     type: v.optional(v.string()),
@@ -170,17 +171,18 @@ export default defineSchema({
     .index("houseId", ["houseId"])
     .index("agentId", ["agentId"]),
   shiftLogger: defineTable({
-    userID: v.string(), // User ID of the agent
-    siteID: v.string(), // Site ID where the shift took place
+    userID: v.id("users"), // User ID of the agent
+    siteID: v.id("site"), // Site ID where the shift took place
     orgID: v.optional(v.string()), // Organization ID where the shift took place
     startingDate: v.number(),
     finishedDate: v.optional(v.number()),
     isFinished: v.boolean(),
+    onBreak: v.optional(v.boolean()),
     updatedHouses: v.optional(v.number()),
     updatedHousesFinal: v.optional(v.number()),
     updatedHousesFinalNo: v.optional(v.number()),
     pace: v.optional(v.number()),
-    userMaxInactiveDuration: v.optional(v.number()),
+    maxInactiveTime: v.optional(v.number()),
     // paceFinal: v.optional(v.number()),
   })
     .index("userID", ["userID"])
@@ -189,10 +191,14 @@ export default defineSchema({
     .index("siteID", ["siteID"]),
   shiftBreaks: defineTable({
     shiftId: v.id("shiftLogger"),
-    siteID: v.string(),
-    startTime: v.number(), // _creationTime
+    siteID: v.id("site"),
+    description: v.optional(v.string()),
     endTime: v.optional(v.number()),
-    motive: v.optional(v.string()),
+    motive: v.union(
+      v.literal("inactivity"),
+      v.literal("transit"),
+      v.literal("general")
+    ),
     status: v.string(), // 'active', 'completed', 'exceeded'
   }).index("shiftId", ["shiftId"]),
 });

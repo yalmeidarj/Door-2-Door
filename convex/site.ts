@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
 import { mutation } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
 
 export const getActiveSitesByUserId = query({
   args: { orgID: v.string() }, 
@@ -37,7 +38,7 @@ export const getActiveSitesByOrgName = query({
   handler: async (ctx, { orgName }) => {
     const org = await ctx.db
       .query("organization")
-      .filter((q) => q.eq(q.field("name"), orgName))
+      .withIndex("name", (q) => q.eq("name", orgName))
       .first();
     if (!org) {
       return [];
@@ -56,7 +57,7 @@ export const getAllSitesByOrgName = query({
       return
     }
     const sites = await ctx.db.query("site")
-      .filter((q) => q.eq(q.field("orgID"), org._id))
+      .withIndex("orgID", (q) => q.eq("orgID", org._id))
       .collect();
 
     // const sites = awaitorg.map((o) =>
@@ -72,7 +73,7 @@ export const getActiveSitesByOrgId = query({
   handler: async (ctx, { orgID }) => {
     return await ctx.db
       .query("site")
-      .filter((q) => q.eq(q.field("orgID"), orgID))
+      .withIndex("orgID", (q) => q.eq("orgID", orgID as Id<"organization">))
       .filter((q) => q.eq(q.field("isActive"), true)) // Filter by isActive
       .collect();
   },
@@ -82,7 +83,7 @@ export const getAllSitesByOrgId = query({
   handler: async (ctx, { orgID }) => {
     return await ctx.db
       .query("site")
-      .filter((q) => q.eq(q.field("orgID"), orgID))      
+      .withIndex("orgID", (q) => q.eq("orgID", orgID as Id<"organization">))
       .collect();
   },
 });
@@ -92,6 +93,7 @@ export const getSiteById = query({
     return await ctx.db
       .query("site")
       .filter((q) => q.eq(q.field("_id"), id))
+      // .withIndex("_id", (q) => q.eq("_id", id as Id<"site">))
       .first();
   },
 });
@@ -126,7 +128,7 @@ export const createNewSite = mutation({
   args: { orgID: v.string(), name: v.string() },
   handler: async (ctx, { orgID, name  }) => {
     return await ctx.db.insert("site", {
-      orgID: orgID,
+      orgID: orgID as Id<"organization">,
       name: name,
       isActive: true,
     });

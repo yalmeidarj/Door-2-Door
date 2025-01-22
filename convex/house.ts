@@ -13,7 +13,10 @@ export const getHousesByStreetIdAndStatus = query({
   handler: async (ctx, { streetId, status }) => {
     const houses = await ctx.db
       .query("house")
-      .filter((q) => q.eq(q.field("streetID"), streetId))
+      // .filter((q) => q.eq(q.field("streetID"), streetId))
+      // .filter((q) => q.eq(q.field("statusAttempt"), status))
+      // .collect();
+      .withIndex("streetID", (q) => q.eq("streetID", streetId as Id<"street">))
       .filter((q) => q.eq(q.field("statusAttempt"), status))
       .collect();
     
@@ -32,7 +35,7 @@ export const getHousesNotInSalesForceBySiteId = query({
   handler: async (ctx, { siteId }) => {
     const houses = await ctx.db
       .query("house")
-      .withIndex("siteID", (q) => q.eq("siteID", siteId))
+      .withIndex("siteID", (q) => q.eq("siteID", siteId as Id<"site">))
       // .filter((q) => q.eq(q.field("isConcilatedInSalesForce"), false))
       .filter((q) => q.or(
         q.eq(q.field("isConcilatedInSalesForce"), null),
@@ -50,7 +53,7 @@ export const getHousesConsentFinalByStreetId = query({
   handler: async (ctx, { streetId}) => {
     const houses = await ctx.db
       .query("house")
-      .filter((q) => q.eq(q.field("streetID"), streetId))
+      .withIndex("streetID", (q) => q.eq("streetID", streetId as Id<"street">))
       .filter((q) => q.or(
         q.eq(q.field("statusAttempt"), "Consent Final Yes"),
         q.eq(q.field("statusAttempt"), "Consent Final No"),
@@ -74,9 +77,9 @@ export const getStatsHousesByStreetId = query({
   handler: async (ctx, { streetId }) => {
     const houses = await ctx.db
       .query("house")
-      .filter((q) => q.eq(q.field("streetID"), streetId))
+      .withIndex("streetID", (q) => q.eq("streetID", streetId as Id<"street">))
     // .take(take || 20);
-    .collect();
+      .collect();
 
     // Sort the houses by street number
     const sortedHouses = houses.sort((a, b) => {
@@ -93,7 +96,7 @@ export const getActiveHousesByStreetId = query({
   handler: async (ctx, { streetId }) => {
     const houses = await ctx.db
       .query("house")
-      .filter((q) => q.eq(q.field("streetID"), streetId))
+      .withIndex("streetID", (q) => q.eq("streetID", streetId as Id<"street">))
       .filter((q) =>
         q.and(
           q.neq(q.field("statusAttempt"), "Consent Final Yes"),
@@ -125,7 +128,7 @@ export const getHousesByStreetIdPaginated = query({
     const housesPaginationResult = await ctx.db
       .query("house")
       .withIndex("by_streetID_and_streetNumber", (q) =>
-        q.eq("streetID", args.streetId)
+        q.eq("streetID", args.streetId as Id<"street">)
       )
       .order("asc")
       .paginate(args.paginationOpts);
@@ -167,7 +170,7 @@ export const getHousesConsentYesByStreetId = query({
   handler: async (ctx, { streetId }) => {
     const houses = await ctx.db
       .query("house")
-      .filter((q) => q.eq(q.field("streetID"), streetId))
+      .withIndex("streetID", (q) => q.eq("streetID", streetId as Id<"street">))
       .filter((q) => q.eq(q.field("statusAttempt"), "Consent Final Yes"))
       .collect();
     
@@ -184,7 +187,7 @@ export const getHousesConsentNoByStreetId = query({
   handler: async (ctx, { streetId }) => {
     return await ctx.db
       .query("house")
-      .filter((q) => q.eq(q.field("streetID"), streetId))
+      .withIndex("streetID", (q) => q.eq("streetID", streetId as Id<"street">))
       .filter((q) => q.eq(q.field("statusAttempt"), "Consent Final No"))
       .collect();
   },
@@ -194,7 +197,7 @@ export const getHousesVisitRequestByStreetId = query({
   handler: async (ctx, { streetId }) => {
     return await ctx.db
       .query("house")
-      .filter((q) => q.eq(q.field("streetID"), streetId))
+      .withIndex("streetID", (q) => q.eq("streetID", streetId as Id<"street">))
       .filter((q) => q.eq(q.field("statusAttempt"), "Site Visit Required"))
       .collect();
   },
@@ -217,7 +220,7 @@ export const getVisitedHousesByStatusAttemptByStreetId = query({
 
     return await ctx.db
       .query("house")
-      .filter((q) => q.eq(q.field("streetID"), streetId))
+      .withIndex("streetID", (q) => q.eq("streetID", streetId as Id<"street">))
       .filter((q) =>
         q.or(
           ...statusAttempts.map((status) =>
@@ -248,7 +251,7 @@ export const getVisitedHousesByStatusByStreetId = query({
 
     return await ctx.db
       .query("house")
-      .filter((q) => q.eq(q.field("streetID"), streetId))
+      .withIndex("streetID", (q) => q.eq("streetID", streetId as Id<"street">))
       .filter((q) =>
         q.or(
           ...statusAttempts.map((status) =>
@@ -267,7 +270,7 @@ export const getHousesBySiteId = query({
   handler: async (ctx, { siteId }) => {
     return await ctx.db
       .query("house")
-      .filter((q) => q.eq(q.field("siteID"), siteId))
+      .withIndex("siteID", (q) => q.eq("siteID", siteId as Id<"site">))
       .collect();
   },
 });
@@ -277,7 +280,7 @@ export const getHousesConsentYesBySiteId = query({
   handler: async (ctx, { siteId }) => {
     return await ctx.db
       .query("house")
-      .filter((q) => q.eq(q.field("siteID"), siteId))
+      .withIndex("siteID", (q) => q.eq("siteID", siteId as Id<"site">))
       .filter((q) => q.eq(q.field("statusAttempt"), "Consent Final Yes"))
       .collect();
   },
@@ -288,7 +291,7 @@ export const getHousesConsentNoBySiteId = query({
   handler: async (ctx, { siteId }) => {
     return await ctx.db
       .query("house")
-      .filter((q) => q.eq(q.field("siteID"), siteId))
+      .withIndex("siteID", (q) => q.eq("siteID", siteId as Id<"site">))
       .filter((q) => q.eq(q.field("statusAttempt"), "Consent Final No"))
       .collect();
   },
@@ -298,7 +301,7 @@ export const getHousesVisitRequestBySiteId = query({
   handler: async (ctx, { siteId }) => {
     return await ctx.db
       .query("house")
-      .filter((q) => q.eq(q.field("siteID"), siteId))
+      .withIndex("siteID", (q) => q.eq("siteID", siteId as Id<"site">))
       .filter((q) => q.eq(q.field("statusAttempt"), "Site Visit Required"))
       .collect();
   },
@@ -317,12 +320,11 @@ export const getVisitedHousesByStatusAttempt = query({
       "Site Visit Required",
       "Drop Type Unverified",
       "Home Does Not Exist"
-
     ];
 
     return await ctx.db
       .query("house")
-      .filter((q) => q.eq(q.field("siteID"), siteId))
+      .withIndex("siteID", (q) => q.eq("siteID", siteId as Id<"site">))
       .filter((q) =>
         q.or(
           ...statusAttempts.map((status) =>
@@ -361,7 +363,7 @@ export async function getHousesByStatus(
 ) {
   const query = ctx.db
     .query("house")
-    .filter((q) => q.eq(q.field("siteID"), siteId));
+    .withIndex("siteID", (q) => q.eq("siteID", siteId as Id<"site">));
 
   if (Array.isArray(status)) {
     return await query
@@ -376,16 +378,6 @@ export async function getHousesByStatus(
     .collect();
 }
 
-// Get all houses for a site
-// export const getHousesBySiteId = query({
-//   args: { siteId: v.string() },
-//   handler: async (ctx, { siteId }) => {
-//     return await ctx.db
-//       .query("house")
-//       .filter((q) => q.eq(q.field("siteID"), siteId))
-//       .collect();
-//   },
-// });
 
 //TODO[HIGH]: Use this function for SiteCard.tsx for better performance
 // Get house statistics for a site
@@ -432,8 +424,7 @@ export const getHouseStatsByOrgId = query({
     // Get all sites for the organization
     const sites = await ctx.db
       .query("site")
-      .filter((q) =>
-        q.or(q.eq(q.field("orgID"), orgId), q.eq(q.field("orgID"), orgId)))
+      .withIndex("orgID", (q) => q.eq("orgID", orgId as Id<"organization">))
       .collect();
 
     // Get statistics for each site concurrently
@@ -496,8 +487,8 @@ export const getHouseStatsByOrgId = query({
 //------------ ------------//
 
 const houseArgs = {
-  streetID: v.string(),
-  siteID: v.string(),
+  streetID: v.id("street"),
+  siteID: v.id("site"),
   streetNumber: v.string(),
   streetName: v.string(),
   lastName: v.optional(v.string()),
@@ -522,8 +513,8 @@ export const createNewHouse = mutation({
     { streetID, siteID, streetNumber, streetName, ...rest }
   ) => {
     return await ctx.db.insert("house", {
-      streetID: streetID,
-      siteID: siteID,
+      streetID: streetID as Id<"street">,
+      siteID: siteID as Id<"site">,
       streetName: streetName,
       streetNumber: streetNumber,
       ...rest,

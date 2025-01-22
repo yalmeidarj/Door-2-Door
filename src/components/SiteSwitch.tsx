@@ -44,10 +44,12 @@ export default function SiteSwitchButton({
             <Switch
                     id={site._id}
                     checked={site.isActive}
-                    className={cn(className,'h-5.5 pr-1 m-2')}
+                    className={cn(className,'h-5.5 pr-1')}
                 onCheckedChange={onSubmit.bind(null, site._id)}
                 />
+                {children &&
                 <Label htmlFor={site._id}>{children}</Label>
+                }
                 </div>         
                 </>
     );

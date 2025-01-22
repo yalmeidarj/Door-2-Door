@@ -3,6 +3,7 @@ import { query } from "./_generated/server";
 import { mutation } from "./_generated/server";
 import { start } from "repl";
 import { get } from "http";
+import { Id } from "./_generated/dataModel";
 
 
 export const getShiftsByAgentId = query({
@@ -10,7 +11,7 @@ export const getShiftsByAgentId = query({
   handler: async (ctx, { userId }) => {
     return await ctx.db
       .query("shiftLogger")
-      .filter((q) => q.eq(q.field("userID"), userId))
+      .filter((q) => q.eq(q.field("userID"), userId as Id<"users">))
       .collect();
   },
 });
@@ -169,7 +170,7 @@ export const getActiveShiftsBySiteId = query({
 export const updateShiftById = mutation({
   args: {
     id: v.id("shiftLogger"),
-    siteID: v.optional(v.string()),
+    siteID: v.optional(v.id("site")),
     startingDate: v.optional(v.number()),
     finishedDate: v.optional(v.number()),
     isFinished: v.optional(v.boolean()),
@@ -186,7 +187,7 @@ export const updateShift = mutation({
   args: {
     shiftId: v.id("shiftLogger"),
     // agentId: v.id("users"),
-    siteID: v.optional(v.string()),
+    siteID: v.optional(v.id("site")),
     startingDate: v.optional(v.number()),
     finishedDate: v.optional(v.number()),
     isFinished: v.optional(v.boolean()),
@@ -198,7 +199,7 @@ export const updateShift = mutation({
   handler: async (ctx, { shiftId, siteID, startingDate, ...rest }) => {
     const timestamp = Date.now();
     return await ctx.db.patch(shiftId, {
-      siteID: siteID,
+      siteID: siteID as Id<"site">,
       startingDate: timestamp,
       ...rest,
     });

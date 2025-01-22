@@ -4,19 +4,22 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 
+
+type breakMotive = "general" | "inactivity" | "transit";
 export const startBreak = mutation({
   args: {
     shiftId: v.id("shiftLogger"),
-    motive: v.optional(v.string()),
+    motive: v.string(),
+    description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Get shiftId as string
     const shiftId: Id<"shiftLogger"> = args.shiftId;
 
-    
     const activeBreak = await ctx.db
       .query("shiftBreaks")
-      .filter((q) => q.eq(q.field("shiftId"), args.shiftId))
+      .withIndex("shiftId", (q) => q.eq("shiftId", shiftId))
+      .filter((q) => q.eq(q.field("status"), "active"))
       .first();
 
     if (activeBreak) {
@@ -29,7 +32,7 @@ export const startBreak = mutation({
       throw new Error("Shift not found");
     }
 
-    const site = await ctx.db.get(shift.siteID  as Id<"shiftLogger">);
+    const site = await ctx.db.get(shift.siteID as Id<"site">);
     if (!site) {
       throw new Error("Site not found");
     }
@@ -45,26 +48,37 @@ export const startBreak = mutation({
     // }
 
     // Create new break
-    const timeNow =  Date.now();
+
     return await ctx.db.insert("shiftBreaks", {
-        shiftId: args.shiftId,
-        siteID: shift.siteID,
-        startTime: timeNow,
-        motive: args.motive,
+      shiftId: args.shiftId,
+      siteID: shift.siteID,
+      motive: args.motive as breakMotive,
       status: "active",
     });
-    },
+  },
 });
-  
-  
+
+export const getActiveBreakByShiftId = query({
+  args: {
+    shiftId: v.id("shiftLogger"),
+  },
+  handler: async (ctx, args) => {
+    const shiftBreak = await ctx.db
+      .query("shiftBreaks")
+      .withIndex("shiftId", (q) => q.eq("shiftId", args.shiftId))
+      .filter((q) => q.eq(q.field("status"), "active"))
+      .first();
+    return shiftBreak;
+  }
+}) 
   
 
 export const endBreak = mutation({
   args: {
-    breakId: v.id("shiftBreaks"),
+    shiftId: v.id("shiftBreaks"),
   },
   handler: async (ctx, args) => {
-    const currentBreak = await ctx.db.get(args.breakId);
+    const currentBreak = await ctx.db.get(args.shiftId);
     if (!currentBreak) {
       throw new Error("Break not found");
     }
@@ -75,13 +89,13 @@ export const endBreak = mutation({
 
     // check if status of shfitBreak is "blocked"
     if (currentBreak.status === "blocked") {
-        throw new Error("Break is blocked");
+      throw new Error("Break is blocked");
     }
 
     // Determine break status
-    const status = "finshed";
+    const status = "finished";
     // Update break
-    return await ctx.db.patch(args.breakId, {
+    return await ctx.db.patch(args.shiftId, {
       endTime: Date.now(),
       status: status,
     });
