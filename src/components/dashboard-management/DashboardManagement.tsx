@@ -6,6 +6,7 @@ import { FaGear } from "react-icons/fa6";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { toast } from "sonner"
+import { Id } from "../../../convex/_generated/dataModel";
 
 export default function DocumentUploader({ orgName }: { orgName: string } ) {
     
@@ -134,8 +135,8 @@ export default function DocumentUploader({ orgName }: { orgName: string } ) {
                                     `Creating house at ${house.streetNumber} ${house.street}...`
                                 );
                                 const newHouse = await createNewHouse({
-                                    streetID: streetId,
-                                    siteID: newSiteId,
+                                    streetID: streetId as Id<"street">,
+                                    siteID: newSiteId as Id<"site">,
                                     streetName: house.street,
                                     streetNumber: house.streetNumber,
                                     name: house.name,
