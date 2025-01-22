@@ -1,6 +1,6 @@
 
 import AdminNavigation from "@/components/AdminNavigation ";
-import DocumentUploader from "@/components/dashboard-management/DashboardManagement";
+// import DocumentUploader from "@/components/dashboard-management/DashboardManagement";
 import PageHeader from "@/components/PageHeader";
 import Link from "next/link";
 import { Button } from "react-day-picker";
