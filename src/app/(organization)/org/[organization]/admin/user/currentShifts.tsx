@@ -22,13 +22,13 @@ export default function CurrentShifts() {
     }    
     return (
         <form className="">
-            {shifts.map((shift: Shift) => (
+            {/* {shifts.map((shift: Shift) => (
                 <ShiftCard
                     key={shift._id}
                     shift={shift}
                     diplayFinishedCard={false}  
                 />
-            ))}
+            ))} */}
         </form>
     )
 }
