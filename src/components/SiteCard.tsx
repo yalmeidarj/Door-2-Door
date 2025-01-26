@@ -39,7 +39,7 @@ export function SiteCard({ siteId }: { siteId: string }) {
 
   return (
     <>      
-      {site.map((site) => (               
+      {site?.map((site) => (               
         <div
           key={site._id}
         className="bg-white rounded-lg shadow-lg p-4 w-sm m-4 
