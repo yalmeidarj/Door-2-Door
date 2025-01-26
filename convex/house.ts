@@ -4,6 +4,7 @@ import { mutation } from "./_generated/server";
 import { paginationOptsValidator } from "convex/server";
 import { Id } from "./_generated/dataModel";
 
+import { filter } from "convex-helpers/server/filter";
 
 export const getHousesByStreetIdAndStatus = query({
   args: {
@@ -280,8 +281,24 @@ export const getHousesConsentYesBySiteId = query({
   handler: async (ctx, { siteId }) => {
     return await ctx.db
       .query("house")
-      .withIndex("siteID", (q) => q.eq("siteID", siteId as Id<"site">))
-      .filter((q) => q.eq(q.field("statusAttempt"), "Consent Final Yes"))
+      .withIndex("siteID_statusAttempt", (q) =>
+        q
+          .eq("siteID", siteId as Id<"site">)
+          .eq("statusAttempt", "Consent Final Yes")
+      )
+      .collect();
+  },
+});
+export const getHousesNonExistBySiteId = query({
+  args: { siteId: v.string() },
+  handler: async (ctx, { siteId }) => {
+    return await ctx.db
+      .query("house")
+      .withIndex("siteID_statusAttempt", (q) =>
+        q
+          .eq("siteID", siteId as Id<"site">)
+          .eq("statusAttempt", "Home Does Not Exist")
+      )
       .collect();
   },
 });
@@ -291,18 +308,25 @@ export const getHousesConsentNoBySiteId = query({
   handler: async (ctx, { siteId }) => {
     return await ctx.db
       .query("house")
-      .withIndex("siteID", (q) => q.eq("siteID", siteId as Id<"site">))
-      .filter((q) => q.eq(q.field("statusAttempt"), "Consent Final No"))
+      .withIndex("siteID_statusAttempt", (q) =>
+        q
+          .eq("siteID", siteId as Id<"site">)
+          .eq("statusAttempt", "Consent Final No")
+      )
       .collect();
   },
 });
+
 export const getHousesVisitRequestBySiteId = query({
   args: { siteId: v.string() },
   handler: async (ctx, { siteId }) => {
     return await ctx.db
       .query("house")
-      .withIndex("siteID", (q) => q.eq("siteID", siteId as Id<"site">))
-      .filter((q) => q.eq(q.field("statusAttempt"), "Site Visit Required"))
+      .withIndex("siteID_statusAttempt", (q) =>
+        q
+          .eq("siteID", siteId as Id<"site">)
+          .eq("statusAttempt", "Site Visit Required")
+      )
       .collect();
   },
 });
@@ -319,7 +343,7 @@ export const getVisitedHousesByStatusAttempt = query({
       "Door Knock Attempt 6",
       "Site Visit Required",
       "Drop Type Unverified",
-      "Home Does Not Exist"
+      "Home Does Not Exist",
     ];
 
     return await ctx.db
@@ -335,6 +359,7 @@ export const getVisitedHousesByStatusAttempt = query({
       .collect();
   },
 });
+
 //------------ ------------//
 
 //------------ Stats by org ID ------------//

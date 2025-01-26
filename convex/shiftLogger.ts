@@ -52,6 +52,8 @@ export const deleteShift = mutation({
   },
 });
 
+
+
 export const getActiveShiftByAgentId = query({
   args: { agentId: v.string() },
   handler: async (ctx, { agentId }) => {
@@ -62,16 +64,55 @@ export const getActiveShiftByAgentId = query({
       .first();
   },
 });
-export const getfinishedShiftsByAgentId = query({
-  args: { agentId: v.string() },
-  handler: async (ctx, { agentId }) => {
-    return await ctx.db
+
+export const getFinishedShiftBreakByAgentId = query({
+  args: {
+    agentId: v.string(),
+    startDate: v.string(),
+    endDate: v.string(),
+  },
+  handler: async (ctx, { agentId, startDate, endDate }) => {
+    //get the timestamp for the start and end date
+    const startTime = new Date(startDate).getTime();
+    const endTime = new Date(endDate).getTime();
+
+    const shifts = await ctx.db
       .query("shiftLogger")
-      .filter((q) => q.eq(q.field("userID"), agentId))
-      .filter((q) => q.eq(q.field("isFinished"), true))
+      .withIndex("by_user_isFinished_creationTime", (q) =>
+        q
+          .eq("userID", agentId as Id<"users">)
+          .eq("isFinished", true)
+          .gte("_creationTime", startTime)
+          .lte("_creationTime", endTime)
+      )
+
       .collect();
+
+    if (!shifts.length) {
+      return { message: "No finished shifts found for this agent." };
+    }
+    const shiftIds = shifts.map((s) => s._id);
+
+    const allShiftBreaks = await ctx.db
+      .query("shiftBreaks")
+      .filter((q) =>
+        q.or(...shiftIds.map((shiftId) => q.eq(q.field("shiftId"), shiftId)))
+      )
+      .collect();
+
+    const shiftsWithBreaks = shifts.map((shift) => {
+      const shiftBreaks = allShiftBreaks.filter((b) => b.shiftId === shift._id);
+      return {
+        ...shift,
+        shiftBreaks,
+      };
+    });
+
+    return shiftsWithBreaks;
   },
 });
+
+
 export const getActiveShiftsByOrgId = query({
   args: { orgId: v.string() },
   handler: async (ctx, { orgId }) => {
@@ -107,7 +148,7 @@ export const getFinishedShiftsByAgentId = query({
   handler: async (ctx, { agentId, startDate, endDate }) => {
     let queryBuilder = await ctx.db
       .query("shiftLogger")
-      .filter((q) => q.eq(q.field("userID"), agentId))
+      .withIndex("userID", (q) => q.eq("userID", agentId as Id<"users">))
       .filter((q) => q.eq(q.field("isFinished"), true))
       .filter((q) =>
         q
@@ -129,9 +170,10 @@ export const calculateTotalHoursPerLocationBySiteId = query({
   handler: async (ctx, { siteId }) => {
     const shifts = await ctx.db
       .query("shiftLogger")
-      .filter((q) => q.eq(q.field("siteID"), siteId))
-      // .filter((q) => q.eq(q.field("isFinished"), true))
-      .filter((q) => q.neq(q.field("finishedDate"), null))
+      .withIndex("siteID_isFinished", (q) =>
+        q.eq("siteID", siteId as Id<"site">)
+        .eq("isFinished", true)
+      )
       .collect();
 
     let totalHours = 0;

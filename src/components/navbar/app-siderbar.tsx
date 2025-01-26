@@ -23,9 +23,7 @@ import {
 import Link from "next/link";
 import { createNavItems } from "./nav-items";
 import SignOut from "../auth-components/SignOut";
-// import navItems from "./nav-items";
 
-// Menu items.
 
 
 export function AppSidebar({ orgName }: { orgName: string }) { 

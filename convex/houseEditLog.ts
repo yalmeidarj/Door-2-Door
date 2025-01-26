@@ -4,6 +4,7 @@ import { mutation } from "./_generated/server";
 import { internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
+import { format } from "date-fns";
 
 export const getEditsByHouseId = query({
   args: { houseId: v.id("house") },
@@ -77,7 +78,7 @@ export const createNewEditByHouseId = mutation({
     // 2. Create log entry with only changed fields
     const logEntry: Record<string, string | undefined> = {
       houseId: args.houseId,
-      agentId: args.agentId,
+      agentId: args.agentId as Id<"users">,
       shiftId: args.shiftId,
     };
 
@@ -105,7 +106,7 @@ export const createNewEditByHouseId = mutation({
 
     const { shiftId, ...restLogEntry } = logEntry;
 
-    // If no changes beyond houseId & agentId, skip
+    // If no changes beyond houseId & agentId & shiftId, skip
     const changesCount = Object.keys(logEntry).filter(
       (k) => k !== "houseId" && k !== "agentId" && k !== "shiftId"
     ).length;
@@ -118,27 +119,40 @@ export const createNewEditByHouseId = mutation({
       // 3. Insert the log entry into houseEditLog
       await ctx.db.insert("houseEditLog", restLogEntry);
 
-      // 4. Update the house using internalMutation
-      // Only include fields that were actually sent in the update
+      // 4. Update the house
       const { houseId, agentId, shiftId, ...restArgs } = args;
+
+      // Build update fields, appending notes if present
       const updateFields = Object.entries(restArgs).reduce(
         (acc, [key, value]) => {
           if (value !== undefined) {
-            acc[key] = value;
+            if (key === "notes") {
+              // Append new notes to existing notes
+              const oldNotes = house.notes || "";
+              // short date format for separator
+              // const currentDate = format(Date.now(),  "p");
+              const currentDate = "||";
+              // const separator = oldNotes ? "\n" : { currentDate };
+              const separator = "||";
+              acc[key] = oldNotes + separator + value;
+            } else {
+              acc[key] = value;
+            }
           }
           return acc;
         },
         {} as Record<string, any>
       );
 
-      const updatedHouse = await ctx.runMutation(
-        internal.houseEditLog.updateProperty,
-        {
-          ...updateFields,
-          isConcilatedInSalesForce: false,
-          houseID: houseId as Id<"house">,
-        }
-      );
+      // Force isConcilatedInSalesForce false on update
+      updateFields.isConcilatedInSalesForce = false;
+
+      // Actually patch/replace in internal mutation
+      await ctx.runMutation(internal.houseEditLog.updateProperty, {
+        ...updateFields,
+        houseID: houseId as Id<"house">,
+      });
+
       return true;
     } catch (error) {
       console.error("Error creating log entry:", error);
@@ -146,6 +160,7 @@ export const createNewEditByHouseId = mutation({
     }
   },
 });
+
 
 
 export const updateProperty = internalMutation({

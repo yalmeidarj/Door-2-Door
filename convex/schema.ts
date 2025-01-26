@@ -152,6 +152,7 @@ export default defineSchema({
   })
     .index("streetID", ["streetID"])
     .index("by_streetID_and_streetNumber", ["streetID", "streetNumber"])
+    .index("siteID_statusAttempt", ["siteID", "statusAttempt"])
     .index("streetNumber", ["streetNumber"])
     .index("siteID", ["siteID"]),
 
@@ -159,7 +160,7 @@ export default defineSchema({
   // shiftLoggerId: v.optional(v.string()),
   houseEditLog: defineTable({
     houseId: v.optional(v.id("house")),
-    agentId: v.optional(v.id("user")),
+    agentId: v.optional(v.id("users")),
     name: v.optional(v.string()),
     lastName: v.optional(v.string()),
     type: v.optional(v.string()),
@@ -185,7 +186,9 @@ export default defineSchema({
     maxInactiveTime: v.optional(v.number()),
     // paceFinal: v.optional(v.number()),
   })
+    .index("by_user_isFinished_creationTime", ["userID", "isFinished"])
     .index("userID", ["userID"])
+    .index("siteID_isFinished", ["siteID", "isFinished"])
     .index("orgID", ["orgID"])
     .index("startingDate", ["startingDate"])
     .index("siteID", ["siteID"]),

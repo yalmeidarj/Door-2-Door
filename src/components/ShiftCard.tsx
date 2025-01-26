@@ -2,17 +2,41 @@ import { format } from "date-fns";
 import { Shift } from "@/lib/Shift/types";
 import AgentName from "./AgentName";
 import SiteName from "./SiteName";
+import {SingleShift } from "./PersonalShifts";
+import { ScrollArea } from "./ui/scroll-area";
+import { Badge } from "./ui/badge";
 
-export default function ShiftCard({ shift, diplayFinishedCard = true }: { shift: Shift, diplayFinishedCard: boolean   }) {
 
+interface ShiftCardProps {
+    shift: SingleShift | { message: string };
+    /**
+     * If true -> display "finished" shifts
+     * If false -> display "active" shift
+     */
+    diplayFinishedCard?: boolean;
+}
+
+export default function ShiftCard({ shift, diplayFinishedCard = true }: ShiftCardProps) {
+    // 1. If we have a message, display it and exit early
+    if ("message" in shift) {
+        return <div className="text-red-600">{shift.message}</div>;
+    }
+
+    // --------------------------------------------
+    // At this point, we know `shift` is a SingleShift
+    // because of the type guard above ("message" in shift).
+    // --------------------------------------------
+
+    // If displayFinishedCard is false, we want to display only "active" shift
     if (!diplayFinishedCard) {
-        if (!shift.startingDate) {
-            return <div>No active shifts found...</div>
+        // Shift must have a startingDate but no finishedDate
+        if (!shift.startingDate || shift.finishedDate) {
+            return <div>No active shifts found...</div>;
         }
     } else {
-        
+        // If displayFinishedCard is true, we want to show only completed shifts
         if (!shift.startingDate || !shift.finishedDate) {
-            return <div>No finished shifts found...</div>
+            return <div>No finished shifts found...</div>;
         }
     }
 
@@ -28,80 +52,112 @@ export default function ShiftCard({ shift, diplayFinishedCard = true }: { shift:
         } else if (minutes > 0) {
             return `${minutes}m`;
         } else {
-            return '0m';
+            return "0m";
         }
     };
 
-    
     const elapsedTimeInHours = shift.startingDate
-        ? (Date.now() - new Date(shift.startingDate).getTime()) / 3600000
-        : 0; // Ensure elapsed time is in hours
+        ? (Date.now() - shift.startingDate) / 3600000
+        : 0; // hours
 
     const elapsedTimeInMinutes = shift.startingDate
-        ? (Date.now() - new Date(shift.startingDate).getTime()) / 60000
-        : 0; // Ensure elapsed time is in minutes.
+        ? (Date.now() - shift.startingDate) / 60000
+        : 0; // minutes
 
-    const houseYes = shift.updatedHousesFinal ?? 0
-    const housesOthers = shift.updatedHouses ?? 0
-    const housesNo = shift.updatedHousesFinalNo ?? 0
+    const houseYes = shift.updatedHousesFinal ?? 0;
+    const housesOthers = shift.updatedHouses ?? 0;
+    const housesNo = shift.updatedHousesFinalNo ?? 0;
+    const totalHouses = houseYes + housesOthers + housesNo;
 
     // Calculate pace
-    const totalHouses = houseYes + housesOthers + housesNo;
-    const pace = totalHouses / elapsedTimeInMinutes;
-
+    const pace = elapsedTimeInMinutes > 0 ? totalHouses / elapsedTimeInMinutes : 0;
     const formattedElapsedTime = formatElapsedTime(elapsedTimeInHours);
 
     return (
-        <div className="bg-white shadow-md
-                 w-screen
-                 max-w-[300px]
-                 mx-2
-                 md:max-w-[340px]
-          flex flex-col justify-between rounded-lg overflow-hidden border border-gray-600">
+        <div
+            className="bg-white shadow-md w-screen max-w-[300px] mx-2 md:max-w-[340px]
+        flex flex-col  rounded-lg overflow-hidden border border-gray-600"
+        >
             <div className="flex flex-row justify-between items-center px-4 py-2 bg-gray-800 text-white">
-                <AgentName id={shift.userID} />
+                <AgentName id={shift.userID} />                
+
                 <div className="text-sm text-gray-200 uppercase tracking-wide">
-                    {format(new Date(shift.startingDate), 'MMM do')}
+                    {new Date(shift.startingDate).toLocaleDateString()}
                 </div>
+
                 <span>
-                    <strong>                        
-                        {formattedElapsedTime}
-                    </strong>
+                    <strong>{formattedElapsedTime}</strong>
                 </span>
             </div>
+
             <div className="p-4">
                 <div className="flex justify-between items-center gap-2 mb-2">
-                    <div className="">
-                        <SiteName className="text-lg font-bold text-gray-400" id={shift.siteID} />
+                    <div>
+                        <SiteName className="text-lg font-bold text-gray-400" id={shift.siteID} />                        
                     </div>
-                    <div className='flex  flex-col text-xs font-semibold'>
-                    
-                    <span>
-                    {format(new Date(shift.startingDate), 'p')}
-                    </span>
-                            {shift.finishedDate && 
-                        
-                        <span>
-                                { format(new Date(shift.finishedDate), 'p')}
-                    </span>                        
-                            }                            
+
+                    <div className="flex flex-col text-xs font-semibold">
+                        <span>{new Date(shift.startingDate).toLocaleTimeString()}</span>
+                        {shift.finishedDate && (
+                            <span>{new Date(shift.finishedDate).toLocaleTimeString()}</span>
+                        )}
                     </div>
                 </div>
+
                 <div className="border-t border-gray-200">
                     <div className="flex justify-between items-center py-2">
                         <div className="text-center">
                             <span className="block text-xs text-gray-600">Edited</span>
-                            <span className="block text-sm font-medium">{shift.updatedHouses || '0'}</span>
+                            <span className="block text-sm font-medium">{shift.updatedHouses || "0"}</span>
                         </div>
                         <div className="text-center">
                             <span className="block text-xs text-gray-600">With Consent</span>
-                            <span className="block text-sm font-medium">{shift.updatedHousesFinal || '0'} | {shift.updatedHousesFinalNo || '0'}</span>
+                            <span className="block text-sm font-medium">
+                                {(shift.updatedHousesFinal || 0) + " | " + (shift.updatedHousesFinalNo || 0)}
+                            </span>
                         </div>
                         <div className="text-center">
                             <span className="block text-xs text-gray-600">Pace</span>
                             <span className="block text-sm font-medium">{pace.toFixed(1)}</span>
                         </div>
                     </div>
+                </div>
+
+                {/* Break Info Section */}
+                <div className="mt-2 ">
+                    <h4 className="font-semibold bg-text-sm mb-1">Breaks:</h4>
+                    <ScrollArea className="rounded-md bg- p-2">
+                        <div className="max-h-[90px] ">
+                    {shift.shiftBreaks && shift.shiftBreaks.length > 0 ? (
+                        shift.shiftBreaks.map((b) => (
+                            <div
+                                key={b._id}
+                                className="bg-gray-50 rounded flex p-2 mb-2 border-l-4 border-gray-300"
+                            >
+                                {/* <p className="text-xs">Status: {b.status}</p> */}
+                                <div className='flex flex-col w-full '>
+                                    <div className=' w-full flex justify-between ' >
+                                 <p className="max-w-max self-end  text-xs">{b.motive.toLocaleUpperCase()}</p>
+                                <p className="text-xs">
+                                    {/* Start:{" "} */}
+                                    {b._creationTime ? new Date(b._creationTime).toLocaleTimeString() : "N/A"}
+                                </p>
+                                <p className="text-xs">
+                                    {/* End:{" "} */}
+                                    {b.endTime ? new Date(b.endTime).toLocaleTimeString() : "N/A"}
+                                </p>
+                                    </div>
+                                    {b.description && 
+                                    <p className="text-xs">{b.description}</p>}                              
+                                </div>
+
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-xs text-gray-500">No breaks recorded</p>
+                        )}
+                </div>
+                    </ScrollArea>
                 </div>
             </div>
         </div>

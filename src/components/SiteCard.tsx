@@ -7,6 +7,7 @@ import Link from "next/link";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { usePathname } from "next/navigation";
+import LoadingSpinner from "./LoadingSpinner";
 
 
 export function SiteCard({ siteId }: { siteId: string }) {
@@ -15,21 +16,30 @@ export function SiteCard({ siteId }: { siteId: string }) {
   const pathName = usePathname();
   const orgName = pathName.split("/")[2].replace("%20", " ").replace("-", " ");
   const orgUrlFormat = pathName.split("/")[2].replace("%20", " ");
-  // const orgId = site.neighborhood;
-  const organization = useQuery(api.organization.getOrgByName, { name: orgName });
+
   const allHouses = useQuery(api.house.getHousesBySiteId, { siteId: siteId })
+
   const getVisitedHousesByStatusAttempt = useQuery(api.house.getVisitedHousesByStatusAttempt, { siteId: siteId });
-  const toBeVisited = Number(allHouses?.length) - Number(getVisitedHousesByStatusAttempt?.length);
+  // const toBeVisited = Number(allHouses?.length) - Number(getVisitedHousesByStatusAttempt?.length);
+  // const toBeVisited = allHouses?.length : 0 - getVisitedHousesByStatusAttempt?.length : 0;
   const visitRequired = useQuery(api.house.getHousesVisitRequestBySiteId, { siteId: siteId });
   const housesWithConsentYes = useQuery(api.house.getHousesConsentYesBySiteId, { siteId: siteId });
   const housesWithConsentNo = useQuery(api.house.getHousesConsentNoBySiteId, { siteId: siteId });
   const totalHoursSpent =useQuery(api.shiftLogger.calculateTotalHoursPerLocationBySiteId, { siteId: siteId as Id<"site"> });
 
+  // if (!allHouses || !site || !visitRequired || !housesWithConsentYes || !housesWithConsentNo || !totalHoursSpent) {
+  //   return <LoadingSpinner />;
+  // }
+
+  const totalHouses = allHouses?.length;
+  // const toBeVisited = totalHouses - (visitRequired?.length + housesWithConsentYes?.length + housesWithConsentNo?.length);
+  // const conse
+  // const visited = visitRequired?.length + housesWithConsentYes?.length + housesWithConsentNo?.length;
+
 
   return (
     <>      
-      {site?.map((site) => (
-               
+      {site.map((site) => (               
         <div
           key={site._id}
         className="bg-white rounded-lg shadow-lg p-4 w-sm m-4 
@@ -63,14 +73,17 @@ export function SiteCard({ siteId }: { siteId: string }) {
         <div className="flex flex-row justify-between mb-2">
           <div className="text-center">
             <div className="text-green-500 text-md font-semibold">
-                {allHouses?.length}
+                {totalHouses}
             </div>
             <p className="text-gray-500 text-xs">Houses</p>
           </div>
           <div className="text-center">
-            <div className="text-blue-500 text-md font-semibold">
-                {toBeVisited}
-            </div>
+                <div className="text-blue-500 text-md font-semibold">
+                  {(totalHouses || 0) -
+                    ((visitRequired?.length || 0) +
+                      (housesWithConsentYes?.length || 0) +
+                      (housesWithConsentNo?.length || 0))}
+                </div>
             <p className="text-gray-500 text-xs">To be visited</p>
           </div>
           <div className="text-center">

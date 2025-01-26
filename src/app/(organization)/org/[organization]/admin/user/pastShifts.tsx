@@ -47,13 +47,12 @@ export default function PastShifts(
                             value={" "}>{"Select an agent"}
                         </SelectItem>
                         {orgUsers?.map((user: any) => (
-                            <>
+                            <div key={user._id}>
                                 <SelectItem    
-                                    key={user._id}    
                                     value={user._id}>
                                     {user.name}
                                 </SelectItem>
-                            </>
+                            </div>
                         ))}
                     </SelectGroup>
                 </SelectContent>

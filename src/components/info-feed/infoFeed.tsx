@@ -6,27 +6,6 @@ import { api } from "../../../convex/_generated/api";
 import LoadingSpinner from "../LoadingSpinner";
 import SiteSwitchButton from "../SiteSwitch";
 
-// Assuming this is the type of your successful response
-type LocationStats = {
-    isDeleted: boolean | undefined;
-    name: string;
-    totalHouses: number;
-    totalHousesWithConsent: number;
-    totalHousesWithConsentYes: number;
-    totalHousesWithConsentNo: number;
-    totalHousesVisited: number;
-    totalHousesNonExistent: number;
-    percentageHousesWithConsentYes: number;
-    percentageHousesWithConsentNo: number;
-    percentageHousesVisited: number;
-    totalHousesVisitRequired: number;
-    toBeVisited: number;
-};
-
-type ErrorResponse = {
-    error: string;
-};
-
 
 export default function InfoFeed() {
     const pathname = usePathname();
@@ -39,20 +18,6 @@ export default function InfoFeed() {
     }
     const orgId = org._id;
     const sites = useQuery(api.site.getAllSitesByOrgId, { orgID: orgId });
-
-
-    // const allStats = await Promise.all(fetchStatsPromises);
-
-    function getCardClassName(number: number) {
-        switch (true) {
-            case (number >= 75):
-                return "text-green-500";
-            case (number > 50):
-                return "text-blue-500";
-            case (number > 20):
-                return "text-red-500";
-        }
-    }
 
 
     return (
@@ -78,6 +43,12 @@ function calculatePercentage(portion: number, total: number): number {
 function InfoLocationCard({ siteId }: { siteId: string }) {
     const site = useQuery(api.site.getSiteById, { id: siteId });
     const siteStats = useQuery(api.house.getHouseStatsBySiteId, { siteId: siteId });
+    const houses = useQuery(api.house.getHousesBySiteId, { siteId: siteId });
+    const consentYesHouses = useQuery(api.house.getHousesConsentYesBySiteId, { siteId: siteId });
+    const consentNoHouses = useQuery(api.house.getHousesConsentNoBySiteId, { siteId: siteId });
+    const visitRequestHouses = useQuery(api.house.getHousesVisitRequestBySiteId, { siteId: siteId });
+    const nonExistHouses = useQuery(api.house.getHousesNonExistBySiteId, { siteId: siteId });
+    // const visitedHouses = useQuery(api.house.getVisitedHousesByStatusAttempt, { siteId: siteId });
     if (!siteStats || !site) {
         
         return (
@@ -85,9 +56,20 @@ function InfoLocationCard({ siteId }: { siteId: string }) {
         );
     }
 
-    // Use the helper function to compute percentages
-    const consentYesPercent = calculatePercentage(siteStats.consentYes, siteStats.totalHouses);
-    const consentNoPercent = calculatePercentage(siteStats.consentNo, siteStats.totalHouses);
+    if (!houses || !consentYesHouses || !consentNoHouses || !visitRequestHouses || !nonExistHouses) {
+    return <LoadingSpinner />;
+    }
+
+    const totalHouses = houses.length;
+    const consentYesCount = consentYesHouses.length;
+    const consentNoCount = consentNoHouses.length;
+    const visitRequestCount = visitRequestHouses.length;
+    const nonExistCount = nonExistHouses.length;
+    const visitedCount = consentNoCount + consentYesCount + visitRequestCount;
+
+    const stillNeedsToBeVisited = totalHouses - visitedCount;
+    const consentYesPercent = calculatePercentage(consentYesCount, totalHouses);
+    const consentNoPercent = calculatePercentage(consentNoCount, totalHouses);
 
     const getConsentYesColor = (percentage: number) => {
         if (percentage > 83) {
@@ -101,8 +83,8 @@ function InfoLocationCard({ siteId }: { siteId: string }) {
 
     return (
         <div className="p-3 mb-6 bg-white shadow rounded-lg text-sm border border-gray-200 ">
-            
-            
+
+
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold">{site.name}</h2>
                 {site.isActive === true ? (
@@ -112,12 +94,12 @@ function InfoLocationCard({ siteId }: { siteId: string }) {
                             className="data-[state=checked]:bg-green-700"
                             site={site} />
                     </span>
-                ): (
+                ) : (
                     <span className="flex items-center text-xs text-red-700">
                         {/* <span className="h-2 w-2 bg-red-500 rounded-full mr-0.5"></span> */}
-                            <SiteSwitchButton
-                                className="data-[state=unchecked]:bg-red-400"
-                                site={site} />                        
+                        <SiteSwitchButton
+                            className="data-[state=unchecked]:bg-red-400"
+                            site={site} />
                     </span>
                 )}
             </div>
@@ -126,19 +108,19 @@ function InfoLocationCard({ siteId }: { siteId: string }) {
                 <div className=" w-full flex flex-col">
                     <div className={`flex justify-between items-center w-full`}>
                         <p>Total Houses:</p>
-                        <p className="font-medium text-gray-900">{siteStats.totalHouses}</p>
+                        <p className="font-medium text-gray-900">{totalHouses}</p>
                     </div>
                     <div className={`${getConsentYesColor(consentYesPercent)} flex justify-between items-center w-full`}>
                         <p className={`px-2 py-1 rounded font-semibold`}>
                             Consent Yes:
                         </p>
                         <p className={` px-2 py-1 rounded text-center font-semibold`}>
-                            {siteStats.consentYes} | {consentYesPercent}%
+                            {consentYesCount} | {consentYesPercent}%
                         </p>
                     </div>
                     <div className="flex justify-between">
                         <p>Consent No:</p>
-                        <p className="font-medium text-gray-900">{siteStats.consentNo} | {consentNoPercent}%</p>
+                        <p className="font-medium text-gray-900">{consentNoCount} | {consentNoPercent}%</p>
                     </div>
                 </div>
                 {/* <div className="flex justify-between">
@@ -153,28 +135,30 @@ function InfoLocationCard({ siteId }: { siteId: string }) {
 
                 <div className="flex justify-between">
                     <p>Left to Visit:</p>
-                    <p className="font-medium text-gray-900">{siteStats.totalHouses - siteStats.visited }</p>
+                    <p className="font-medium text-gray-900">{stillNeedsToBeVisited}</p>
                     {/* <p className="font-medium text-gray-900">{siteStats.totalHouses} - {siteStats.visited}</p> */}
                 </div>
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                     <p>Visited:</p>
-                    <p className="font-medium text-gray-900">{siteStats.visited ?? 0}</p>
-                </div>
+                    <p className="font-medium text-gray-900">{visitedCount + consentNoCount + consentYesCount}</p>
+                </div> */}
 
                 <div className="flex justify-between">
                     <p>Visit Required:</p>
-                    <p className="font-medium text-gray-900">{siteStats.visitRequired}</p>
+                    <p className="font-medium text-gray-900">{visitRequestCount}</p>
                 </div>
 
 
-                {/* <div className="flex justify-between">
+                <div className="flex justify-between">
                     <p>Non-exist.:</p>
-                    <p className="font-medium text-gray-900">{location.totalHousesNonExistent}</p>
-                </div> */}
+                    <p className="font-medium text-gray-900">{nonExistCount}</p>
+                </div>
             </div>
         </div>
     );
 }
+
+
 
 
 function InfoConditionalFormat() {
