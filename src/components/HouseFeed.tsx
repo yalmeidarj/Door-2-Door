@@ -191,6 +191,11 @@ function HousesToBeVisited({
         return <NoHouses />;
     }
 
+    // Sort houses by street number
+    const sortedHouses = houses.sort((a, b) =>
+        a.streetNumber.localeCompare(b.streetNumber, undefined, { numeric: true })
+    )
+
     let currentShift = false;
     if (activeShift?.siteID === houses[0].siteID) {
         currentShift = true;
@@ -211,7 +216,7 @@ function HousesToBeVisited({
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-1 sm:gap-y-1 sm:gap-8 justify-items-center">
-            {houses.map((house) => (
+            {sortedHouses.map((house) => (
                 <div key={house._id} className="w-full max-w-sm">
                     <HouseItem
                         house={house}
