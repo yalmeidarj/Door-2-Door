@@ -28,6 +28,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Check, X } from "lucide-react";
 import { Id } from "../../../../../../../convex/_generated/dataModel";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 interface User {
     _id: string;
@@ -111,12 +112,16 @@ export default function UserManager() {
         )
 
     return (
-            <div className="container mx-auto py-10">
-                <h1 className="text-2xl font-bold mb-5">User Management</h1>
+        <div className="w-full bg-card mx-auto py-4">
+            <ScrollArea
+                
+            >
+
+                {/* <h1 className="text-2xl font-bold mb-5">User Management</h1>
                 <div className="grid gap-6 mb-6">
 
             <div className="bg-card p-4 rounded-lg shadow">
-                <h2 className="text-lg font-semibold mb-4">User List</h2>
+                <h2 className="text-lg font-semibold mb-4">User List</h2> */}
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -133,7 +138,7 @@ export default function UserManager() {
                                         <Input
                                             value={editingUser[user._id]?.name ?? user.name ?? ''}
                                             onChange={(e) => handleEdit(user._id, 'name', e.target.value)}
-                                            className="w-full"
+                                            className="min-w-[100px] w-full"
                                         />
                                     </TableCell>
                                     <TableCell>{user.email}</TableCell>
@@ -173,10 +178,12 @@ export default function UserManager() {
                                 </TableRow>
                             ))}
                         </TableBody>
-                    </Table>
+                </Table>
+                <ScrollBar orientation="horizontal" />
+            </ScrollArea>
             </div>
-            </div>
-            </div>
+            // </div>
+            // </div>
     );
 }
 

@@ -28,6 +28,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Check, X } from "lucide-react";
 import { Id } from "../../../../../../../convex/_generated/dataModel";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 interface User {
     _id: string;
@@ -100,12 +101,12 @@ export default function NewUserRequests() {
 
 
     return (
-        <div className="container mx-auto py-10">
-            <h1 className="text-2xl font-bold mb-5">Access Requests</h1>
-            <div className="grid gap-6 mb-6">
-                <div className="bg-card p-4 rounded-lg shadow">
-                    <h2 className="text-lg font-semibold mb-4">Pending Requests</h2>
-                    <Table>
+        <div className="w-full bg-card mx-auto py-4">
+            <ScrollArea
+
+            >
+                    {/* <h2 className="text-lg font-semibold mb-4">Pending Requests</h2> */}
+                    <Table className="w-full m-0">
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Name</TableHead>
@@ -186,9 +187,9 @@ export default function NewUserRequests() {
                             })}
                         </TableBody>
                     </Table>
+                <ScrollBar orientation="horizontal" />
+            </ScrollArea>
                 </div>
-            </div>
-        </div>
     );
 }
 
