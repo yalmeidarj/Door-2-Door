@@ -114,15 +114,46 @@ export const getFinishedShiftBreakByAgentId = query({
 
 
 export const getActiveShiftsByOrgId = query({
-  args: { orgId: v.string() },
+  args: {
+    orgId: v.string(),
+  },
   handler: async (ctx, { orgId }) => {
-    return await ctx.db
+    // Query for all active shifts for the given organization
+    const shifts = await ctx.db
       .query("shiftLogger")
-      .filter((q) => q.eq(q.field("orgID"), orgId))
-      .filter((q) => q.eq(q.field("isFinished"), false))
+      .withIndex("orgID_isFinished", (q) =>
+        q.eq("orgID", orgId).eq("isFinished", false)
+      )
       .collect();
+
+    if (!shifts.length) {
+      return { message: "No active shifts found for this organization." };
+    }
+    // Extract the shift IDs
+    const shiftIds = shifts.map((s) => s._id);
+
+    // Fetch all shift breaks associated with the active shifts
+    const allShiftBreaks = await ctx.db
+      .query("shiftBreaks")
+      .filter((q) =>
+        q.or(...shiftIds.map((shiftId) => q.eq(q.field("shiftId"), shiftId)))
+      )
+      .collect();
+
+    // Combine shifts with their breaks
+    const shiftsWithBreaks = shifts.map((shift) => {
+      const shiftBreaks = allShiftBreaks.filter((b) => b.shiftId === shift._id);
+      return {
+        ...shift,
+        shiftBreaks,
+      };
+    });
+
+    return shiftsWithBreaks;
   },
 });
+
+
 export const getFinishedShiftsByOrgId = query({
   args: {
     orgId: v.string(),

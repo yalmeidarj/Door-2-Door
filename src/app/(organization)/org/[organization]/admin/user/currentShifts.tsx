@@ -3,7 +3,6 @@
 import { useQuery } from "convex/react";
 import { api } from "../../../../../../../convex/_generated/api";
 import ShiftCard from "@/components/ShiftCard";
-import { Shift } from "@/lib/Shift/types";
 import { usePathname } from "next/navigation";
 
 export default function CurrentShifts() {
@@ -17,18 +16,18 @@ export default function CurrentShifts() {
     if (!shifts) {
         return <div>Looking for Active Shifts for {orgName}...</div>;
     }
-    if (shifts.length === 0) {
+    if (!Array.isArray(shifts)) {
         return <div>No Active Shifts for {orgName}</div>;
     }    
     return (
         <form className="">
-            {/* {shifts.map((shift: Shift) => (
+            {shifts.map((shift) => (
                 <ShiftCard
                     key={shift._id}
                     shift={shift}
-                    diplayFinishedCard={false}  
+                    displayFinishedCard={false}  
                 />
-            ))} */}
+            ))}
         </form>
     )
 }

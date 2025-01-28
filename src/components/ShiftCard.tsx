@@ -13,10 +13,10 @@ interface ShiftCardProps {
      * If true -> display "finished" shifts
      * If false -> display "active" shift
      */
-    diplayFinishedCard?: boolean;
+    displayFinishedCard?: boolean;
 }
 
-export default function ShiftCard({ shift, diplayFinishedCard = true }: ShiftCardProps) {
+export default function ShiftCard({ shift, displayFinishedCard = true }: ShiftCardProps) {
     // 1. If we have a message, display it and exit early
     if ("message" in shift) {
         return <div className="text-red-600">{shift.message}</div>;
@@ -28,7 +28,7 @@ export default function ShiftCard({ shift, diplayFinishedCard = true }: ShiftCar
     // --------------------------------------------
 
     // If displayFinishedCard is false, we want to display only "active" shift
-    if (!diplayFinishedCard) {
+    if (!displayFinishedCard) {
         // Shift must have a startingDate but no finishedDate
         if (!shift.startingDate || shift.finishedDate) {
             return <div>No active shifts found...</div>;

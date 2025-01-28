@@ -189,6 +189,7 @@ export default defineSchema({
     .index("by_user_isFinished_creationTime", ["userID", "isFinished"])
     .index("userID", ["userID"])
     .index("siteID_isFinished", ["siteID", "isFinished"])
+    .index("orgID_isFinished", ["orgID", "isFinished"])
     .index("orgID", ["orgID"])
     .index("startingDate", ["startingDate"])
     .index("siteID", ["siteID"]),
