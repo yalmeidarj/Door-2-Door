@@ -331,9 +331,14 @@ function ClockOut({ clockOutProps }: { clockOutProps: ClockOutProps }) {
                                 General Break
                             </DropdownMenuItem>
                             {/* Transit Break */}
-                            <DropdownMenuItem onClick={() => onDropdownSelect("break", "transit")}>
-                                Transit Break
+                            <div className="cursor-not-allowed">                                            
+                                    <DropdownMenuItem
+                                        disabled
+                                        // className="cursor-wait"
+                                        onClick={() => onDropdownSelect("break", "transit")}>
+                                            Transit Break
                             </DropdownMenuItem>
+                                        </div>
                             {/* Inactivity break is system-only, so not shown here */}
                         </DropdownMenuContent>
                     </DropdownMenu>
