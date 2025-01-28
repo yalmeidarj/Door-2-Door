@@ -59,8 +59,9 @@ export const getActiveShiftByAgentId = query({
   handler: async (ctx, { agentId }) => {
     return await ctx.db
       .query("shiftLogger")
-      .filter((q) => q.eq(q.field("userID"), agentId))
-      .filter((q) => q.eq(q.field("isFinished"), false))
+      .withIndex("by_user_isFinished_creationTime", (q) =>
+        q.eq("userID", agentId as Id<"users">).eq("isFinished", false)
+      )
       .first();
   },
 });

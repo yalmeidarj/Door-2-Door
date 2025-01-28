@@ -83,9 +83,10 @@ export const getStatsHousesByStreetId = query({
       .collect();
 
     // Sort the houses by street number
-    const sortedHouses = houses.sort((a, b) => {
-      return a.streetNumber.localeCompare(b.streetNumber);
-    });
+    const sortedHouses = houses.sort((a, b) =>
+      a.streetNumber.localeCompare(b.streetNumber, undefined, { numeric: true })
+    );
+
     return sortedHouses;
   },
 });
