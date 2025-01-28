@@ -192,10 +192,6 @@ function ClockOut({ clockOutProps }: { clockOutProps: ClockOutProps }) {
         return <div>Loading shift...</div>;
     }
 
-    // // check if shift has breaks
-    // const hasBreaks = useQuery(api.shiftBreaks.getActiveBreakByShiftId, {
-    //     shiftId: shiftId as Id<"shiftLogger">
-    // });
 
     // Format time examples
     const formatElapsedTime = (totalHours: number) => {
@@ -292,7 +288,6 @@ function ClockOut({ clockOutProps }: { clockOutProps: ClockOutProps }) {
                 </div>
                 <div className="flex justify-between items-center gap-2">
                     <span className="text-sm">
-                        Pace:
                         <span className="text-xs text-gray-500"> ~</span>
                         {pace.toFixed(1)}
                         <span className="text-xs text-gray-500">/m</span>
@@ -303,14 +298,12 @@ function ClockOut({ clockOutProps }: { clockOutProps: ClockOutProps }) {
                                 <DropdownMenuTrigger                                    
                                     asChild>    
                                     <p 
-                                        //  border-x border-t border-gray-300
-                                        //   hover:bg-night  hover:text-white
-                                        className="text-xs  text-white bg-red-700
-                                         rounded-md 
-                                          px-1 cursor-pointer
-                                            hover:text-night
-                                            overflow-hidden
-                                         "
+                                    className="text-xs  text-white bg-red-700
+                                        rounded-md 
+                                        px-1 cursor-pointer
+                                        hover:text-night
+                                        overflow-hidden
+                                        "
                                     >   
                                     Clock Out    
                                     </p>
