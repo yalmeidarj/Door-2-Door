@@ -57,7 +57,9 @@ export default async function Page(props: {
             id: 2,
             name: "Update a Site  (FETCHING)",
             // component: <UpdateActiveSite orgName={orgName} />
-            component: <DataProcessor update/>
+            component: <DataProcessor
+                userId={user.id as string}
+                update />
         },
         // {
         //     id: 3,

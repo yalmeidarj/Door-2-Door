@@ -119,6 +119,7 @@ export default defineSchema({
     shiftMaxInactiveTime: v.optional(v.number()),
   })
     .index("orgID", ["orgID"])
+    .index("orgId_name_isActive", ["orgID", "name", "isActive"])
     .index("name", ["name"]),
 
   street: defineTable({
@@ -128,6 +129,7 @@ export default defineSchema({
     lastVisitedBy: v.optional(v.string()),
   })
     .index("siteID", ["siteID"])
+    .index("siteID_name", ["siteID", "name"])
     .index("name", ["name"]),
 
   house: defineTable({

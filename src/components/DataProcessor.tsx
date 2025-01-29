@@ -39,11 +39,12 @@ type DataProcessorProps = {
      * Switches the component between two modes
      * (for example, "Data Processor" vs "Update Data Processor").
      */
+    userId?: string;
     update?: boolean;
 
 };
 
-const DataProcessor: React.FC<DataProcessorProps> = ({ update = false }) => {
+const DataProcessor: React.FC<DataProcessorProps> = ({userId, update = false }) => {
     const pathName = usePathname();
     const orgName = pathName?.split("/")[2]?.replace("%20", " ").replace("-", " ");
     // get org using orgName
@@ -64,7 +65,7 @@ const DataProcessor: React.FC<DataProcessorProps> = ({ update = false }) => {
     const createNewSiteMutation = useMutation(api.site.createNewSite);
     const createNewStreetMutation = useMutation(api.street.createNewStreet);
     const createNewHouseMutation = useMutation(api.house.createNewHouse);
-
+    const updateSiteMutation = useMutation(api.house.updateSiteMutation);
     const updateSite = async () => {
         console.log("Updating site with processed data:", processedData);
         // TODO: Add your update logic
@@ -81,10 +82,18 @@ const DataProcessor: React.FC<DataProcessorProps> = ({ update = false }) => {
 
             // 1) Update the Site
             setLoadingMessage("Updating site...");
-            // await updateSiteMutation({
-            //     name: processedData.name,
-            //     orgID: orgId,
-            // });
+            for (const house of processedData.houses) {
+                setLoadingMessage(`Updating house ${house.streetNumber} ${house.street}...`);
+                await updateSiteMutation({
+                    orgId: orgId,
+                    streetName: house.street,
+                    streetNumber: house.streetNumber,
+                    agentId: userId as Id<"users">, 
+                    siteName: processedData.name,
+                    statusAttempt: house.statusAttempt,
+                    consent: house.consent,
+                });
+            }
             setLoadingMessage(`Site "${processedData.name}" updated successfully.`);
         } catch (err: any) {
             console.error(err);

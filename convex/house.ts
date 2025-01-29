@@ -90,6 +90,7 @@ export const getStatsHousesByStreetId = query({
     return sortedHouses;
   },
 });
+
 export const getActiveHousesByStreetId = query({
   args: {
     streetId: v.string(),
@@ -577,6 +578,79 @@ export const updateProperty = mutation({
     { houseID, ...houseArgs }
   ) => {
     return await ctx.db.patch(houseID, { ...houseArgs });
+  },
+});
+
+
+export const updateSiteMutation = mutation({
+  args: {
+    orgId: v.string(),
+    streetName: v.string(),
+    streetNumber: v.string(),
+    siteName: v.string(),
+    agentId: v.string(),
+    statusAttempt: v.string(),
+    consent: v.optional(v.string()),
+  },
+  handler: async (ctx, { orgId, siteName, streetName, streetNumber, agentId, statusAttempt, consent }) => {
+    // 1. Get the siteID based on the orgID
+    const site = await ctx.db
+      .query("site")
+      .withIndex("orgId_name_isActive", (q) =>
+        q.eq("orgID", orgId as Id<"organization">).eq("name", siteName).eq("isActive", true)
+      )
+      .first();
+
+    if (!site) {
+      throw new Error(`Site not found for orgId: ${orgId}`);
+    }
+
+    // 2. Get the streetID based on the siteID
+    const street = await ctx.db
+      .query("street")
+      .withIndex("siteID_name", (q) =>
+        q
+          .eq("siteID", site._id as Id<"site">)
+          .eq("name", streetName)
+      )
+      .first();
+
+    if (!street) {
+      throw new Error(`Street not found for siteId: ${site._id}`);
+    }
+
+    // 3. Query for the specific house using the streetID and streetNumber
+    const house = await ctx.db
+      .query("house")
+      .withIndex("by_streetID_and_streetNumber", (q) =>
+        q
+          .eq("streetID", street._id as Id<"street">)
+          .eq("streetNumber", streetNumber)
+      )
+      .first();
+
+    if (!house) {
+      throw new Error(
+        `House not found with streetNumber: ${streetNumber} at site ${site._id}`
+      );
+    }
+
+    // 4. Update the house document
+    await ctx.db.patch(house._id, {
+      statusAttempt: statusAttempt + ' ' + consent,
+      consent: consent,
+    });
+
+        // 5. Create a new houseEditLog record
+    await ctx.db.insert("houseEditLog", {
+      houseId: house._id as Id<"house">,
+      agentId: agentId as Id<"users">,
+      statusAttempt: statusAttempt + " " + consent,
+      // consent: consent,
+    });
+
+    return house;
+    
   },
 });
 
