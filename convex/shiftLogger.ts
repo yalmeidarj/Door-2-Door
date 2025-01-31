@@ -70,7 +70,11 @@ export const getActiveShiftsBySiteId = query({
   handler: async (ctx, { siteId }) => {
     return await ctx.db
       .query("shiftLogger")
-      .withIndex("siteID", (q) => q.eq("siteID", siteId as Id<"site">))
+      .withIndex("siteID_isFinished", (q) =>
+        q
+          .eq("siteID", siteId as Id<"site">)
+        .eq("isFinished", false)
+      )
       .collect();
   },
 });
