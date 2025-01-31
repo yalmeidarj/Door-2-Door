@@ -8,6 +8,7 @@ import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { usePathname } from "next/navigation";
 import LoadingSpinner from "./LoadingSpinner";
+import AllUsersInSite from "./AllUsersInSite";
 
 
 export function SiteCard({ siteId }: { siteId: string }) {
@@ -117,7 +118,10 @@ export function SiteCard({ siteId }: { siteId: string }) {
         </div>
         <hr className="border-gray-200 my-2" />
         <div className="mt-3">
-          <h3 className="text-md font-semibold text-gray-700">Active Users</h3>
+              <h3 className="text-md font-semibold text-gray-700">Active Users</h3>
+              <AllUsersInSite
+                siteId={site._id}
+              />
           {/* <ul className="text-sm text-gray-600">
             {activeUsers.map((user, index) => (
               <li key={index}>{user?.split(' ')[0]}</li>

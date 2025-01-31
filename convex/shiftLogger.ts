@@ -65,6 +65,15 @@ export const getActiveShiftByAgentId = query({
       .first();
   },
 });
+export const getActiveShiftsBySiteId = query({
+  args: { siteId: v.string() },
+  handler: async (ctx, { siteId }) => {
+    return await ctx.db
+      .query("shiftLogger")
+      .withIndex("siteID", (q) => q.eq("siteID", siteId as Id<"site">))
+      .collect();
+  },
+});
 
 export const getFinishedShiftBreakByAgentId = query({
   args: {
@@ -230,16 +239,7 @@ export const getShiftsBySiteId = query({
   },
 });
 
-export const getActiveShiftsBySiteId = query({
-  args: { siteId: v.id("site") },
-  handler: async (ctx, { siteId }) => {
-    return await ctx.db
-      .query("shiftLogger")
-      .filter((q) => q.eq(q.field("siteID"), siteId))
-      .filter((q) => q.eq(q.field("isFinished"), false))
-      .collect();
-  },
-});
+
 
 export const updateShiftById = mutation({
   args: {
@@ -279,6 +279,8 @@ export const updateShift = mutation({
     });
   },
 });
+
+
 export const clockOut = mutation({
   args: {
     id: v.id("shiftLogger"),
