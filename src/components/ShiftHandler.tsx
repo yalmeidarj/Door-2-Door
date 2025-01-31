@@ -52,12 +52,18 @@ function ClockIn({ clockInProps }: { clockInProps: ClockInProps }) {
     const { userId } = clockInProps;
     const [selectedSite, setSelectedSite] = useState<string>('');
     const clockIn = useMutation(api.shiftLogger.createShift);
-
+    const user = useQuery(api.users.getUserById, { id: userId as Id<"users"> });
     const pathName = usePathname();
     const orgName = pathName.split("/")[2].replace("%20", " ").replace("-", " ");
 
     const org = useQuery(api.organization.getOrgByName, { name: orgName });
     console.log("org ID: ", org?._id)
+
+    // if (user?.inactivityBlocked) {
+    //     return (
+    //         <BlockedAgent />            
+    //     )
+    // }
 
     if (!org) {
         return (
@@ -68,7 +74,7 @@ function ClockIn({ clockInProps }: { clockInProps: ClockInProps }) {
     const sites = useQuery(api.site.getActiveSitesByOrgId, { orgID: org._id });
 
 
-    if (!sites) {
+    if (!sites || !user){
         return <div>Loading sites...</div>;
     }
     if (!Array.isArray(sites) || sites.length === 0) {
@@ -87,38 +93,57 @@ function ClockIn({ clockInProps }: { clockInProps: ClockInProps }) {
         clockIn({ siteID: siteId, agentId: agentId, orgID: org._id });
     };
 
+
     return (
-        <div className="mt-2">
-            <div className="flex justify-between items-center gap-2 mb-2">
-                <FaClock className="text-night" />
-                <Select onValueChange={handleSiteSelect}>
-                    <SelectTrigger className="bg-night text-white w-[120px] h-[25px] text-sm hover:bg-slate-200 hover:text-night">
-                        <SelectValue placeholder="Clock In" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-night text-white">
-                        {sites.map((site) => (
-                            <SelectItem
-                                key={site._id}
-                                value={site._id}
-                                className="text-xs"
+        <>
+            {user.inactivityBlocked ? (
+                <BlockedAgent />
+            ) : (
+                <div className="mt-2">
+                    <div className="flex justify-between items-center gap-2 mb-2">
+                        <FaClock className="text-night" />
+                        <Select onValueChange={handleSiteSelect}>
+                            <SelectTrigger className="bg-night text-white w-[120px] h-[25px] text-sm hover:bg-slate-200 hover:text-night">
+                                <SelectValue placeholder="Clock In" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-night text-white">
+                                {sites.map((site) => (
+                                    <SelectItem
+                                        key={site._id}
+                                        value={site._id}
+                                        className="text-xs"
+                                    >
+                                        {site.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        {selectedSite && (
+                            <Button
+                                onClick={handleSubmit}
+                                className="text-white bg-green-700 text-xs h-6 px-2 py-0 hover:bg-slate-200 hover:text-night transition-colors"
                             >
-                                {site.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            {selectedSite && (
-                <Button
-                    onClick={handleSubmit}
-                    // variant="ghost"
-                        className="text-white bg-green-700 text-xs h-6 px-2 py-0  hover:bg-slate-200 hover:text-night transition-colors"
-                        >
-                    Clock In
-                </Button>
+                                Clock In
+                            </Button>
+                        )}
+                    </div>
+                </div>
             )}
-            </div>
-        </div>
+        </>
     );
+}
+
+function BlockedAgent() {
+    return (
+        <div className="max-w-max w-full flex flex-col items-center justify-center bg-red-500 text-white p-2">
+            <h1 className="text-sm">            
+            Blocked By Long Inactivity
+            </h1>
+            <h2 className="text-xs">            
+            Please contact an administrator
+            </h2>
+        </div>
+    )
 }
 
 type ClockOutProps = { shiftId: string }

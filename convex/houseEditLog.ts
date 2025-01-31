@@ -1,10 +1,107 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
-import { mutation } from "./_generated/server";
-import { internalMutation } from "./_generated/server";
+/* eslint-disable no-restricted-imports */
+import { mutation as rawMutation, internalMutation as rawInternalMutation } from "./_generated/server";
+/* eslint-enable no-restricted-imports */
+import { DataModel } from "./_generated/dataModel";
+import { Triggers } from "convex-helpers/server/triggers";
+import { customCtx, customMutation } from "convex-helpers/server/customFunctions";
+
 import { internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 import { format } from "date-fns";
+
+
+const triggers = new Triggers<DataModel>();
+export const mutation = customMutation(rawMutation, customCtx(triggers.wrapDB));
+export const internalMutation = customMutation(
+  rawInternalMutation,
+  customCtx(triggers.wrapDB)
+);
+
+triggers.register("houseEditLog", async (ctx, change) => {
+  
+  if (change.newDoc) {
+    // Check if status is not 'consent final'
+    console.log("houseEditLog trigger activated");
+    if (
+      change.newDoc.statusAttempt !== "Consent Final Yes" &&
+      change.newDoc.statusAttempt !== "Consent Final No"
+    ) {
+      const userId = change.newDoc.agentId;
+      // Fetch the *active* shiftLogger document related to the current user
+      const shiftLogger = await ctx.db
+        .query("shiftLogger")
+        .withIndex("by_user_isFinished_creationTime", (q) =>
+          q.eq("userID", userId as Id<"users">).eq("isFinished", false)
+        )
+        .order("desc")
+        .first();
+
+      if (shiftLogger) {
+        console.log("Found shiftLogger: ", shiftLogger);
+        // Check if it's the first house of the shift
+        const isFirstHouse =(
+          (shiftLogger.updatedHouses ?? 0) +
+            (shiftLogger.updatedHousesFinal ?? 0) +
+            (shiftLogger.updatedHousesFinalNo ?? 0)) === 0;
+            console.log("isFirstHouse", isFirstHouse);
+        if (!isFirstHouse) {
+          // Get the last house edit log for the agent
+          const lastEdit = await ctx.db
+            .query("houseEditLog")
+            .withIndex("agentId", (q) => q.eq("agentId", userId))
+            .order("desc")
+            .first();
+
+          if (lastEdit) {
+            console.log("Found lastEdit: ", lastEdit);
+            const userInfo = (
+              await ctx.db.get(userId as Id<"users">)
+            ) ;
+
+            if (userInfo?.shiftMaxInactiveTime) {
+              const timeDifference =
+                shiftLogger.lastActivity ??
+                change.newDoc._creationTime - lastEdit._creationTime;
+              console.log("timeDifference: ", timeDifference);
+              console.log(
+                "shiftMaxInactiveTime: ",
+                userInfo.shiftMaxInactiveTime
+              );
+
+              // Compare time difference with shiftMaxInactiveTime and log if needed
+              if (timeDifference > userInfo.shiftMaxInactiveTime) {
+                // console.log(
+                //   "User Inactive Time Exceeded",
+                //   timeDifference,
+                //   shiftMaxInactiveTime
+                // );
+                // Finish the shift
+                await ctx.db.patch(shiftLogger._id, {
+                  isFinished: true,
+                  lastActivity: Date.now(),
+                  finishedDate: Date.now()
+                });
+                 
+                // Block user
+                await ctx.db.patch(userId as Id<"users">, {
+                  inactivityBlocked: true
+                });
+              } else {
+                // update user's lastActivity
+                await ctx.db.patch(shiftLogger._id, {
+                  lastActivity: Date.now(),
+                });
+              }
+            }
+          }
+        }
+      }
+      // console.log("\nShift not found");
+    }
+  }
+});
 
 export const getEditsByHouseId = query({
   args: { houseId: v.id("house") },

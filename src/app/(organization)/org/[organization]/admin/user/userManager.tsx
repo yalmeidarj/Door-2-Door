@@ -29,6 +29,9 @@ import { Input } from "@/components/ui/input";
 import { Check, X } from "lucide-react";
 import { Id } from "../../../../../../../convex/_generated/dataModel";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { MdNotInterested } from "react-icons/md";
+import { Switch } from "@/components/ui/switch";
+
 
 interface User {
     _id: string;
@@ -36,6 +39,7 @@ interface User {
     name?: string;
     email: string;
     role?: "dev" | "admin" | "user";
+    shiftMaxInactiveTime?: number;
     userId?: string;
     emailVerified?: number;
     image?: string;
@@ -45,29 +49,35 @@ interface User {
 
 export default function UserManager() {
     const updateUser = useMutation(api.users.updateUser);
-    const removeUserFromOrg = useMutation(api.users.removeUserFromOrg);
-    const [users, setUsers] = useState<User[]>([
-    ])
+    const removeUserFromOrg = useMutation(api.users.removeUserFromOrg);    
+    const unblockUser = useMutation(api.users.switchUserBlockStatus);
+    const [users, setUsers] = useState<User[]>([]);
 
     const [editingUser, setEditingUser] = useState<{
         [userId: string]: {
             name?: string;
-            role?: "dev" | "admin" | "user"
+            role?: "dev" | "admin" | "user";
+            shiftMaxInactiveTime?: number;
         }
-    }>({})
+    }>({});
+
     const pathName = usePathname();
     const orgName = pathName.split("/")[2].replace("%20", " ").replace("-", " ");
     const orgId = useQuery(api.organization.getOrgByName, { name: orgName })?._id;
     const orgUsers = useQuery(api.users.getAllUsersInOrgByName, { orgName: orgName });
+
     if (!orgUsers) {
         return <div>Finding Users: {orgName}...</div>;
     }
 
-    const handleEdit = (userId: string, field: 'name' | 'role', value: string) => {
+    const handleEdit = (userId: string, field: 'name' | 'role' | 'shiftMaxInactiveTime', value: string) => {
         setEditingUser(prev => ({
             ...prev,
-            [userId]: { ...prev[userId], [field]: value }
-        }))
+            [userId]: {
+                ...prev[userId],
+                [field]: field === 'shiftMaxInactiveTime' ? Number(value) : value
+            }
+        }));
     }
 
     const handleSubmit = async (userId: string) => {
@@ -75,118 +85,144 @@ export default function UserManager() {
         if (!updatedData) return;
 
         try {
-            // Perform the Convex mutation to update the user in the database
-            const updatedUser = updateUser({ id: userId as Id<"users">, ...updatedData });
+            const updatedUser = await updateUser({
+                id: userId as Id<"users">,
+                ...updatedData
+            });
 
-            // Clear the editing state for this user
             setEditingUser(prev => {
                 const { [userId]: _, ...rest } = prev;
                 return rest;
             });
-            return updatedUser
+            return updatedUser;
         } catch (error) {
             console.error("Failed to update user:", error);
-            // Handle error: show a notification, or revert local changes if needed.
         }
     }
 
-
     const handleDelete = async (userId: string) => {
         try {
-            const deletedUser = removeUserFromOrg({ userId: userId as Id<"users"> });
+            const deletedUser = await removeUserFromOrg({
+                userId: userId as Id<"users">
+            });
 
-            // Remove the deleted user from the local state
-            setUsers((prevUsers) => prevUsers.filter((user) => user._id !== userId));
+            setUsers((prevUsers) =>
+                prevUsers.filter((user) => user._id !== userId)
+            );
 
-            return deletedUser
+            return deletedUser;
         } catch (error) {
             console.error("Failed to delete user:", error);
-            // Handle error: show a notification, or revert local changes if needed.
         }
     };
 
     const isEditing = (userId: string) =>
         editingUser[userId] && (
             editingUser[userId].name !== undefined ||
-            editingUser[userId].role !== undefined
-        )
+            editingUser[userId].role !== undefined ||
+            editingUser[userId].shiftMaxInactiveTime !== undefined
+        );
+
+    const formatInactiveTime = (time: number | undefined) => {
+        if (!time) return '';
+        return time.toString();
+    };
+
+    async function onUnblockSubmit(userId: string) {
+        await unblockUser({ userId: userId as Id<"users"> });
+    }
 
     return (
         <div className="w-full bg-card mx-auto py-4">
-            <ScrollArea
-                
-            >
-
-                {/* <h1 className="text-2xl font-bold mb-5">User Management</h1>
-                <div className="grid gap-6 mb-6">
-
-            <div className="bg-card p-4 rounded-lg shadow">
-                <h2 className="text-lg font-semibold mb-4">User List</h2> */}
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Role</TableHead>
-                                <TableHead>Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {orgUsers?.map((user) => (
-                                <TableRow key={user._id}>
-                                    <TableCell>
-                                        <Input
-                                            value={editingUser[user._id]?.name ?? user.name ?? ''}
-                                            onChange={(e) => handleEdit(user._id, 'name', e.target.value)}
-                                            className="min-w-[100px] w-full"
-                                        />
-                                    </TableCell>
-                                    <TableCell>{user.email}</TableCell>
-                                    <TableCell>
-                                        <Select
-                                            value={editingUser[user._id]?.role ?? user.role ?? ''}
-                                            onValueChange={(value) => handleEdit(user._id, 'role', value)}
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="user">User</SelectItem>
-                                                <SelectItem value="admin">Admin</SelectItem>
-                                                <SelectItem value="dev">Developer</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex space-x-2">
-                                            {isEditing(user._id) && (
-                                                <>
-                                                    <Button size="icon" variant="outline" onClick={() => handleSubmit(user._id)}>
-                                                        <Check className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button size="icon" variant="outline" onClick={() => setEditingUser(prev => {
-                                                        const { [user._id]: _, ...rest } = prev
-                                                        return rest
-                                                    })}>
-                                                        <X className="h-4 w-4" />
-                                                    </Button>
-                                                </>
-                                            )}
-                                            <UserDeleteDialog onConfirm={() => handleDelete(user._id)} />
+            <ScrollArea>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Inactivity Time</TableHead>
+                            <TableHead>Role</TableHead>
+                            <TableHead>Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {orgUsers?.map((user) => (
+                            <TableRow
+                                className={user.inactivityBlocked ? "bg-red-100" : ""}
+                                key={user._id}>
+                                <TableCell>
+                                    <Input
+                                        value={editingUser[user._id]?.name ?? user.name ?? ''}
+                                        onChange={(e) => handleEdit(user._id, 'name', e.target.value)}
+                                        className="min-w-[100px] w-full"
+                                    />
+                                </TableCell>
+                                <TableCell>{user.email}</TableCell>
+                                <TableCell
+                                    className="flex flex-row items-center w-full justify-between"
+                                >
+                                    <Input
+                                        value={editingUser[user._id]?.shiftMaxInactiveTime ?? formatInactiveTime(user.shiftMaxInactiveTime)}
+                                        onChange={(e) => handleEdit(user._id, 'shiftMaxInactiveTime', e.target.value)}
+                                        type="number"
+                                        min="0"
+                                        max="1440"
+                                        placeholder="0-1440"
+                                        className="max-w-[100px] w-full"
+                                    />
+                                    {user.inactivityBlocked && <>
+                                        
+                                        <div className="flex flex-col items-center space-x-2">
+                                            <Switch
+                                                id={user._id}
+                                                onCheckedChange={onUnblockSubmit.bind(null, user._id)}
+                                                checked />
+                                            <Label htmlFor="airplane-mode">Unblock User</Label>
                                         </div>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
+                                    </>}
+                                </TableCell>
+                                <TableCell>
+                                    <Select
+                                        value={editingUser[user._id]?.role ?? user.role ?? ''}
+                                        onValueChange={(value) => handleEdit(user._id, 'role', value)}
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="user">User</SelectItem>
+                                            <SelectItem value="admin">Admin</SelectItem>
+                                            <SelectItem value="dev">Dev</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex space-x-2">
+                                        {isEditing(user._id) && (
+                                            <>
+                                                <Button size="icon" variant="outline" onClick={() => handleSubmit(user._id)}>
+                                                    <Check className="h-4 w-4" />
+                                                </Button>
+                                                <Button size="icon" variant="outline" onClick={() => setEditingUser(prev => {
+                                                    const { [user._id]: _, ...rest } = prev;
+                                                    return rest;
+                                                })}>
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            </>
+                                        )}
+                                        <UserDeleteDialog onConfirm={() => handleDelete(user._id)} />
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
                 </Table>
                 <ScrollBar orientation="horizontal" />
             </ScrollArea>
-            </div>
-            // </div>
-            // </div>
+        </div>
     );
 }
-
 interface UserDeleteDialogProps {
     onConfirm: () => void
 }

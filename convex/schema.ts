@@ -10,6 +10,7 @@ export const userSchema = {
   name: v.optional(v.string()),
   emailVerified: v.optional(v.number()),
   image: v.optional(v.string()),
+  inactivityBlocked: v.optional(v.boolean()),
   role: v.optional(
     v.union(v.literal("dev"), v.literal("admin"), v.literal("user"))
   ),
@@ -172,6 +173,7 @@ export default defineSchema({
     phone: v.optional(v.string()),
   })
     .index("houseId", ["houseId"])
+
     .index("agentId", ["agentId"]),
   shiftLogger: defineTable({
     userID: v.id("users"), // User ID of the agent
@@ -186,6 +188,7 @@ export default defineSchema({
     updatedHousesFinalNo: v.optional(v.number()),
     pace: v.optional(v.number()),
     maxInactiveTime: v.optional(v.number()),
+    lastActivity: v.optional(v.number()),
     // paceFinal: v.optional(v.number()),
   })
     .index("by_user_isFinished_creationTime", ["userID", "isFinished"])
