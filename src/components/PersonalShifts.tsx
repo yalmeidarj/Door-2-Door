@@ -177,22 +177,17 @@ function ShiftDurationDisplay({ shifts }: ShiftDurationDisplayProps) {
             <CardContent className="p-6">
                 {/* Overall Totals Section */}
                 <section className="mb-8">
-                    <div className="flex items-center">
+                    <div className="flex items-center justify-between">
                         {/* Section title takes 2/5 of the width */}
                         <div className="w-2/5">
                             <h2 className="text-xl font-semibold">Overall Totals</h2>
                         </div>
                         {/* Totals data takes the remaining 3/5 */}
-                        <div className="w-3/5 flex justify-between items-center">
+                        <div className="w-3/5 flex justify-end gap-6 border bg-slate-100 p-2 max-w-max items-center">
                             <div className="flex flex-col items-center">
                                 <span className="text-gray-700 text-sm">Total Hours</span>
-                                <span className="text-gray-700 text-xl font-semibold">{formattedTotalHoursWorked}</span>
-                                {/* <DataBadge color="bg-green-500">{formattedTotalHoursWorked}</DataBadge> */}
+                                <span className="text-gray-700 text-xl font-semibold">{formattedTotalHoursWorked}</span>                               
                             </div>
-                            {/* <div className="flex flex-col items-center">
-                                <span className="text-gray-700 text-sm">Average Shift</span>
-                                <DataBadge color="bg-blue-500">{avgDurationFormatted}</DataBadge>
-                            </div> */}
                             <div className="flex justify-center items-center max-x-max ">
                             <div className="flex flex-col items-center">
                                 <span className="text-gray-700 text-sm">Att.</span>
@@ -228,7 +223,24 @@ function ShiftDurationDisplay({ shifts }: ShiftDurationDisplayProps) {
                                     {/* {shift.location && (
                                     )} */}
                                 </div>
+                                <div className="max-w-max flex justify-between items-center gap-6">
                                 <span className="text-xl font-bolt">{shift.formattedDuration}</span>
+                                
+                                    <div className="flex justify-center items-center max-x-max ">
+                                        <div className="flex flex-col items-center justify-between ">
+                                            <span className="text-gray-700 self-start text-sm">Att.</span>
+                                            <span className="text-gray-700 text-sm">{shift.updatedHouses ?? 0}</span>
+                                        </div>
+                                        <div className="flex flex-col items-center border-x mx-1 px-1">
+                                            <span className="text-gray-700 self-start text-sm">Yes</span>
+                                            <span className="text-gray-700 text-sm">{shift.updatedHousesFinal ?? 0}</span>
+                                        </div>
+                                        <div className="flex flex-col items-center">
+                                            <span className="text-gray-700 self-start text-sm">No</span>
+                                            <span className="text-gray-700 text-sm">{shift.updatedHousesFinalNo ?? 0}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         ))}
                     </div>
