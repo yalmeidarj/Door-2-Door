@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import { DatePickerWithRange } from '@/components/DatePickerWithRange';
 import { DateRange } from 'react-day-picker';
 import ShiftCard from './ShiftCard';
@@ -8,6 +8,8 @@ import { useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Id } from '../../convex/_generated/dataModel';
+import { CalendarDays } from "lucide-react"
+import SiteName from './SiteName';
 
 export type SingleShift = {
     _id: string;
@@ -44,11 +46,48 @@ interface ShiftDurationDisplayProps {
     // and handle the case when it's an array vs. when it's { message: string }
     shifts: ShiftBreakData;
 }
+
+function formatDurationMs(durationMs: number) {
+    // Convert total duration (ms) to hours and minutes
+    const totalHours = durationMs / (1000 * 60 * 60);
+    const hours = Math.floor(totalHours);
+    // Zero-pad minutes if you want an "H:MMh" style
+    const minutes = Math.floor((totalHours - hours) * 60);
+
+    // For a "H:MMh" format (3:05h)
+    if (hours > 0) {
+        const paddedMinutes = String(minutes).padStart(2, "0");
+        return `${hours}:${paddedMinutes}h`;
+    }
+    // If no whole hours, just show minutes
+    return `${minutes}m`;
+
+    /*
+    // Alternate style: "Xh Ym"
+    if (hours > 0 && minutes > 0) {
+      return `${hours}h ${minutes}m`;
+    } else if (hours > 0) {
+      return `${hours}h`;
+    } else if (minutes > 0) {
+      return `${minutes}m`;
+    } else {
+      return "0m";
+    }
+    */
+}
+
+function formatHoursDecimal(totalHours: number) {
+    // For the summary "Xh Ym"
+    const hours = Math.floor(totalHours);
+    const minutes = Math.floor((totalHours - hours) * 60);
+    return `${hours}h ${minutes}m`;
+}
+
 // -----------------------------------------------
 // ShiftDurationDisplay Component
 // -----------------------------------------------
-const ShiftDurationDisplay: React.FC<ShiftDurationDisplayProps> = ({ shifts }) => {
-    // 1. Handle the case where shifts is not an array but rather { message: string }
+function ShiftDurationDisplay({ shifts }: ShiftDurationDisplayProps) {
+    // 1. Handle the case where shifts is not an array
     if (!Array.isArray(shifts)) {
         return (
             <Card className="w-full">
@@ -56,14 +95,13 @@ const ShiftDurationDisplay: React.FC<ShiftDurationDisplayProps> = ({ shifts }) =
                     <CardTitle>Shift Durations</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {/* Show the message or a fallback if no message is provided */}
                     <p className="text-gray-500">{shifts.message ?? "No shift data available"}</p>
                 </CardContent>
             </Card>
         );
     }
 
-    // 2. From here on, we know 'shifts' is an array of shift objects.
+    // 2. If we have an empty array
     if (shifts.length === 0) {
         return (
             <Card className="w-full">
@@ -81,24 +119,13 @@ const ShiftDurationDisplay: React.FC<ShiftDurationDisplayProps> = ({ shifts }) =
     const shiftsWithDuration = shifts
         .filter((shift) => shift.startingDate && shift.finishedDate)
         .map((shift) => {
-            const startTime = shift.startingDate;
-            const endTime = shift.finishedDate!; // safe because of the filter
-
-            // Calculate duration in milliseconds
-            const durationMs = endTime - startTime;
-
-            // Convert to hours and minutes
-            const hours = Math.floor(durationMs / (1000 * 60 * 60));
-            const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+            const { startingDate, finishedDate } = shift;
+            const durationMs = finishedDate! - startingDate; // safe because of the filter
 
             return {
                 ...shift,
-                duration: {
-                    hours,
-                    minutes,
-                    totalHours: durationMs / (1000 * 60 * 60),
-                    raw: durationMs,
-                },
+                durationMs,
+                formattedDuration: formatDurationMs(durationMs),
             };
         });
 
@@ -115,86 +142,122 @@ const ShiftDurationDisplay: React.FC<ShiftDurationDisplayProps> = ({ shifts }) =
         );
     }
 
-    // 4. Calculate total and average durations
-    const totalDuration = shiftsWithDuration.reduce((acc, shift) => acc + shift.duration.raw, 0);
-    const avgDuration = totalDuration / shiftsWithDuration.length;
+    // 4. Calculate total and average durations in ms
+    const totalDurationMs = shiftsWithDuration.reduce((acc, shift) => acc + shift.durationMs, 0);
+    const avgDurationMs = totalDurationMs / shiftsWithDuration.length;
 
-    const avgHours = Math.floor(avgDuration / (1000 * 60 * 60));
-    const avgMinutes = Math.floor((avgDuration % (1000 * 60 * 60)) / (1000 * 60));
+    // 5. Convert ms -> hours for total hours worked
+    const totalHoursWorked = totalDurationMs / (1000 * 60 * 60);
 
-    // 5. Calculate total hours worked
-    const totalHoursWorked = shiftsWithDuration.reduce((acc, shift) => {
-        return acc + shift.duration.totalHours;
-    }, 0);
+    // 6. Format total hours worked (e.g., "3h 15m")
+    const formattedTotalHoursWorked = formatHoursDecimal(totalHoursWorked);
 
-    // 6. Format total hours worked as h:m
-    const formattedTotalHoursWorked = `${Math.floor(totalHoursWorked)}h ${Math.floor(
-        (totalHoursWorked - Math.floor(totalHoursWorked)) * 60
-    )}m`;
+    // For average shift
+    const avgDurationFormatted = formatDurationMs(avgDurationMs);
+
+    // 7. Calculate totals for updatedHouses, updatedHousesFinal, updatedHousesFinalNo
+    const totalUpdatedHouses = shiftsWithDuration.reduce(
+        (acc, shift) => acc + (shift.updatedHouses ?? 0),
+        0
+    );
+    const totalUpdatedHousesFinal = shiftsWithDuration.reduce(
+        (acc, shift) => acc + (shift.updatedHousesFinal ?? 0),
+        0
+    );
+    const totalUpdatedHousesFinalNo = shiftsWithDuration.reduce(
+        (acc, shift) => acc + (shift.updatedHousesFinalNo ?? 0),
+        0
+    );
 
     return (
-        <Card className="w-full">
-            <CardHeader>
-                <CardTitle>Summary</CardTitle>
+        <Card className="w-full shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-night to-black p-4 rounded-t-lg">
+                <CardTitle className="text-white text-2xl font-bold">Work Summary</CardTitle>
             </CardHeader>
-            <CardContent>
-                <div className="space-y-4">
-                    <div className="py-2 p-2 bg-slate-200 text-night border-y items-center">
-                        <div className="flex justify-between items-center">
-                            <span className="font-medium">Total Hours:</span>
-                            <span className="text-lg font-semibold">{formattedTotalHoursWorked}</span>
+            <CardContent className="p-6">
+                {/* Overall Totals Section */}
+                <section className="mb-8">
+                    <div className="flex items-center">
+                        {/* Section title takes 2/5 of the width */}
+                        <div className="w-2/5">
+                            <h2 className="text-xl font-semibold">Overall Totals</h2>
+                        </div>
+                        {/* Totals data takes the remaining 3/5 */}
+                        <div className="w-3/5 flex justify-between items-center">
+                            <div className="flex flex-col items-center">
+                                <span className="text-gray-700 text-sm">Total Hours</span>
+                                <span className="text-gray-700 text-xl font-semibold">{formattedTotalHoursWorked}</span>
+                                {/* <DataBadge color="bg-green-500">{formattedTotalHoursWorked}</DataBadge> */}
+                            </div>
+                            {/* <div className="flex flex-col items-center">
+                                <span className="text-gray-700 text-sm">Average Shift</span>
+                                <DataBadge color="bg-blue-500">{avgDurationFormatted}</DataBadge>
+                            </div> */}
+                            <div className="flex justify-center items-center max-x-max ">
+                            <div className="flex flex-col items-center">
+                                <span className="text-gray-700 text-sm">Att.</span>
+                                <span className="text-gray-700 text-sm">{totalUpdatedHouses}</span>
+                            </div>
+                            <div className="flex flex-col items-center border-x m-1 p-1">
+                                <span className="text-gray-700 text-sm">Yes</span>
+                                <span className="text-gray-700 text-sm">{totalUpdatedHousesFinal}</span>
+                            </div>
+                            <div className="flex flex-col items-center">
+                                <span className="text-gray-700 text-sm">No</span>
+                                <span className="text-gray-700 text-sm">{totalUpdatedHousesFinalNo}</span>
+                            </div>
+                        </div>
                         </div>
                     </div>
+                </section>
 
-                    <div className="grid gap-4 bg-gray-50 rounded">
+                {/* Shift Details Section */}
+                <section>
+                    <div className="space-y-3">
                         {shiftsWithDuration.map((shift, index) => (
                             <div
                                 key={shift._id ?? index}
-                                className="p-2 border-b border-slate-200"
+                                className="flex justify-between items-center bg-white p-4  border-b"
                             >
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm font-medium">
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-medium text-gray-800">
                                         {new Date(shift.startingDate).toLocaleDateString()}
                                     </span>
-                                    <span className="text-sm">
-                                        {shift.duration.hours}h {shift.duration.minutes}m
-                                    </span>
+                                    {/* Optionally include additional shift details if available */}
+                                    <span className="text-xs text-gray-500"> {<SiteName id={shift.siteID} />}</span>
+                                    {/* {shift.location && (
+                                    )} */}
                                 </div>
-
-                                {/* Display Break Info */}
-                                {/* <div className="mt-2 ml-4 text-xs text-gray-600">
-                                    <p className="font-semibold">Breaks:</p>
-                                    {shift.shiftBreaks && shift.shiftBreaks.length > 0 ? (
-                                        shift.shiftBreaks.map((b) => (
-                                            <div
-                                                key={b._id}
-                                                className="flex flex-col ml-2 my-1 border-l pl-2"
-                                            >
-                                                <span>Motive: {b.motive}</span>
-                                                <span>Status: {b.status}</span>
-                                                <span>
-                                                    End Time:
-                                                    {b.endTime
-                                                        ? ` ${new Date(b.endTime).toLocaleTimeString()}`
-                                                        : " N/A"}
-                                                </span>
-                                                {b.description && (
-                                                    <span>Description: {b.description}</span>
-                                                )}
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <span className="ml-2">No breaks recorded</span>
-                                    )}
-                                </div> */}
+                                <span className="text-xl font-bolt">{shift.formattedDuration}</span>
                             </div>
                         ))}
                     </div>
-                </div>
+                </section>
             </CardContent>
         </Card>
     );
-};
+}
+const DataBadge = ({ children, color = 'bg-blue-500' }: { children: ReactNode, color?: string }) => (
+    
+    <span className={`inline-block px-3 py-1 text-sm font-semibold text-white rounded-full ${color}`}>
+        {children}
+    </span>
+);
+
+interface SummaryItemProps {
+    label: string
+    value: ReactNode
+    color?: string
+}
+
+function SummaryItem({ label, value, color = "bg-blue-100 text-blue-800" }: SummaryItemProps) {
+    return (
+        <div className="flex flex-col max-w-max justify-between text-center items-center py-2">
+            <span className="text-sm font-medium text-gray-600">{label}</span>
+            <span className={`px-2 py-1 rounded-full text-sm font-semibold ${color}`}>{value}</span>
+        </div>
+    )
+}
 
 
 export default function PersonalShifts({ agentId }: { agentId: string }) {

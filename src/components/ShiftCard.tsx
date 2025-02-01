@@ -42,35 +42,51 @@ export default function ShiftCard({ shift, displayFinishedCard = true }: ShiftCa
 
     const formatElapsedTime = (totalHours: number) => {
         const hours = Math.floor(totalHours);
-        const minutes = Math.round((totalHours - hours) * 60);
+        // Using Math.floor for minutes is often more expected than Math.ceil
+        const minutes = Math.floor((totalHours - hours) * 60);
 
-        // Handle different display cases
-        if (hours > 0 && minutes > 0) {
-            return `${hours}:${minutes}h`;
-        } else if (hours > 0) {
-            return `${hours}h`;
-        } else if (minutes > 0) {
-            return `${minutes}m`;
-        } else {
-            return "0m";
+        // Option A: "H:MMh" style (e.g., 3:05h)
+        if (hours > 0) {
+            // zero-pad the minutes to always be two digits
+            const paddedMinutes = String(minutes).padStart(2, '0');
+            return `${hours}:${paddedMinutes}h`;
         }
+        // If < 1 hour, just show minutes
+        return `${minutes}m`;
+
+        /* 
+         // Option B: "Hh Mm" style
+         if (hours > 0 && minutes > 0) {
+           return `${hours}h ${minutes}m`;
+         } else if (hours > 0) {
+           return `${hours}h`;
+         } else if (minutes > 0) {
+           return `${minutes}m`;
+         } else {
+           return '0m';
+         }
+         */
     };
 
-    const elapsedTimeInHours = shift.startingDate
-        ? (Date.now() - shift.startingDate) / 3600000
-        : 0; // hours
+    const endTime = shift.finishedDate || Date.now();
 
-    const elapsedTimeInMinutes = shift.startingDate
-        ? (Date.now() - shift.startingDate) / 60000
-        : 0; // minutes
+    // Total elapsed time in milliseconds
+    const elapsedMs = endTime - shift.startingDate;
 
+    // Convert to hours/minutes
+    const elapsedTimeInHours = elapsedMs / 3600000;
+    const elapsedTimeInMinutes = elapsedMs / 60000;
+
+    // Houses updated
     const houseYes = shift.updatedHousesFinal ?? 0;
     const housesOthers = shift.updatedHouses ?? 0;
     const housesNo = shift.updatedHousesFinalNo ?? 0;
     const totalHouses = houseYes + housesOthers + housesNo;
 
-    // Calculate pace
+    // Calculate pace: houses / minute
     const pace = elapsedTimeInMinutes > 0 ? totalHouses / elapsedTimeInMinutes : 0;
+
+    // Format the elapsed time
     const formattedElapsedTime = formatElapsedTime(elapsedTimeInHours);
 
     return (

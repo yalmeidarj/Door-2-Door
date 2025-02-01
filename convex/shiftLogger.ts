@@ -98,8 +98,8 @@ export const getFinishedShiftBreakByAgentId = query({
           .eq("isFinished", true)
           .gte("_creationTime", startTime)
           .lte("_creationTime", endTime)
-      )
-
+    )
+      .order("desc")
       .collect();
 
     if (!shifts.length) {
