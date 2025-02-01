@@ -84,7 +84,9 @@ export default function ShiftCard({ shift, displayFinishedCard = true }: ShiftCa
     const totalHouses = houseYes + housesOthers + housesNo;
 
     // Calculate pace: houses / minute
-    const pace = elapsedTimeInMinutes > 0 ? totalHouses / elapsedTimeInMinutes : 0;
+    const pace = elapsedTimeInMinutes > 0 ?
+        elapsedTimeInMinutes /totalHouses
+        : 0;
 
     // Format the elapsed time
     const formattedElapsedTime = formatElapsedTime(elapsedTimeInHours);

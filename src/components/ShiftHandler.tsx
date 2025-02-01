@@ -249,7 +249,7 @@ function ClockOut({ clockOutProps }: { clockOutProps: ClockOutProps }) {
     const housesOthers = shift.updatedHouses ?? 0;
     const housesNo = shift.updatedHousesFinalNo ?? 0;
     const totalHouses = houseYes + housesOthers + housesNo;
-    const pace = totalHouses / elapsedTimeInMinutes;
+    const pace = elapsedTimeInMinutes / totalHouses ;
 
     const handleClockOut = async () => {
         try {

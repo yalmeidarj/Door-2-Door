@@ -126,6 +126,7 @@ function ShiftDurationDisplay({ shifts }: ShiftDurationDisplayProps) {
                 ...shift,
                 durationMs,
                 formattedDuration: formatDurationMs(durationMs),
+                duration: durationMs,
             };
         });
 
@@ -169,6 +170,9 @@ function ShiftDurationDisplay({ shifts }: ShiftDurationDisplayProps) {
         0
     );
 
+    const allTotalHouses = totalUpdatedHouses + totalUpdatedHousesFinal + totalUpdatedHousesFinalNo;
+    const pace = totalDurationMs / allTotalHouses;
+
     return (
         <Card className="w-full shadow-lg">
             <CardHeader className="bg-gradient-to-r from-night to-black p-4 rounded-t-lg">
@@ -201,6 +205,10 @@ function ShiftDurationDisplay({ shifts }: ShiftDurationDisplayProps) {
                                 <span className="text-gray-700 text-sm">No</span>
                                 <span className="text-gray-700 text-sm">{totalUpdatedHousesFinalNo}</span>
                             </div>
+                            {/* <div className="flex flex-col items-center">
+                                <span className="text-gray-700 text-sm">Pace</span>
+                                    <span className="text-gray-700 text-sm">{pace.toFixed(2)}</span>
+                            </div> */}
                         </div>
                         </div>
                     </div>
@@ -239,6 +247,10 @@ function ShiftDurationDisplay({ shifts }: ShiftDurationDisplayProps) {
                                             <span className="text-gray-700 self-start text-sm">No</span>
                                             <span className="text-gray-700 text-sm">{shift.updatedHousesFinalNo ?? 0}</span>
                                         </div>
+                                        {/* <div className="flex flex-col items-center">
+                                            <span className="text-gray-700 text-sm">Pace</span>
+                                            <span className="text-gray-700 text-sm">{((shift.durationMs ?? 0)  / (shift.updatedHouses ?? 0 + (shift.updatedHousesFinal ?? 0) + (shift.updatedHousesFinalNo ?? 0) )).toFixed(2)}</span>
+                                        </div> */}
                                     </div>
                                 </div>
                             </div>
