@@ -164,24 +164,37 @@ export default function UserManager() {
                                 <TableCell
                                     className="flex flex-row items-center w-full justify-between"
                                 >
+                                    <div className='flex flex-col m-1'>  
+                                    <Label
+                                        htmlFor="AttemptTime"
+                                        className="text-xs text-center"
+                                    >Attempt</Label>
                                     <Input
                                         value={editingUser[user._id]?.shiftMaxInactiveTime ?? formatInactiveTime(user.shiftMaxInactiveTime)}
                                         onChange={(e) => handleEdit(user._id, 'shiftMaxInactiveTime', e.target.value)}
                                         type="number"
                                         min="0"
                                         max="1440"
-                                        placeholder="0-1440"
-                                        className="max-w-[60px] w-full"
+                                        placeholder="Attempt"
+                                            className="max-w-[60px] w-full "
                                     />
+                                        </div>
+                                    <div className='flex flex-col m-1'>                                    
+                                    <Label
+                                        htmlFor="ConsentTime"
+                                        className="text-xs text-center"
+
+                                    >Consent</Label>
                                     <Input
                                         value={editingUser[user._id]?.shiftMaxInactiveTimeFinal ?? formatInactiveTime(user.shiftMaxInactiveTimeFinal)}
                                         onChange={(e) => handleEdit(user._id, 'shiftMaxInactiveTimeFinal', e.target.value)}
                                         type="number"
                                         min="0"
                                         max="1440"
-                                        placeholder="0-1440"
-                                        className="max-w-[60px] w-full"
-                                    />
+                                        placeholder="Consent"
+                                            className="max-w-[60px] w-full "
+                                        />
+                                        </div>
                                     {user.inactivityBlocked && <>
                                         
                                         <div className="flex flex-col items-center space-x-2">
