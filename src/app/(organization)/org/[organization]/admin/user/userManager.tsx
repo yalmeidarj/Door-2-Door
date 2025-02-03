@@ -40,6 +40,7 @@ interface User {
     email: string;
     role?: "dev" | "admin" | "user";
     shiftMaxInactiveTime?: number;
+    shiftMaxInactiveTimeFinal?: number;
     userId?: string;
     emailVerified?: number;
     image?: string;
@@ -58,6 +59,7 @@ export default function UserManager() {
             name?: string;
             role?: "dev" | "admin" | "user";
             shiftMaxInactiveTime?: number;
+            shiftMaxInactiveTimeFinal?: number;
         }
     }>({});
 
@@ -70,12 +72,12 @@ export default function UserManager() {
         return <div>Finding Users: {orgName}...</div>;
     }
 
-    const handleEdit = (userId: string, field: 'name' | 'role' | 'shiftMaxInactiveTime', value: string) => {
+    const handleEdit = (userId: string, field: 'name' | 'role' | 'shiftMaxInactiveTime' | 'shiftMaxInactiveTimeFinal', value: string) => {
         setEditingUser(prev => ({
             ...prev,
             [userId]: {
                 ...prev[userId],
-                [field]: field === 'shiftMaxInactiveTime' ? Number(value) : value
+                [field]: field === 'shiftMaxInactiveTime' || field === 'shiftMaxInactiveTimeFinal' ? Number(value) : value
             }
         }));
     }
@@ -120,7 +122,8 @@ export default function UserManager() {
         editingUser[userId] && (
             editingUser[userId].name !== undefined ||
             editingUser[userId].role !== undefined ||
-            editingUser[userId].shiftMaxInactiveTime !== undefined
+            editingUser[userId].shiftMaxInactiveTime !== undefined ||
+            editingUser[userId].shiftMaxInactiveTimeFinal !== undefined
         );
 
     const formatInactiveTime = (time: number | undefined) => {
@@ -168,7 +171,16 @@ export default function UserManager() {
                                         min="0"
                                         max="1440"
                                         placeholder="0-1440"
-                                        className="max-w-[100px] w-full"
+                                        className="max-w-[60px] w-full"
+                                    />
+                                    <Input
+                                        value={editingUser[user._id]?.shiftMaxInactiveTimeFinal ?? formatInactiveTime(user.shiftMaxInactiveTimeFinal)}
+                                        onChange={(e) => handleEdit(user._id, 'shiftMaxInactiveTimeFinal', e.target.value)}
+                                        type="number"
+                                        min="0"
+                                        max="1440"
+                                        placeholder="0-1440"
+                                        className="max-w-[60px] w-full"
                                     />
                                     {user.inactivityBlocked && <>
                                         

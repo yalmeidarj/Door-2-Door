@@ -20,76 +20,61 @@ export const internalMutation = customMutation(
 );
 
 triggers.register("houseEditLog", async (ctx, change) => {
-  
   if (change.newDoc) {
-    // Check if status is not 'consent final'
     console.log("houseEditLog trigger activated");
-    if (
-      change.newDoc.statusAttempt !== "Consent Final Yes" &&
-      change.newDoc.statusAttempt !== "Consent Final No"
-    ) {
-      const userId = change.newDoc.agentId;
-      // Fetch the *active* shiftLogger document related to the current user
-      const shiftLogger = await ctx.db
-        .query("shiftLogger")
-        .withIndex("by_user_isFinished_creationTime", (q) =>
-          q.eq("userID", userId as Id<"users">).eq("isFinished", false)
-        )
-        .order("desc")
-        .first();
+    const userId = change.newDoc.agentId;
+    const shiftLogger = await ctx.db
+      .query("shiftLogger")
+      .withIndex("by_user_isFinished_creationTime", (q) =>
+        q.eq("userID", userId as Id<"users">).eq("isFinished", false)
+      )
+      .order("desc")
+      .first();
 
-      if (shiftLogger) {
-        console.log("Found shiftLogger: ", shiftLogger);
-        // Check if it's the first house of the shift
-        const isFirstHouse =(
-          (shiftLogger.updatedHouses ?? 0) +
-            (shiftLogger.updatedHousesFinal ?? 0) +
-            (shiftLogger.updatedHousesFinalNo ?? 0)) === 0;
-            console.log("isFirstHouse", isFirstHouse);
-        if (!isFirstHouse) {
-          // Get the last house edit log for the agent
-          const lastEdit = await ctx.db
-            .query("houseEditLog")
-            .withIndex("agentId", (q) => q.eq("agentId", userId))
-            .order("desc")
-            .first();
+    if (shiftLogger) {
+      console.log("Found shiftLogger: ", shiftLogger);
+      const isFirstHouse =
+        (shiftLogger.updatedHouses ?? 0) +
+          (shiftLogger.updatedHousesFinal ?? 0) +
+          (shiftLogger.updatedHousesFinalNo ?? 0) ===
+        0;
+      console.log("isFirstHouse", isFirstHouse);
+      if (!isFirstHouse) {
+        const lastEdit = await ctx.db
+          .query("houseEditLog")
+          .withIndex("agentId", (q) => q.eq("agentId", userId))
+          .order("desc")
+          .first();
 
-          if (lastEdit) {
-            console.log("Found lastEdit: ", lastEdit);
-            const userInfo = (
-              await ctx.db.get(userId as Id<"users">)
-            ) ;
+        if (lastEdit) {
+          console.log("Found lastEdit: ", lastEdit);
+          const userInfo = await ctx.db.get(userId as Id<"users">);
 
-            if (userInfo?.shiftMaxInactiveTime) {
+          if (userInfo) {
+            const inactivityTime =
+              change.newDoc.statusAttempt === "Consent Final Yes" ||
+              change.newDoc.statusAttempt === "Consent Final No"
+                ? userInfo.shiftMaxInactiveTimeFinal
+                : userInfo.shiftMaxInactiveTime;
+
+            if (inactivityTime) {
               const timeDifference =
                 shiftLogger.lastActivity ??
                 change.newDoc._creationTime - lastEdit._creationTime;
               console.log("timeDifference: ", timeDifference);
-              console.log(
-                "shiftMaxInactiveTime: ",
-                userInfo.shiftMaxInactiveTime
-              );
+              console.log("inactivityTime: ", inactivityTime);
 
-              // Compare time difference with shiftMaxInactiveTime and log if needed
-              if (timeDifference > userInfo.shiftMaxInactiveTime) {
-                // console.log(
-                //   "User Inactive Time Exceeded",
-                //   timeDifference,
-                //   shiftMaxInactiveTime
-                // );
-                // Finish the shift
+              if (timeDifference > inactivityTime) {
                 await ctx.db.patch(shiftLogger._id, {
                   isFinished: true,
                   lastActivity: Date.now(),
-                  finishedDate: Date.now()
+                  finishedDate: Date.now(),
                 });
-                 
-                // Block user
+
                 await ctx.db.patch(userId as Id<"users">, {
-                  inactivityBlocked: true
+                  inactivityBlocked: true,
                 });
               } else {
-                // update user's lastActivity
                 await ctx.db.patch(shiftLogger._id, {
                   lastActivity: Date.now(),
                 });
@@ -98,10 +83,10 @@ triggers.register("houseEditLog", async (ctx, change) => {
           }
         }
       }
-      // console.log("\nShift not found");
     }
   }
 });
+
 
 export const getEditsByHouseId = query({
   args: { houseId: v.id("house") },

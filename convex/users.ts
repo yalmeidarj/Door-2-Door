@@ -58,21 +58,30 @@ export const updateUser = mutation({
       v.union(v.literal("dev"), v.literal("admin"), v.literal("user"))
     ),
     shiftMaxInactiveTime: v.optional(v.number()),
+    shiftMaxInactiveTimeFinal: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { id, name,organizationId, role, shiftMaxInactiveTime } = args;
+    const {
+      id,
+      name,
+      organizationId,
+      role,
+      shiftMaxInactiveTime,
+      shiftMaxInactiveTimeFinal,
+    } = args;
 
-    // Before patching, we confirm the user exists.
-    const existingUser = await ctx.db.get(id);
-    console.log(existingUser);
-
+    
     // Patch only the fields that should actually update the document.
     const updatedFields: Record<string, unknown> = {};
 
     if (name !== undefined) updatedFields.name = name;
-    if (organizationId !== undefined) updatedFields.organizationId = organizationId;
+    if (organizationId !== undefined)
+      updatedFields.organizationId = organizationId;
     if (role !== undefined) updatedFields.role = role;
-    if (shiftMaxInactiveTime !== undefined) updatedFields.shiftMaxInactiveTime = shiftMaxInactiveTime;
+    if (shiftMaxInactiveTime !== undefined)
+      updatedFields.shiftMaxInactiveTime = shiftMaxInactiveTime;
+    if (shiftMaxInactiveTimeFinal !== undefined)
+      updatedFields.shiftMaxInactiveTimeFinal = shiftMaxInactiveTimeFinal;
 
     await ctx.db.patch(id, updatedFields);
 

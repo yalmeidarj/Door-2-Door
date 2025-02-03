@@ -16,6 +16,7 @@ export const userSchema = {
   ),
   organizationId: v.optional(v.string()),
   shiftMaxInactiveTime: v.optional(v.number()),
+  shiftMaxInactiveTimeFinal: v.optional(v.number()),
 };
 
 export const sessionSchema = {
