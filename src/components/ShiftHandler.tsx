@@ -316,10 +316,21 @@ function ClockOut({ clockOutProps }: { clockOutProps: ClockOutProps }) {
                         <span className="text-xs text-gray-500"> ~</span>
                         {pace.toFixed(1)}
                         <span className="text-xs text-gray-500">/m</span>
-                    </span>
+                            </span>
+                            <button
+                                className="text-xs  text-white bg-red-700
+                                        rounded-md 
+                                        p-0 m-0
+                                        px-1 cursor-pointer
+                                        hover:text-night
+                                        overflow-hidden
+                                        "
+                                onClick={() => onDropdownSelect("clockOut")}>
+                            Clock Out
 
-                    {/* Dropdown Menu Trigger */}
-                    <DropdownMenu>
+                            </button>
+
+                    {/* <DropdownMenu>
                                 <DropdownMenuTrigger                                    
                                     asChild>    
                                     <p 
@@ -337,18 +348,18 @@ function ClockOut({ clockOutProps }: { clockOutProps: ClockOutProps }) {
                         <DropdownMenuContent>
                             <DropdownMenuLabel>Shift Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            {/* Clock Out */}
+                            
                             <DropdownMenuItem onClick={() => onDropdownSelect("clockOut")}>
                                 Clock Out
                             </DropdownMenuItem>
-                            {/* Break Sub-Menu */}
+                            
                             <DropdownMenuLabel className="pt-2">Break</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            {/* General Break */}
+                            
                             <DropdownMenuItem onClick={() => onDropdownSelect("break", "general")}>
                                 General Break
                             </DropdownMenuItem>
-                            {/* Transit Break */}
+                            
                             <div className="cursor-not-allowed">                                            
                                     <DropdownMenuItem
                                         disabled
@@ -357,9 +368,9 @@ function ClockOut({ clockOutProps }: { clockOutProps: ClockOutProps }) {
                                             Transit Break
                             </DropdownMenuItem>
                                         </div>
-                            {/* Inactivity break is system-only, so not shown here */}
+                            
                         </DropdownMenuContent>
-                    </DropdownMenu>
+                    </DropdownMenu> */}
                 </div>
 
                 {/* If transit break was selected, show a small form to enter description and confirm */}
