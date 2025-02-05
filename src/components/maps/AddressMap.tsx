@@ -24,8 +24,24 @@ const AddressMap: React.FC<MapProps> = ({ data = [] }) => {
                 return '#fde047'; // Tailwind green-600
             case 'Consent Final No':
                 return '#dc2626'; // Tailwind red-600
+            case 'Home Does Not Exist':
+                return '#374151'; // Tailwind gray-600
+            case 'No Attempt':
+                return '#64748b'; // Tailwind slate-600
+            case 'Door Knock Attempt 1':
+                return '#3b82f6'; // Tailwind blue-600
+            case 'Door Knock Attempt 2':
+                return '#3b82f6'; // Tailwind blue-600
+            case 'Door Knock Attempt 3':
+                return '#3b82f6'; // Tailwind blue-600
+            case 'Door Knock Attempt 4':
+                return '#3b82f6'; // Tailwind blue-600
+            case 'Door Knock Attempt 5':
+                return '#3b82f6'; // Tailwind blue-600
+            case 'Door Knock Attempt 6':
+                return '#3b82f6'; // Tailwind blue-600
             default:
-                return '#4f46e5'; // Tailwind indigo-600
+                return '#64748b'; // Tailwind slate-600
         }
     };
 

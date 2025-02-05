@@ -193,9 +193,9 @@ export const createNewEditByHouseId = mutation({
       (k) => k !== "houseId" && k !== "agentId" && k !== "shiftId"
     ).length;
 
-    if (changesCount === 0) {
-      return null;
-    }
+    // if (changesCount === 0) {
+    //   return null;
+    // }
 
     try {
       // 3. Insert the log entry into houseEditLog
