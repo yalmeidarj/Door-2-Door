@@ -66,7 +66,7 @@ export function SiteCard({ siteId }: { siteId: string }) {
         </div>
           <div className="flex flex-col border-dotted px-2 border-gray-300 border-2 text-blue-500 text-md font-semibold rounded-sm">
                 {totalHoursSpent &&
-                  Number(totalHoursSpent / 2).toFixed(2)}
+                  Number(totalHoursSpent ).toFixed(2)}
                 <p className="text-gray-500 text-xs">Hours</p>
           </div>        
         </div>

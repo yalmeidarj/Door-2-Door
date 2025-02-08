@@ -4,6 +4,7 @@ import { mutation } from "./_generated/server";
 import { start } from "repl";
 import { get } from "http";
 import { Id } from "./_generated/dataModel";
+import { filter } from "convex-helpers/server/filter";
 
 
 export const getShiftsByAgentId = query({
@@ -210,29 +211,62 @@ export const getFinishedShiftsByAgentId = query({
 
 
 
+// export const calculateTotalHoursPerLocationBySiteId = query({
+//   args: {siteId: v.id("site")},
+//   handler: async (ctx, { siteId }) => {
+//     const shifts = await ctx.db
+//       .query("shiftLogger")
+//       .withIndex("siteID_isFinished", (q) =>
+//         q.eq("siteID", siteId as Id<"site">)
+//         .eq("isFinished", true)
+//       )
+//       .collect();
+
+//     let totalHours = 0;
+//     for (const shift of shifts) {
+//       // check if the shift is finished
+//       if (shift.finishedDate) {
+//         const duration = shift.finishedDate - shift.startingDate;
+//         totalHours += duration / (1000 * 60 * 60);
+//       }
+//     }
+
+//     return totalHours;
+//   }
+// })
+
 export const calculateTotalHoursPerLocationBySiteId = query({
-  args: {siteId: v.id("site")},
+  args: { siteId: v.id("site") },
   handler: async (ctx, { siteId }) => {
-    const shifts = await ctx.db
-      .query("shiftLogger")
-      .withIndex("siteID_isFinished", (q) =>
-        q.eq("siteID", siteId as Id<"site">)
-        .eq("isFinished", true)
-      )
-      .collect();
-
-    let totalHours = 0;
-    for (const shift of shifts) {
-      // check if the shift is finished
-      if (shift.finishedDate) {
-        const duration = shift.finishedDate - shift.startingDate;
-        totalHours += duration / (1000 * 60 * 60);
+    // **AWAIT THE RESULT OF FILTER.COLLECT()**
+    const filteredShifts = await filter(
+      ctx.db
+        .query("shiftLogger")
+        .withIndex("siteID_isFinished", (q) =>
+          q.eq("siteID", siteId as Id<"site">).eq("isFinished", true)
+        ),
+      async (shift) => {
+        const user = await ctx.db.get(shift.userID);
+        if (user) {
+          return user.role !== "admin" && user.role !== "dev";
+        }
+        return false;
       }
-    }
+    ).collect();
 
+    const totalHours = filteredShifts.reduce((acc, shift) => {
+      if (shift.finishedDate && shift.startingDate) {
+        const shiftHours =
+          (shift.finishedDate - shift.startingDate) / (1000 * 60 * 60);
+        return acc + shiftHours;
+      }
+      return acc;
+    }, 0);
     return totalHours;
-  }
-})
+  },
+});
+
+    
 export const getShiftsBySiteId = query({
   args: { siteId: v.id("site") },
   handler: async (ctx, { siteId }) => {
