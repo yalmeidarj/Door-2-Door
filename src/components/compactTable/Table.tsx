@@ -9,7 +9,7 @@ import { LuBadgeAlert } from "react-icons/lu";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
-
+import { useSession } from "next-auth/react"
 
 import {
     Dialog,
@@ -23,7 +23,6 @@ import HouseEditLog from '@/app/(organization)/org/[organization]/seeding/HouseL
 import { ScrollArea } from '../ui/scroll-area';
 import { toast } from 'sonner';
 import { Id } from '../../../convex/_generated/dataModel';
-import { useSession } from 'next-auth/react';
 import { useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { ConflictSign } from './ConflictSign';
@@ -66,9 +65,10 @@ interface House {
 interface TableProps {
     data: House[];
     siteId: string
+    userId: string
 }
 
-const Table: React.FC<TableProps> = ({ data, siteId }) => {
+const Table: React.FC<TableProps> = ({ data, siteId, userId }) => {
     
     return (
         <div className="overflow-x-auto">
@@ -109,7 +109,7 @@ const Table: React.FC<TableProps> = ({ data, siteId }) => {
                                     houseId={row._id as string}
                                     siteId={siteId as string}
                                     statusAttempt={row.statusAttempt as string}
-                                    // agentId={row._id as string}
+                                    userId={userId}
                                 />
                                 <div className="flex justify-center ">
                                     {/* <span>{row.lastUpdatedBy.substring(0, 9)}-{format(new Date(row.lastUpdated), 'MMM dd, HH:mm')}</span> */}

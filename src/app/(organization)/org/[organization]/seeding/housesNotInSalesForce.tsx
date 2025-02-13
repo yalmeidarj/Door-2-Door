@@ -15,7 +15,7 @@ import Table from "@/components/compactTable/Table";
 
 
 
-export default function HousesNotInSalesForce() {
+export default function HousesNotInSalesForce({ userId }: { userId:string }) {
     const [siteId, setSiteId] = useState("");
     const [selectedSiteName, setSelectedSiteName] = useState("Select a site");
     const pathName = usePathname();
@@ -33,14 +33,15 @@ export default function HousesNotInSalesForce() {
                 setSelectedSiteName={setSelectedSiteName}
             />
             <DataTable
-                id={siteId}
+                    id={siteId}
+                    userId={userId}
             />
         </div>
         </div>
     );
 }
 
-function DataTable({ id }: { id: string }) {
+function DataTable({ id, userId }: { id: string, userId: string }) {
     const housesNotInSalesForce = useQuery(
         api.house.getHousesNotInSalesForceBySiteId,
         { siteId: id }
@@ -70,6 +71,7 @@ function DataTable({ id }: { id: string }) {
             <Table
                 data={data}
                 siteId={id}
+                userId={userId}
             />
         </div>
     );

@@ -15,27 +15,23 @@ import { api } from '../../convex/_generated/api';
 import { Id } from '../../convex/_generated/dataModel';
 import { toast } from 'sonner';
 
-export default function ChangeHouseStatusDropdown({ houseId,  statusAttempt }:
-    { houseId: string,  siteId: string, statusAttempt: string }) {
-    const { data: session } = useSession(); 
-    if (!session || !session.user) {
-                
-        return <div>Loading...</div>;
-    }
+export default function ChangeHouseStatusDropdown({ houseId,  statusAttempt, userId }:
+    { houseId: string,  siteId: string, statusAttempt: string, userId: string }) {
+
     const updateProperty = useMutation(api.houseEditLog.createNewEditByHouseId);
     const [currentStatus, setCurrentStatus] = useState(statusAttempt);
 
     
-    const user = session.user;
     // const agentId = session.user.id;
     // const agentName = session.user.name;
     const ref = useRef<HTMLFormElement>(null);
 
     async function clientAction(formData: FormData) {
+        console.log("User Id: ", userId);
         const newObject = {
             statusAttempt: formData.get("statusAttempt") as string,
             houseId: formData.get("id") as Id<"house">,
-            agentId: user.id as Id<"users">,
+            agentId: userId as Id<"users">,
             // siteID: siteId
             // shiftId: formData.get("shiftId") as Id<"shiftLogger"> 
         };
@@ -71,7 +67,7 @@ export default function ChangeHouseStatusDropdown({ houseId,  statusAttempt }:
 
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger className='flex flex-row justify-between gap-2 w-full h-full m-0 p-0 bg-slate-100'>
+            <DropdownMenuTrigger className='flex flex-row justify-between gap-2 w-full h-full m-0 p-0 bg-slate-100'>                    
                 <span>{currentStatus}</span>
                 <RiArrowDropDownLine />
             </DropdownMenuTrigger>

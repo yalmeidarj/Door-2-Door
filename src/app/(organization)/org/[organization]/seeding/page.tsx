@@ -2,10 +2,18 @@
 import PageHeader from "@/components/PageHeader";
 import HousesNotInSalesForce from "./housesNotInSalesForce";
 import HouseEditLog from "./HouseLog";
+import { auth } from "@/auth";
 // import HouseLog from "./HouseLog";
 
-export default  function Page() {
+export default async function Page() {
+    // get session
+    const session = await auth();
+    if (!session || !session.user) {
+        console.log("no session")
+        return null
+    }
 
+    const userId = session.user.id as string;
     const routeLinks = [
         {
             name: "Organization",
@@ -23,7 +31,9 @@ export default  function Page() {
             />
         <div className="w-full  items-center justify-center">
                    
-                    <HousesNotInSalesForce />
+                <HousesNotInSalesForce
+                    userId={userId}
+                />
                 {/* <HouseEditLog /> */}
                 
                 {/* <HouseLog /> */}
