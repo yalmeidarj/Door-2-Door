@@ -69,7 +69,7 @@ const StreetCard = ({ streetId, name }: { streetId: string, name: string }) => {
 
                     <div className='flex flex-col items-center justify-center space-y-1'>
                         <div className='flex items-center space-x-1'>
-                            <RiForbidLine className="mr-1 text-red-600" aria-label="Not Visited" />
+                            <RiForbidLine className="mr-1 text-red-600" aria-label="Consent No" />
                                 <span>{housesWithConsentNo?.length}</span>
                         </div>
                         <h2 className='text-xs'>No</h2>
@@ -85,7 +85,7 @@ const StreetCard = ({ streetId, name }: { streetId: string, name: string }) => {
                         <h2 className='text-xs'>Visited</h2>
                     </div>
 
-                        <div className='flex flex-col items-center justify-center space-y-1'>
+                        {/* <div className='flex flex-col items-center justify-center space-y-1'>
                         {allHouses && getVisitedHousesByStatusAttempt && allHouses.length === getVisitedHousesByStatusAttempt.length ? (
                             <div className='flex items-center space-x-1'>
                                 <FaTimes className="mr-1" aria-label="Not Visited" />
@@ -99,7 +99,7 @@ const StreetCard = ({ streetId, name }: { streetId: string, name: string }) => {
                         )
                         }
                         <h2 className='text-xs'>Not Visited</h2>
-                    </div>
+                    </div> */}
                 </div>
                 </div>
             </div>

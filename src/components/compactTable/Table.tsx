@@ -5,6 +5,12 @@ import ChangeHouseStatusDropdown from '../ChangeHouseStatusDropdown';
 import { string } from 'zod';
 import { FaSalesforce } from "react-icons/fa6";
 
+import { LuBadgeAlert } from "react-icons/lu";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
+
+
 import {
     Dialog,
     DialogContent,
@@ -20,6 +26,7 @@ import { Id } from '../../../convex/_generated/dataModel';
 import { useSession } from 'next-auth/react';
 import { useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
+import { ConflictSign } from './ConflictSign';
 
 interface LogEntry {
     name: string | null;
@@ -48,7 +55,8 @@ interface House {
     type: string  | undefined;
     phone: string  | undefined;
     email: string  | undefined;
-    statusAttempt: string  | undefined;
+    statusAttempt: string | undefined;
+    salesForceConflict: boolean | undefined;
     // isConcilatedInSalesForce: boolean  | undefined;
     // consent: string  | undefined;
     // location: string;
@@ -79,11 +87,13 @@ const Table: React.FC<TableProps> = ({ data, siteId }) => {
                 />
                 <tbody>
                     {data.map((row) => (
-                        <tr key={row._id} className="odd:bg-gray-100 even:bg-gray-50 hover:bg-gray-200">
-                            <TableCell className='flex flex-row-reverse justify-end gap-4 font-semibold min-w-[180px]  m-0 items-center' text={`${row.streetNumber} ${row.streetName} `} >
-                                <CornerNoteButton
-                                    houseId={row._id}
-                                />
+                        
+                        <tr key={row._id}
+                            className={` ${row.salesForceConflict === true ? "bg-red-200" : "odd:bg-gray-200 even:bg-gray-50 hover:bg-gray-200"
+                                }`}
+                        >
+                            <TableCell className={`  border-b-0 pr-2  gap-2 font-semibold min-w-[180px] justify-between ${row.salesForceConflict ? "bg-red-200" : ""} `} text={`${row.streetNumber} ${row.streetName} `} >
+                                {row.salesForceConflict ? <ConflictSign  /> : null}
                             </TableCell>                                
 
                             <TableCell text={row.lastName} />
@@ -109,6 +119,9 @@ const Table: React.FC<TableProps> = ({ data, siteId }) => {
                                 clipboard={false}
                                 text={row.notes}
                             >
+                                                                <CornerNoteButton
+                                    houseId={row._id}
+                                />
                                 <div className="flex flex-col justify-between ">
                                     
                                     <Dialog>
@@ -233,7 +246,7 @@ function TableCell({ text, className, clipboard = true, children }: TableCellPro
     }
 
     return (
-        <td className={cn('h-full p-2 border border-gray-300', className)}>
+        <td className={cn('h-full p-2 border-y border-gray-300', className)}>
             {displayText ? (
                 <div className="flex items-center justify-between w-full ">
                     <span>{displayText}</span>
@@ -246,7 +259,6 @@ function TableCell({ text, className, clipboard = true, children }: TableCellPro
         </td>
     );
 }
-
 
 
 export default Table;

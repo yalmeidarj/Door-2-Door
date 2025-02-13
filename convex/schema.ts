@@ -145,6 +145,7 @@ export default defineSchema({
     type: v.optional(v.string()),
     lastUpdated: v.optional(v.number()),
     isConcilatedInSalesForce: v.optional(v.boolean()),
+    salesForceConflict: v.optional(v.boolean()),
     lastUpdatedBy: v.optional(v.string()),
     statusAttempt: v.optional(v.string()),
     consent: v.optional(v.string()),
@@ -170,6 +171,7 @@ export default defineSchema({
     type: v.optional(v.string()),
     statusAttempt: v.optional(v.string()),
     email: v.optional(v.string()),
+    salesForceConflict: v.optional(v.boolean()),
     notes: v.optional(v.string()),
     phone: v.optional(v.string()),
   })

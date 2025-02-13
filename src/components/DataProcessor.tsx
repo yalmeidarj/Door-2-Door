@@ -66,6 +66,11 @@ const DataProcessor: React.FC<DataProcessorProps> = ({userId, update = false }) 
     const createNewStreetMutation = useMutation(api.street.createNewStreet);
     const createNewHouseMutation = useMutation(api.house.createNewHouse);
     const updateSiteMutation = useMutation(api.house.updateSiteMutation);
+
+    /**
+     * Updates the site in the database based on the processed data.    
+     * @param processedData - The processed data containing the site and houses to update.
+     */
     const updateSite = async () => {
         console.log("Updating site with processed data:", processedData);
         // TODO: Add your update logic
@@ -84,6 +89,10 @@ const DataProcessor: React.FC<DataProcessorProps> = ({userId, update = false }) 
             setLoadingMessage("Updating site...");
             for (const house of processedData.houses) {
                 setLoadingMessage(`Updating house ${house.streetNumber} ${house.street}...`);
+                let consent = ''
+                if (house.statusAttempt === "Consent Final" || house.statusAttempt === "Consent Final Yes" || house.statusAttempt === "Consent Final No") {
+                    consent = house.consent
+                }
                 await updateSiteMutation({
                     orgId: orgId,
                     streetName: house.street,
@@ -91,7 +100,7 @@ const DataProcessor: React.FC<DataProcessorProps> = ({userId, update = false }) 
                     agentId: userId as Id<"users">, 
                     siteName: processedData.name,
                     statusAttempt: house.statusAttempt,
-                    consent: house.consent,
+                    consent: consent,
                 });
             }
             setLoadingMessage(`Site "${processedData.name}" updated successfully.`);
@@ -292,10 +301,16 @@ const DataProcessor: React.FC<DataProcessorProps> = ({userId, update = false }) 
                         Site Data Manager
                         <CardDescription>
                             {update ? (
+                                <>
                                 <p>
                                     Copy and paste the data from SF table here to
                                     <span className="font-bold uppercase"> update an existing Site</span>
                                 </p>
+                                    <p className="text-night">
+                                    Select only the status to be updated:
+                                    <span className="font-bold uppercase"> Consent Final, Drop Type Unverified</span>
+                                </p>
+                                </>
                             ) : (
                                 "Copy and paste the data from SF table here to create a new Site"
                             )}

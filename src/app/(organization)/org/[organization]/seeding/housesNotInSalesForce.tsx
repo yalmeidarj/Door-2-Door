@@ -7,12 +7,12 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
 import { useQuery } from "convex/react";
 import { api } from "../../../../../../convex/_generated/api";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import Table from "@/components/compactTable/Table";
+
 
 
 export default function HousesNotInSalesForce() {
@@ -61,6 +61,7 @@ function DataTable({ id }: { id: string }) {
         email: house.email,
         notes: house.notes,
         type: house.type,
+        salesForceConflict: house.salesForceConflict,
         statusAttempt: house.statusAttempt,
     }));
 
@@ -95,7 +96,8 @@ function SiteSelector({
     };
 
     return (
-        <div>
+        <div className="flex w-full justify-between items-start gap-2">
+            
             <DropdownMenu>
                 <DropdownMenuTrigger className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     {selectedSiteName}
@@ -114,7 +116,10 @@ function SiteSelector({
                     ))}
                 </DropdownMenuContent>
             </DropdownMenu>
+            {/* <ConflictExplainer /> */}
         </div>
     );
 }
+
+
                     
