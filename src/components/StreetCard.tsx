@@ -3,7 +3,6 @@
 import { FaHome, FaCheck, FaTimes } from "react-icons/fa";
 import { IoIosCheckmarkCircleOutline } from "react-icons/io";
 import { RiForbidLine } from "react-icons/ri";
-import { defaultValues } from "@/lib/utils";
 import { MdEngineering } from "react-icons/md";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -17,6 +16,8 @@ const StreetCard = ({ streetId, name }: { streetId: string, name: string }) => {
     const visitRequired = useQuery(api.house.getHousesVisitRequestByStreetId, { streetId });
     const housesWithConsentYes = useQuery(api.house.getHousesConsentYesByStreetId, { streetId });
     const housesWithConsentNo = useQuery(api.house.getHousesConsentNoByStreetId, { streetId });
+
+    const toBeVisited = (allHouses?.length || 0) - (visitRequired?.length || 0) - (housesWithConsentYes?.length || 0) - (housesWithConsentNo?.length || 0);
 
     
     return (
@@ -36,9 +37,15 @@ const StreetCard = ({ streetId, name }: { streetId: string, name: string }) => {
                 </h1>
                 <div className='flex flex-row gap-2 '>
 
-                    <div className='flex items-center space-x-1'>
-                        <FaHome className="mr-1" aria-label="Houses" />
-                            <span>{allHouses?.length}</span>
+                            <div className='flex flex-col '>
+                    <div className='flex items-center space-x-1 '>
+                            <FaHome className="mr-1" aria-label="Houses" />
+                                <span className="text-xl font-bold">{allHouses?.length}</span>
+                            
+                            </div>
+                                <span className="text-xs font-semibold text-gray-500">
+                                Total houses
+                                </span>
                     </div>
 
                 </div>
@@ -64,7 +71,7 @@ const StreetCard = ({ streetId, name }: { streetId: string, name: string }) => {
                                 <MdEngineering className="text-lg mr-1" />
                                 <span>{visitRequired?.length}</span>
                         </div>
-                        <h2 className='text-xs'>Visit Required</h2>
+                        <h2 className='text-xs'>Visit required</h2>
                     </div>
 
                     <div className='flex flex-col items-center justify-center space-y-1'>
@@ -77,29 +84,13 @@ const StreetCard = ({ streetId, name }: { streetId: string, name: string }) => {
                 </div>
 
                 <div className='flex space-x-2 justify-end'>
-                    <div className='flex flex-col items-center justify-center space-y-1'>
-                        <div className='flex items-center space-x-1'>
-                            <FaCheck className="mr-1" aria-label="Visited" />
-                                <span>{getVisitedHousesByStatusAttempt?.length}</span>
-                        </div>
-                        <h2 className='text-xs'>Visited</h2>
+                        <div className='flex flex-col items-center justify-center space-y-1'>                        
+                            <div className='flex items-center space-x-1'>
+                                {/* <FaTimes className="mr-1" aria-label="Not Visited" /> */}
+                                    <span>{toBeVisited}</span>
+                            </div>                        
+                        <h2 className='text-xs'>To be visited</h2>
                     </div>
-
-                        {/* <div className='flex flex-col items-center justify-center space-y-1'>
-                        {allHouses && getVisitedHousesByStatusAttempt && allHouses.length === getVisitedHousesByStatusAttempt.length ? (
-                            <div className='flex items-center space-x-1'>
-                                <FaTimes className="mr-1" aria-label="Not Visited" />
-                                <span>{allHouses.length - getVisitedHousesByStatusAttempt.length}</span>
-                            </div>
-                        ) : (
-                            <div className='flex items-center space-x-1'>
-                                <FaTimes className="mr-1" aria-label="Not Visited" />
-                                <span>...</span>
-                            </div>
-                        )
-                        }
-                        <h2 className='text-xs'>Not Visited</h2>
-                    </div> */}
                 </div>
                 </div>
             </div>
