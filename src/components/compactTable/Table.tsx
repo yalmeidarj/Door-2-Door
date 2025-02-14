@@ -82,6 +82,7 @@ const Table: React.FC<TableProps> = ({ data, siteId, userId }) => {
                         'Email',
                         'Type',
                         'Status',
+                        'SF Update',
                         'Notes',
                     ]}
                 />
@@ -116,12 +117,15 @@ const Table: React.FC<TableProps> = ({ data, siteId, userId }) => {
                                 </div>
                             </TableCell>
                             <TableCell
+                                className='items-center  justify-center'
+                                clipboard={false} text=" ">
+                                <CornerNoteButton
+                                houseId={row._id}
+                            /></TableCell>
+                            <TableCell
                                 clipboard={false}
                                 text={row.notes}
                             >
-                                                                <CornerNoteButton
-                                    houseId={row._id}
-                                />
                                 <div className="flex flex-col justify-between ">
                                     
                                     <Dialog>
@@ -220,10 +224,10 @@ const CornerNoteButton = ({ houseId }: { houseId?: string }) => {
                 name='id'
                 type="button"
             onClick={() => handleSubmit()}
-            className=" top-0 left-0 h-full px-3 bg-blue-500 hover:bg-blue-600 transition-all duration-300 ease-in-out group flex items-center justify-center shadow-md"
+                className=" flex items-center rounded-sm w-full px-2 py-1 bg-blue-500 hover:bg-blue-600 transition-all duration-300 ease-in-out group  shadow-md"
         >
             <FaSalesforce
-                className="text-white text-xl group-hover:scale-110 transition-all duration-300 ease-in-out"
+                className="w-full text-white text-xl group-hover:scale-110 transition-all duration-300 ease-in-out"
             />
         </button>
             </form>
