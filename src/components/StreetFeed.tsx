@@ -90,7 +90,7 @@ function SiteMap({ siteId }: { siteId: string}) {
             </MapDialog>
 
             {/* 3) Display any houses that do not have valid lat/lng */}
-            {invalidHouses.length > 0 && (
+            {/* {invalidHouses.length > 0 && (
                 <div className="mt-4 p-2 border rounded flex flex-col">
                     <h2 className="font-semibold text-lg mb-2">Houses Missing Coordinates</h2>
                     <span>
@@ -120,7 +120,7 @@ function SiteMap({ siteId }: { siteId: string}) {
                         ))}
                     </ul>
                 </div>
-            )}
+            )} */}
         </>
     );
 }

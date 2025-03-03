@@ -6,6 +6,7 @@ import { auth } from "@/auth";
 import DataProcessor from "@/components/DataProcessor";
 import AddressGeocoder from "@/components/AddressGeocoder";
 import InfoFeed from "@/components/info-feed/infoFeed";
+import AddSingleHouse from "@/components/AddSingleHouse";
 
 type Params = Promise<{ organization: string }>
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
@@ -61,11 +62,12 @@ export default async function Page(props: {
                 userId={user.id as string}
                 update />
         },
-        // {
-        //     id: 3,
-        //     name: "Switch Site Status (active/inactive)",
-        //     component: <SiteSwitch />
-        // },
+        {
+            id: 32,
+            name: "Add a single house to a site",
+            // component: <UpdateActiveSite orgName={orgName} />
+            component: <AddSingleHouse/>
+        },
         {
             id: 4,
             name: "Get lat/long from address",

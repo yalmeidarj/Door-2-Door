@@ -5,6 +5,7 @@ import { paginationOptsValidator } from "convex/server";
 import { DataModel, Id } from "./_generated/dataModel";
 
 import { filter } from "convex-helpers/server/filter";
+import { Console } from "console";
 
 export const getHousesByStreetIdAndStatus = query({
   args: {
@@ -559,6 +560,7 @@ export const conciliateHouse = mutation({
       
       const house = await ctx.db.patch(houseID, {
         isConcilatedInSalesForce: true,
+        salesForceConflict: false
       });
       return true;
     } catch (error) {
@@ -616,41 +618,7 @@ export const reverseHouseChanges = mutation({
 type HouseEditLog = DataModel["houseEditLog"];
 type House = DataModel["house"];
 
-// export async function reverseHouseEdit(db: DatabaseReader, logEntry: HouseEditLog) {
-//   if (!logEntry.houseId) {
-//     console.error("No houseId in the log entry:", logEntry);
-//     return;
-//   }
-//   const houseId = logEntry.houseId;
-//   const house = await db.get(houseId as Id<"house">);
-//   if (!house) {
-//     console.error(`House with ID ${houseId} not found`);
-//     return;
-//   }
-//   const updates: Partial<House> = {};
-//   // Iterate over fields
-//   for (const key in logEntry) {
-//     if (key === "_id" || key === "_creationTime") {
-//       continue;
-//     }
-//     // Type assertion to bypass the type check and treat key as a valid key of logEntry
-//     const logValue = logEntry[key as keyof HouseEditLog];
-//     if (typeof logValue === "string" && logValue.includes(" | |")) {
-//       const [oldValue, newValue] = logValue.split(" | |");
-//       if (oldValue !== newValue)
-//         updates[key as keyof House] =
-//           oldValue === " | |" ? undefined : oldValue;
-//     }
-//   }
 
-//   if (Object.keys(updates).length > 0) {
-//     // Apply the updates to the house document
-//     await db.patch(houseId, updates);
-//     console.log(`House ${houseId} updated with values from the log:`, updates);
-//   } else {
-//     console.log(`No changes to apply for house ${houseId}`);
-//   }
-// }
 
 // export const updateSiteMutation = mutation({
 //   args: {
@@ -662,18 +630,7 @@ type House = DataModel["house"];
 //     statusAttempt: v.string(),
 //     consent: v.optional(v.string()),
 //   },
-//   handler: async (
-//     ctx,
-//     {
-//       orgId,
-//       siteName,
-//       streetName,
-//       streetNumber,
-//       agentId,
-//       statusAttempt,
-//       consent,
-//     }
-//   ) => {
+//   handler: async (ctx, { orgId, siteName, streetName, streetNumber, agentId, statusAttempt, consent }) => {
 //     // 1. Get the siteID based on the orgID
 //     const site = await ctx.db
 //       .query("site")
@@ -717,22 +674,60 @@ type House = DataModel["house"];
 //       );
 //     }
 
-//     // 4. Update the house document
-//     await ctx.db.patch(house._id, {
-//       statusAttempt: statusAttempt + " " + consent,
-//       consent: consent,
-//     });
+//     // 4 Get the current statusAttempt and consent
+//     const currentStatus = house.statusAttempt;
+//     const currentConsent = house.consent;
+//     const currentStatusAttempt = currentStatus + " " + currentConsent;
 
-//     // 5. Create a new houseEditLog record
-//     await ctx.db.insert("houseEditLog", {
-//       houseId: house._id as Id<"house">,
-//       agentId: agentId as Id<"users">,
-//       statusAttempt: statusAttempt + " " + consent,
-//       // consent: consent,
-//     });
+//     // // 5 If current currentStatus is either "Consent Final","Consent Final Yes", "Consent Final No", or "Drop Type Unverified",
+//     // // then check if the new statusAttempt is different from the current statusAttempt and if so, add "conflict" = true
+//     let conflict = null;
+//     if (
+//       currentStatus === "Consent Final" ||
+//       currentStatus === "Consent Final Yes" ||
+//       currentStatus === "Consent Final No" ||
+//       currentStatus === "Drop Type Unverified"
+//     ) {
+//       if (currentConsent !== consent) {
+//         conflict = true;
+//       }
+//     }
+//     // 6 if conflict is true, only update "salesForceConflict"
+//     if (conflict) {
+//       await ctx.db.patch(house._id, {
+//         isConcilatedInSalesForce: false,
+//         salesForceConflict: true,
+//       });
+      
+//       // 6.1 Create a new houseEditLog record
+//       await ctx.db.insert("houseEditLog", {
+//         houseId: house._id as Id<"house">,
+//         agentId: agentId as Id<"users">,
+//         salesForceConflict: true,
+//       });
 
+//       return house;
+//     } else {
+//       // 6.2 Update the house document
+//       await ctx.db.patch(house._id, {
+//         isConcilatedInSalesForce: true,
+//         statusAttempt: statusAttempt + " " + consent,
+//         consent: consent,
+//         salesForceConflict: false,
+//       });
+
+//       // 6.2a Create a new houseEditLog record
+//       await ctx.db.insert("houseEditLog", {
+//         houseId: house._id as Id<"house">,
+//         agentId: agentId as Id<"users">,
+//         statusAttempt: statusAttempt + " " + consent,
+//         salesForceConflict: false,
+//         // consent: consent,
+//       });
+//     }
+//     // 7 return
 //     return house;
-//   },
+//     }    
 // });
 
 export const updateSiteMutation = mutation({
@@ -745,105 +740,127 @@ export const updateSiteMutation = mutation({
     statusAttempt: v.string(),
     consent: v.optional(v.string()),
   },
-  handler: async (ctx, { orgId, siteName, streetName, streetNumber, agentId, statusAttempt, consent }) => {
-    // 1. Get the siteID based on the orgID
-    const site = await ctx.db
-      .query("site")
-      .withIndex("orgId_name_isActive", (q) =>
-        q
-          .eq("orgID", orgId as Id<"organization">)
-          .eq("name", siteName)
-          .eq("isActive", true)
-      )
-      .first();
-
-    if (!site) {
-      throw new Error(`Site not found for orgId: ${orgId}`);
+  handler: async (
+    ctx,
+    {
+      orgId,
+      siteName,
+      streetName,
+      streetNumber,
+      agentId,
+      statusAttempt,
+      consent,
     }
+  ) => {
+        // 1. Get the siteID based on the orgID
+        const site = await ctx.db
+          .query("site")
+          .withIndex("orgId_name_isActive", (q) =>
+            q
+              .eq("orgID", orgId as Id<"organization">)
+              .eq("name", siteName)
+              .eq("isActive", true)
+          )
+          .first();
 
-    // 2. Get the streetID based on the siteID
-    const street = await ctx.db
-      .query("street")
-      .withIndex("siteID_name", (q) =>
-        q.eq("siteID", site._id as Id<"site">).eq("name", streetName)
-      )
-      .first();
+        if (!site) {
+          throw new Error(`Site not found for orgId: ${orgId}`);
+        }
 
-    if (!street) {
-      throw new Error(`Street not found for siteId: ${site._id}`);
-    }
+        // 2. Get the streetID based on the siteID
+        const street = await ctx.db
+          .query("street")
+          .withIndex("siteID_name", (q) =>
+            q.eq("siteID", site._id as Id<"site">).eq("name", streetName)
+          )
+          .first();
 
-    // 3. Query for the specific house using the streetID and streetNumber
-    const house = await ctx.db
-      .query("house")
-      .withIndex("by_streetID_and_streetNumber", (q) =>
-        q
-          .eq("streetID", street._id as Id<"street">)
-          .eq("streetNumber", streetNumber)
-      )
-      .first();
+        if (!street) {
+          throw new Error(`Street not found for siteId: ${site._id}`);
+        }
 
+        // 3. Query for the specific house using the streetID and streetNumber
+        const house = await ctx.db
+          .query("house")
+          .withIndex("by_streetID_and_streetNumber", (q) =>
+            q
+              .eq("streetID", street._id as Id<"street">)
+              .eq("streetNumber", streetNumber)
+          )
+          .first();
     if (!house) {
       throw new Error(
         `House not found with streetNumber: ${streetNumber} at site ${site._id}`
       );
     }
 
-    // 4 Get the current statusAttempt and consent
-    const currentStatus = house.statusAttempt;
-    const currentConsent = house.consent;
-    const currentStatusAttempt = currentStatus + " " + currentConsent;
+    // 4. Get the current stored statusAttempt (which might include consent)
+    const currentStoredStatus = house.statusAttempt || "";
 
-    // // 5 If current currentStatus is either "Consent Final","Consent Final Yes", "Consent Final No", or "Drop Type Unverified",
-    // // then check if the new statusAttempt is different from the current statusAttempt and if so, add "conflict" = true
-    let conflict = null;
-    if (
-      currentStatus === "Consent Final" ||
-      currentStatus === "Consent Final Yes" ||
-      currentStatus === "Consent Final No" ||
-      currentStatus === "Drop Type Unverified"
-    ) {
-      if (currentStatusAttempt !== statusAttempt) {
-        conflict = true;
-      }
+    // 5. Determine the effective current consent from the stored status
+    let effectiveCurrentConsent = "";
+    if (currentStoredStatus.includes("Consent Final Yes")) {
+      effectiveCurrentConsent = "Yes";
+    } else if (currentStoredStatus.includes("Consent Final No")) {
+      effectiveCurrentConsent = "No";
     }
-    // 6 if conflict is true, only update "salesForceConflict"
+
+    // 6. Determine if there's a conflict
+    let conflict = false;
+
+    // Only check for conflict if:
+    // 1. Current status contains "Consent Final"
+    // 2. New input statusAttempt is "Consent Final"
+    // 3. New consent doesn't match current effective consent
+    if (
+      currentStoredStatus.includes("Consent Final") &&
+      statusAttempt === "Consent Final" &&
+      effectiveCurrentConsent !== (consent || "")
+    ) {
+      conflict = true;
+    }
+
+    // 7. Update based on conflict status
     if (conflict) {
       await ctx.db.patch(house._id, {
         isConcilatedInSalesForce: false,
         salesForceConflict: true,
       });
-      
-      // 6.1 Create a new houseEditLog record
+
+      // 7.1 Create a new houseEditLog record
       await ctx.db.insert("houseEditLog", {
         houseId: house._id as Id<"house">,
         agentId: agentId as Id<"users">,
         salesForceConflict: true,
       });
-
-      return house;
     } else {
-      // 6.2 Update the house document
+      // 7.2 Construct the combined status+consent string for storage
+      let newCombinedStatus = statusAttempt;
+      if (statusAttempt === "Consent Final" && consent) {
+        newCombinedStatus = `Consent Final ${consent}`;
+      }
+
+      // Update the house document
       await ctx.db.patch(house._id, {
         isConcilatedInSalesForce: true,
-        statusAttempt: statusAttempt + " " + consent,
-        consent: consent,
+        statusAttempt: newCombinedStatus,
+        consent: consent || "",
+        salesForceConflict: false,
       });
 
-      // 6.2a Create a new houseEditLog record
+      // Create a new houseEditLog record
       await ctx.db.insert("houseEditLog", {
         houseId: house._id as Id<"house">,
         agentId: agentId as Id<"users">,
-        statusAttempt: statusAttempt + " " + consent,
-        // consent: consent,
+        statusAttempt: newCombinedStatus,
+        salesForceConflict: false,
       });
     }
-    // 7 return
+
+    // 8. Return house
     return house;
-    }    
+  },
 });
-
-
 export const changeStatus = mutation({
   args: {
     houseID: v.id("house"),

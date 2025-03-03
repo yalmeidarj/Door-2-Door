@@ -11,44 +11,51 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../../../convex/_generated/api";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import Table from "@/components/compactTable/Table";
+import Table, { ConciliationProvider } from "@/components/compactTable/Table";
 
 
 
-export default function HousesNotInSalesForce({ userId }: { userId:string }) {
+
+
+// Updated main component with ConciliationProvider
+export default function HousesNotInSalesForce({ userId }: { userId: string }) {
+    
     const [siteId, setSiteId] = useState("");
     const [selectedSiteName, setSelectedSiteName] = useState("Select a site");
     const pathName = usePathname();
     const orgName = pathName.split("/")[2].replace("%20", " ").replace("-", " ");
+
     return (
         <div className="w-full">
             <div className="container mx-auto flex flex-col">
-            <h1 className=" text-2xl font-bold text-gray-800 mb-6">
-                Get houses not updated in SalesForce
-            </h1>
-            <SiteSelector
-                orgName={orgName}
-                setSiteId={setSiteId}
-                selectedSiteName={selectedSiteName}
-                setSelectedSiteName={setSelectedSiteName}
-            />
-            <DataTable
-                    id={siteId}
-                    userId={userId}
-            />
-        </div>
+                <h1 className="text-2xl font-bold text-gray-800 mb-6">
+                    Get houses not updated in SalesForce
+                </h1>
+                <SiteSelector
+                    orgName={orgName}
+                    setSiteId={setSiteId}
+                    selectedSiteName={selectedSiteName}
+                    setSelectedSiteName={setSelectedSiteName}
+                />
+                <ConciliationProvider>
+                    <DataTable
+                        id={siteId}
+                        userId={userId}
+                    />
+                </ConciliationProvider>
+            </div>
         </div>
     );
 }
 
-function DataTable({ id, userId }: { id: string, userId: string }) {
+function DataTable({ id, userId }: { id: string; userId: string }) {
+    
     const housesNotInSalesForce = useQuery(
         api.house.getHousesNotInSalesForceBySiteId,
         { siteId: id }
     );
 
-    if (!housesNotInSalesForce || !Array.isArray(housesNotInSalesForce)) {        
-        
+    if (!housesNotInSalesForce || !Array.isArray(housesNotInSalesForce)) {
         return <div>Loading...</div>;
     }
 
