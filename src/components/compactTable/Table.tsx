@@ -304,7 +304,7 @@ const CornerNoteButton: React.FC<CornerNoteButtonProps> = ({ houseId }) => {
                     type="button"
                     onClick={houseId && conciliatedHouses.has(houseId) ? handleSubmit : handleToggleMark}
                     className={`flex items-center rounded-sm w-full px-2 py-1 transition-all duration-300 ease-in-out group shadow-md ${houseId && conciliatedHouses.has(houseId)
-                        ? "bg-yellow-500 hover:bg-yellow-600"
+                        ? "bg-green-500 hover:bg-green-600"
                         : "bg-blue-500 hover:bg-blue-600"
                         }`}
                 >
