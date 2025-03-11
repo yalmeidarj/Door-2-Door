@@ -243,7 +243,38 @@ export const createNewEditByHouseId = mutation({
   },
 });
 
+export const getAllHouseVisitsBySiteId = query({
+  args: { siteId: v.id("site") }, 
+  handler: async (ctx, args) => {
+    // First get all houses in the site
+    const houses = await ctx.db
+      .query("house")
+      .withIndex("siteID", (q) => q.eq("siteID", args.siteId))
+      .filter((q) =>
+        q.and(
+          q.neq(q.field("statusAttempt"), "Consent Final Yes"),
+          q.neq(q.field("statusAttempt"), "Consent Final No"),
+          q.neq(q.field("statusAttempt"), "Drop Type Unverified")
+        )
+      )
+      .collect();
 
+    const houseIds = houses.map((house) => house._id);
+
+    // Get all visit logs for these houses
+    const allVisitLogs = [];
+    for (const houseId of houseIds) {
+      const logs = await ctx.db
+        .query("houseEditLog")
+        .withIndex("houseId", (q) => q.eq("houseId", houseId))
+        .collect();
+
+      allVisitLogs.push(...logs);
+    }
+
+    return allVisitLogs;
+  },
+});
 
 export const updateProperty = internalMutation({
   args: {

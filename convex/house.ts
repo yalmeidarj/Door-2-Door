@@ -4,9 +4,6 @@ import { mutation } from "./_generated/server";
 import { paginationOptsValidator } from "convex/server";
 import { DataModel, Id } from "./_generated/dataModel";
 
-import { filter } from "convex-helpers/server/filter";
-import { Console } from "console";
-
 export const getHousesByStreetIdAndStatus = query({
   args: {
     streetId: v.string(),
@@ -30,6 +27,19 @@ export const getHousesByStreetIdAndStatus = query({
   },
 })
 
+export const getHousesByStreetId = query({
+  args: {
+    streetId: v.id("street"),
+  }, // Use v.string() for userId
+  handler: async (ctx, { streetId }) => {
+    const houses = await ctx.db
+      .query("house")
+      .withIndex("streetID", (q) => q.eq("streetID", streetId as Id<"street">))
+      .collect();
+    
+    return houses;
+  },
+})
 export const getHousesNotInSalesForceBySiteId = query({
   args: {
     siteId: v.string(),
@@ -275,6 +285,22 @@ export const getHousesBySiteId = query({
     return await ctx.db
       .query("house")
       .withIndex("siteID", (q) => q.eq("siteID", siteId as Id<"site">))
+      .collect();
+  },
+});
+export const getHousesToBeVisitedBySiteId = query({
+  args: { siteId: v.string() }, // Use v.string() for userId
+  handler: async (ctx, { siteId }) => {
+    return await ctx.db
+      .query("house")
+      .withIndex("siteID", (q) => q.eq("siteID", siteId as Id<"site">))
+      .filter((q) =>
+        q.and(
+          q.neq(q.field("statusAttempt"), "Consent Final Yes"),
+          q.neq(q.field("statusAttempt"), "Consent Final No"),
+          q.neq(q.field("statusAttempt"), "Drop Type Unverified")
+        )
+      )
       .collect();
   },
 });

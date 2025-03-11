@@ -166,6 +166,7 @@ export default defineSchema({
   houseEditLog: defineTable({
     houseId: v.optional(v.id("house")),
     agentId: v.optional(v.id("users")),
+    siteId: v.optional(v.id("site")),
     name: v.optional(v.string()),
     lastName: v.optional(v.string()),
     type: v.optional(v.string()),
@@ -176,7 +177,7 @@ export default defineSchema({
     phone: v.optional(v.string()),
   })
     .index("houseId", ["houseId"])
-
+    .index("siteId", ["siteId"])
     .index("agentId", ["agentId"]),
   shiftLogger: defineTable({
     userID: v.id("users"), // User ID of the agent
