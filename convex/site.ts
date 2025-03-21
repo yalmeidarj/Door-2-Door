@@ -67,6 +67,31 @@ export const getAllSitesByOrgName = query({
   },
 })
 
+export const changeSitePayStatus = mutation({
+  args: {
+    siteID: v.string(),
+    orgID: v.string(),
+    payStatus: v.optional(v.boolean()),
+  },
+  handler: async (ctx, { siteID, payStatus, orgID }) => {
+    const site =  await ctx.db
+      .query("site")
+      .withIndex("orgID", (q) => q.eq("orgID", orgID as Id<"organization">))
+      .filter((q) => q.eq(q.field("_id"), siteID))
+      .first();
+
+    if (!site) {
+      return;
+    }
+
+    const updatedSite = await ctx.db.patch(site._id, {
+      payStatus: payStatus,
+    });
+
+    return updatedSite;
+  },
+});
+
 
 export const getActiveSitesByOrgId = query({
   args: { orgID: v.string() }, 

@@ -119,6 +119,7 @@ export default defineSchema({
     priorityStatus: v.optional(v.number()), // Status of the site (e.g., "Active", "Inactive")
     neighborhood: v.optional(v.string()),
     shiftMaxInactiveTime: v.optional(v.number()),
+    payStatus: v.optional(v.boolean()),
   })
     .index("orgID", ["orgID"])
     .index("orgId_name_isActive", ["orgID", "name", "isActive"])

@@ -46,3 +46,5 @@ authWithJwt.ts
 new-env.txt
 
 railway.session.sql
+
+src/lib/helper.py

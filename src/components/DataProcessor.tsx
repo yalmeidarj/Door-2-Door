@@ -1,3 +1,4 @@
+// "src/components/DataProcessor.tsx"
 "use client";
 import { useState } from "react";
 import { Button } from "./ui/button";
@@ -44,7 +45,7 @@ type DataProcessorProps = {
 
 };
 
-const DataProcessor: React.FC<DataProcessorProps> = ({userId, update = false }) => {
+const DataProcessor: React.FC<DataProcessorProps> = ({ userId, update = false }) => {
     const pathName = usePathname();
     const orgName = pathName?.split("/")[2]?.replace("%20", " ").replace("-", " ");
     // get org using orgName
@@ -73,7 +74,6 @@ const DataProcessor: React.FC<DataProcessorProps> = ({userId, update = false }) 
      */
     const updateSite = async () => {
         console.log("Updating site with processed data:", processedData);
-        // TODO: Add your update logic
         if (!processedData) return;
 
         setIsUploading(true);
@@ -88,16 +88,22 @@ const DataProcessor: React.FC<DataProcessorProps> = ({userId, update = false }) 
             // 1) Update the Site
             setLoadingMessage("Updating site...");
             for (const house of processedData.houses) {
-                setLoadingMessage(`Updating house ${house.streetNumber} ${house.street}...`);
+                // Apply the same address parsing function to ensure consistent format
+                const fullAddress = `${house.streetNumber} ${house.street}`;
+                const { streetNumber, streetName } = parseAddress(fullAddress);
+
+                setLoadingMessage(`Updating house ${streetNumber} ${streetName}...`);
+
                 let consent = ''
                 if (house.statusAttempt === "Consent Final" || house.statusAttempt === "Consent Final Yes" || house.statusAttempt === "Consent Final No") {
                     consent = house.consent
                 }
+
                 await updateSiteMutation({
                     orgId: orgId,
-                    streetName: house.street,
-                    streetNumber: house.streetNumber,
-                    agentId: userId as Id<"users">, 
+                    streetName: streetName,
+                    streetNumber: streetNumber,
+                    agentId: userId as Id<"users">,
                     siteName: processedData.name,
                     statusAttempt: house.statusAttempt,
                     consent: consent,
@@ -159,24 +165,28 @@ const DataProcessor: React.FC<DataProcessorProps> = ({userId, update = false }) 
             // 4) Create Houses in parallel
             setLoadingMessage("Creating houses...");
             const housePromises = processedData.houses.map(async (house) => {
-                const streetId = streetNameToIdMap.get(house.street);
+                // Consistently parse the address with our address parser
+                const fullAddress = `${house.streetNumber} ${house.street}`;
+                const { streetNumber, streetName } = parseAddress(fullAddress);
+
+                const streetId = streetNameToIdMap.get(streetName);
                 if (!streetId) {
-                    throw new Error(`Street not found for name: ${house.street}`);
+                    throw new Error(`Street not found for name: ${streetName}`);
                 }
                 setLoadingMessage(
-                    `Creating house at ${house.streetNumber} ${house.street}...`
+                    `Creating house at ${streetNumber} ${streetName}...`
                 );
 
                 let status = house.statusAttempt;
-                if(house.statusAttempt === "Consent Final"){
+                if (house.statusAttempt === "Consent Final") {
                     status = house.statusAttempt + " " + house.consent;
                 }
 
                 await createNewHouseMutation({
                     streetID: streetId as Id<"street">,
                     siteID: newSiteId as Id<"site">,
-                    streetName: house.street,
-                    streetNumber: house.streetNumber,
+                    streetName: streetName,
+                    streetNumber: streetNumber,
                     name: house.name,
                     lastName: house.lastName,
                     phone: house.phone,
@@ -202,6 +212,39 @@ const DataProcessor: React.FC<DataProcessorProps> = ({userId, update = false }) 
         } finally {
             setIsUploading(false);
         }
+    };
+
+    /**
+     * Parses an address into street number and street name components
+     * Handles various formats like:
+     * - "3316 SEARCHMONT"
+     * - "3694 556 HWY"
+     * - "B - 3873 556 HWY"
+     * - "1 - 3523 556 HWY"
+     * @param address The full address string to parse
+     * @returns An object with streetNumber and streetName properties
+     */
+    const parseAddress = (address: string) => {
+        // Regular expression to handle various address formats
+        // This pattern matches:
+        // 1. Optional prefix (like "B - ", "1 - ", etc.)
+        // 2. The numeric part of the street number
+        // 3. The remaining street name
+        const addressMatch = address.match(/^((?:[A-Z0-9]+ - )?)([\d]+)\s+(.+?)\s*$/);
+
+        if (addressMatch) {
+            const [, prefix, numericPart, streetName] = addressMatch;
+            const streetNumber = prefix ? `${prefix}${numericPart}` : numericPart;
+            return { streetNumber: streetNumber.trim(), streetName: streetName.trim() };
+        }
+
+        // Fallback for addresses that don't match the pattern
+        console.warn(`Address didn't match expected pattern: ${address}`);
+        const parts = address.split(' ');
+        return {
+            streetNumber: parts[0] || '',
+            streetName: parts.slice(1).join(' ') || ''
+        };
     };
 
     /**
@@ -231,13 +274,12 @@ const DataProcessor: React.FC<DataProcessorProps> = ({userId, update = false }) 
                 const projectCode = parts[2].trim();
                 const consent = parts[3].trim();
 
-                // Extract street number and street name
-                const addressMatch = fullAddress.match(/^(\d+)\s+(.+?)\s*$/);
-
                 siteName = projectCode;
 
-                if (addressMatch) {
-                    const [, streetNumber, streetName] = addressMatch;
+                // Use the new address parsing function
+                const { streetNumber, streetName } = parseAddress(fullAddress);
+
+                if (streetName) {
                     streetsSet.add(streetName);
 
                     let newConsent = "";
@@ -302,14 +344,14 @@ const DataProcessor: React.FC<DataProcessorProps> = ({userId, update = false }) 
                         <CardDescription>
                             {update ? (
                                 <>
-                                <p>
-                                    Copy and paste the data from SF table here to
-                                    <span className="font-bold uppercase"> update an existing Site</span>
-                                </p>
+                                    <p>
+                                        Copy and paste the data from SF table here to
+                                        <span className="font-bold uppercase"> update an existing Site</span>
+                                    </p>
                                     <p className="text-night">
-                                    Select only the status to be updated:
-                                    <span className="font-bold uppercase"> Consent Final, Drop Type Unverified</span>
-                                </p>
+                                        Select only the status to be updated:
+                                        <span className="font-bold uppercase"> Consent Final, Drop Type Unverified</span>
+                                    </p>
                                 </>
                             ) : (
                                 "Copy and paste the data from SF table here to create a new Site"

@@ -29,7 +29,7 @@ export default async function Page() {
             <PageHeader
                 routes={routeLinks}
             />
-        <div className="w-full  items-center justify-center">
+            <div className="container  items-center justify-center">
                    
                 <HousesNotInSalesForce
                     userId={userId}

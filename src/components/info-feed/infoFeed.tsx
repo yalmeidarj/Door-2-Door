@@ -1,11 +1,14 @@
 "use client"
 
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { usePathname } from "next/navigation";
 import { api } from "../../../convex/_generated/api";
 import LoadingSpinner from "../LoadingSpinner";
 import SiteSwitchButton from "../SiteSwitch";
-
+import { Switch } from "../ui/switch";
+import { BiMoney } from "react-icons/bi";
+import { MdPaid } from "react-icons/md";
+import { FaBullseye } from "react-icons/fa6";
 
 export default function InfoFeed() {
     const pathname = usePathname();
@@ -18,7 +21,6 @@ export default function InfoFeed() {
     }
     const orgId = org._id;
     const sites = useQuery(api.site.getAllSitesByOrgId, { orgID: orgId });
-
 
     return (
             <>
@@ -48,16 +50,13 @@ function InfoLocationCard({ siteId }: { siteId: string }) {
     const consentNoHouses = useQuery(api.house.getHousesConsentNoBySiteId, { siteId: siteId });
     const visitRequestHouses = useQuery(api.house.getHousesVisitRequestBySiteId, { siteId: siteId });
     const nonExistHouses = useQuery(api.house.getHousesNonExistBySiteId, { siteId: siteId });
-    // const visitedHouses = useQuery(api.house.getVisitedHousesByStatusAttempt, { siteId: siteId });
+
     if (!siteStats || !site) {
-        
-        return (
-            <LoadingSpinner />
-        );
+        return <LoadingSpinner />;
     }
 
     if (!houses || !consentYesHouses || !consentNoHouses || !visitRequestHouses || !nonExistHouses) {
-    return <LoadingSpinner />;
+        return <LoadingSpinner />;
     }
 
     const totalHouses = houses.length;
@@ -81,85 +80,136 @@ function InfoLocationCard({ siteId }: { siteId: string }) {
         }
     };
 
+    const getBgColor = (payStatus: boolean | undefined) => {
+        if (payStatus === undefined) {
+            return 'bg-gray-200';
+        }
+        switch (payStatus) {
+            case true:
+                return 'bg-green-200';
+            case false:
+                return 'bg-red-200 text-night';
+            default:
+                return 'bg-blue-100 text-white';
+        }
+    };
+
     return (
-        <div className="p-3 mb-6 bg-white shadow rounded-lg text-sm border border-gray-200 ">
-
-
-            <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">{site.name}</h2>
-                {site.isActive === true ? (
-                    <span className="flex items-center text-xs text-green-500">
-                        {/* <span className="h-2 w-2 bg-green-500 rounded-full mr-0.5"></span> */}
+        <div className={`${getBgColor(site.payStatus)} p-4 mb-2 shadow rounded-lg text-sm border border-gray-200`}>
+            {/* Header section with improved alignment */}
+            <div className="flex items-start justify-between mb-1">
+                <h2 className="text-lg font-bold text-gray-900">{site.name}</h2>
+                <div className="flex flex-col items-end space-y-1">
+                    <div className="flex items-center gap-2">
+                        <span className={`text-xs ${site.isActive ? 'text-green-600' : 'text-red-600'} font-medium`}>
+                            {site.isActive ? '' : ''}
+                        </span>
                         <SiteSwitchButton
-                            className="data-[state=checked]:bg-green-700"
-                            site={site} />
-                    </span>
-                ) : (
-                    <span className="flex items-center text-xs text-red-700">
-                        {/* <span className="h-2 w-2 bg-red-500 rounded-full mr-0.5"></span> */}
-                        <SiteSwitchButton
-                            className="data-[state=unchecked]:bg-red-400"
-                            site={site} />
-                    </span>
-                )}
+                            className={site.isActive ? "data-[state=checked]:bg-green-700" : "data-[state=unchecked]:bg-red-400"}
+                            site={site}
+                        />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className={`text-xs font-medium ${site.payStatus === true ? 'text-green-600' :
+                                site.payStatus === false ? 'text-red-600' : 'text-gray-600'
+                            }`}>
+                            {site.payStatus === true ? '' :
+                                site.payStatus === false ? '' : ' '}
+                        </span>
+                        <SwitchPayStatusButton
+                            className={
+                                site.payStatus === true ? "data-[state=checked]:bg-green-700" :
+                                    site.payStatus === false ? "data-[state=unchecked]:bg-red-400" :
+                                        "data-[state=undefined]:bg-gray-200"
+                            }
+                            site={site}
+                        />
+                    </div>
+                </div>
             </div>
 
-            <div className="flex flex-col gap-2 text-gray-700">
-                <div className=" w-full flex flex-col">
-                    <div className={`flex justify-between items-center w-full`}>
-                        <p>Total Houses:</p>
-                        <p className="font-medium text-gray-900">{totalHouses}</p>
+            {/* Stats section with consistent spacing */}
+            <div className="bg-white rounded-md shadow-sm overflow-hidden">
+                {/* Total Houses - Header row */}
+                <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                    <div className="flex justify-between items-center">
+                        <p className="font-semibold text-gray-700">Total Houses:</p>
+                        <p className="font-bold text-gray-900">{totalHouses}</p>
                     </div>
-                    <div className={`${getConsentYesColor(consentYesPercent)} flex justify-between items-center w-full`}>
-                        <p className={`px-2 py-1 rounded font-semibold`}>
-                            Consent Yes:
-                        </p>
-                        <p className={` px-2 py-1 rounded text-center font-semibold`}>
-                            {consentYesCount} | {consentYesPercent}%
-                        </p>
+                </div>
+
+                {/* Consent Yes - Highlighted row */}
+                <div className={`${getConsentYesColor(consentYesPercent)} px-4 py-3`}>
+                    <div className="flex justify-between items-center">
+                        <p className="font-semibold">Consent Yes:</p>
+                        <p className="font-bold">{consentYesCount} | {consentYesPercent}%</p>
                     </div>
-                    <div className="flex justify-between">
-                        <p>Consent No:</p>
+                </div>
+
+                {/* Other stats - Consistent rows */}
+                <div className="px-4 py-2 border-b border-gray-100">
+                    <div className="flex justify-between items-center">
+                        <p className="text-gray-700">Consent No:</p>
                         <p className="font-medium text-gray-900">{consentNoCount} | {consentNoPercent}%</p>
                     </div>
                 </div>
-                {/* <div className="flex justify-between">
-                    <p>Total with Consent:</p>
-                    <p className="font-medium text-gray-900">{location.totalHousesWithConsent}</p>
-                </div> */}
 
-                {/* <div className="flex justify-between">
-                    <p>Houses Visited:</p>
-                    <p className="font-medium text-gray-900">{location.totalHousesVisited} | {location.percentageHousesVisited}%</p>
-                </div> */}
-
-                <div className="flex justify-between">
-                    <p>Left to Visit:</p>
-                    <p className="font-medium text-gray-900">{stillNeedsToBeVisited}</p>
-                    {/* <p className="font-medium text-gray-900">{siteStats.totalHouses} - {siteStats.visited}</p> */}
-                </div>
-                {/* <div className="flex justify-between">
-                    <p>Visited:</p>
-                    <p className="font-medium text-gray-900">{visitedCount + consentNoCount + consentYesCount}</p>
-                </div> */}
-
-                <div className="flex justify-between">
-                    <p>Visit Required:</p>
-                    <p className="font-medium text-gray-900">{visitRequestCount}</p>
+                <div className="px-4 py-2 border-b border-gray-100">
+                    <div className="flex justify-between items-center">
+                        <p className="text-gray-700">Left to Visit:</p>
+                        <p className="font-medium text-gray-900">{stillNeedsToBeVisited}</p>
+                    </div>
                 </div>
 
+                <div className="px-4 py-2 border-b border-gray-100">
+                    <div className="flex justify-between items-center">
+                        <p className="text-gray-700">Visit Required:</p>
+                        <p className="font-medium text-gray-900">{visitRequestCount}</p>
+                    </div>
+                </div>
 
-                <div className="flex justify-between">
-                    <p>Non-exist.:</p>
-                    <p className="font-medium text-gray-900">{nonExistCount}</p>
+                <div className="px-4 py-2">
+                    <div className="flex justify-between items-center">
+                        <p className="text-gray-700">Non-existent:</p>
+                        <p className="font-medium text-gray-900">{nonExistCount}</p>
+                    </div>
                 </div>
             </div>
         </div>
     );
 }
 
+function SwitchPayStatusButton({ site, className }: { site: any; className?: string }) {
+    const SwitchPayStatus = useMutation(api.site.changeSitePayStatus);
+    const payStatus = site.payStatus;
 
+    async function onSubmit(status: boolean) {
+        try {
+            await SwitchPayStatus({
+                siteID: site._id,
+                orgID: site.orgID,
+                payStatus: status
+            });
+        } catch (error) {
+            console.error("Error updating status:", error);
+        }
+    }
 
+    return (
+        <button
+            onClick={onSubmit.bind(null, payStatus === true ? false : true)}
+            className={`flex items-center justify-center p-1.5 rounded-full transition-colors ${className}`}
+        >
+            {payStatus === undefined || payStatus === null ? (
+                <BiMoney className="w-4 h-4 text-gray-600" />
+            ) : payStatus === true ? (
+                <MdPaid className="w-4 h-4 text-green-500" />
+            ) : (
+                <MdPaid className="w-4 h-4 text-red-500" />
+            )}
+        </button>
+    );
+}
 
 function InfoConditionalFormat() {
     return (

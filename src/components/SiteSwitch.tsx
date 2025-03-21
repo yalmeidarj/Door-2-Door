@@ -44,7 +44,7 @@ export default function SiteSwitchButton({
             <Switch
                     id={site._id}
                     checked={site.isActive}
-                    className={cn(className,'h-5.5 pr-1')}
+                    className={cn(className,'h-5.5 ')}
                 onCheckedChange={onSubmit.bind(null, site._id)}
                 />
                 {children &&
