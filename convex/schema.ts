@@ -157,6 +157,7 @@ export default defineSchema({
     longitude: v.optional(v.string()),
   })
     .index("streetID", ["streetID"])
+    .index("by_siteId_and_streetId", ["siteID", "streetID"])
     .index("by_streetID_and_streetNumber", ["streetID", "streetNumber"])
     .index("siteID_statusAttempt", ["siteID", "statusAttempt"])
     .index("streetNumber", ["streetNumber"])

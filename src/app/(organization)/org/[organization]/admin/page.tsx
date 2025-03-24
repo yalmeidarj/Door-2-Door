@@ -7,6 +7,7 @@ import DataProcessor from "@/components/DataProcessor";
 import AddressGeocoder from "@/components/AddressGeocoder";
 import InfoFeed from "@/components/info-feed/infoFeed";
 import AddSingleHouse from "@/components/AddSingleHouse";
+import DeleteSingleHouse from "@/components/DeleteSingleHouse";
 
 type Params = Promise<{ organization: string }>
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
@@ -63,18 +64,23 @@ export default async function Page(props: {
                 update />
         },
         {
-            id: 32,
+            id: 3,
             name: "Add a single house to a site",
             // component: <UpdateActiveSite orgName={orgName} />
             component: <AddSingleHouse/>
         },
         {
             id: 4,
+            name: "Delete a single house from a site",            
+            component: <DeleteSingleHouse />
+        },
+        {
+            id: 5,
             name: "Get lat/long from address",
             component: <AddressGeocoder  />
         },
         {
-            id: 5,
+            id: 6,
             name: "View Site Info",
             component: <InfoFeed  />
         },

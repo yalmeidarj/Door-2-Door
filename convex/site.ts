@@ -66,7 +66,6 @@ export const getAllSitesByOrgName = query({
     return sites;
   },
 })
-
 export const changeSitePayStatus = mutation({
   args: {
     siteID: v.string(),
@@ -91,8 +90,6 @@ export const changeSitePayStatus = mutation({
     return updatedSite;
   },
 });
-
-
 export const getActiveSitesByOrgId = query({
   args: { orgID: v.string() }, 
   handler: async (ctx, { orgID }) => {
