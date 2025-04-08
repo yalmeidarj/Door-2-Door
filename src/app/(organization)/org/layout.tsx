@@ -38,7 +38,7 @@ export default async function Layout({
             <main className=" w-full">            
                 {children}
             </main>
-            <Toaster  richColors position="top-center" />
+            <Toaster richColors position="bottom-left" />
         </div>
     )
 }

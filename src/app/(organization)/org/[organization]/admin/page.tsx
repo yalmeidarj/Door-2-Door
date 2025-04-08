@@ -51,22 +51,19 @@ export default async function Page(props: {
     const adminOptions = [
         {
             id: 1,
-            name: "Create New Site",
-            // component: <DocumentUploader orgName={orgName} />
+            name: "Create New Site",            
             component: <DataProcessor />
         },
         {
             id: 2,
-            name: "Update a Site  (FETCHING)",
-            // component: <UpdateActiveSite orgName={orgName} />
+            name: "Update a Site  (FETCHING)",            
             component: <DataProcessor
                 userId={user.id as string}
                 update />
         },
         {
             id: 3,
-            name: "Add a single house to a site",
-            // component: <UpdateActiveSite orgName={orgName} />
+            name: "Add a single house to a site",            
             component: <AddSingleHouse/>
         },
         {
@@ -84,11 +81,6 @@ export default async function Page(props: {
             name: "View Site Info",
             component: <InfoFeed  />
         },
-        // {
-        //     id: 6,
-        //     name: "Delete Site",
-        //     component: <div>Delete Site</div>
-        // }
     ] 
 
     const secret = process.env.CONVEX_AUTH_ADAPTER_SECRET!;

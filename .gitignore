@@ -48,3 +48,6 @@ new-env.txt
 railway.session.sql
 
 src/lib/helper.py
+
+env.txt
+src/components/gold-energy/

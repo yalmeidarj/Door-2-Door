@@ -114,6 +114,7 @@ export const updateActiveShiftByShiftId = internalMutation({
 
 const houseArgs = {
   houseId: v.string(),
+  siteId: v.optional(v.string()),
   agentId: v.string(),
   lastName: v.optional(v.string()),
   name: v.optional(v.string()),

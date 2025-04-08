@@ -19,6 +19,7 @@ export const userSchema = {
   shiftMaxInactiveTimeFinal: v.optional(v.number()),
 };
 
+
 export const sessionSchema = {
   userId: v.id("users"),
   expires: v.number(),
@@ -120,11 +121,27 @@ export default defineSchema({
     neighborhood: v.optional(v.string()),
     shiftMaxInactiveTime: v.optional(v.number()),
     payStatus: v.optional(v.boolean()),
+    polygon: v.optional(v.array(v.array(v.number()))), // Array of [lat, lng] pairs
+    representative: v.optional(v.string()), // ID of the representative
   })
     .index("orgID", ["orgID"])
     .index("orgId_name_isActive", ["orgID", "name", "isActive"])
     .index("name", ["name"]),
-
+  address: defineTable({
+    hash: v.string(),
+    number: v.string(),
+    street: v.string(),
+    unit: v.optional(v.string()),
+    city: v.string(),
+    district: v.optional(v.string()),
+    region: v.optional(v.string()),
+    postcode: v.string(),
+    id: v.string(), // Original ID from GeoJSON
+    orgID: v.id("organization"), // Link to organization
+    coordinates: v.array(v.number()), // [longitude, latitude]
+  })
+    .index("coordinates", ["coordinates"])
+    .index("orgID", ["orgID"]),
   street: defineTable({
     siteID: v.id("site"),
     name: v.string(),

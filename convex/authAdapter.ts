@@ -173,6 +173,7 @@ export const getUserByAccount = adapterQuery({
         q.eq("provider", provider).eq("providerAccountId", providerAccountId)
       )
       .unique();
+      // .first();
     if (account === null) {
       return null;
     }

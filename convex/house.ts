@@ -42,7 +42,7 @@ export const getHouseById = query({
       .filter((q) => q.eq(q.field("_id"), id ))
       .first();
 
-    return houses; // Assuming you want to return all matching houses
+    return houses;
   },
 });
 

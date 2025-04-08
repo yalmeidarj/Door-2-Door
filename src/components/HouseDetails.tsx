@@ -6,16 +6,16 @@ function HouseDetails({ props }: { props: any }) {
 
     return (
         <div className='w-full'>
-            <div className='text-right'>
+            {/* <div className='text-right'>
                 <p className="text-lg">
                     <span className="font-bold">
                         {props.lastName ?? "No last name"}, {props.name ?? "No name"}
                     </span>
                 </p>
                 <p className="text-sm font-light">{props.phone ?? "No phone"} | {props.email ?? "No email"}</p>
-            </div>
+            </div> */}
 
-            <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center justify-between ">
                 <h2 className="font-bold">Notes:</h2>
                 <button
                     type="button"

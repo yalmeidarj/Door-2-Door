@@ -5,9 +5,10 @@ import React from "react";
 interface PhoneInputProps {
     value: string;
     onChange: (newValue: string) => void;
+    placeholder?: string;
 }
 
-export default function PhoneInput({ value, onChange }: PhoneInputProps) {
+export default function PhoneInput({ value, onChange, placeholder }: PhoneInputProps) {
     const formatCanadianPhoneNumber = (input: string): string => {
         const digits = input.replace(/\D/g, "").slice(0, 10); // Only keep up to 10 digits
         const length = digits.length;
@@ -32,6 +33,14 @@ export default function PhoneInput({ value, onChange }: PhoneInputProps) {
         onChange(formatted);
     };
 
+    // Determine final placeholder text
+    let finalPlaceholder = "(XXX) XXX-XXXX";
+
+    // If a phone number is provided (contains digits), format it
+    if (placeholder && /\d/.test(placeholder)) {
+        finalPlaceholder = formatCanadianPhoneNumber(placeholder);
+    }
+
     return (
         <input
             value={value}
@@ -44,8 +53,7 @@ export default function PhoneInput({ value, onChange }: PhoneInputProps) {
                  ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium
                  placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2
                  focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            placeholder="(XXX) XXX-XXXX"
+            placeholder={finalPlaceholder}
         />
     );
 }
-

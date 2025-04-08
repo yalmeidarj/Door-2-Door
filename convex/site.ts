@@ -156,3 +156,136 @@ export const createNewSite = mutation({
     });
   },
 })
+
+// Create site with polygon data and link addresses
+export const createSiteWithPolygon = mutation({
+  args: { 
+    orgID: v.id("organization"),
+    name: v.string(),
+    polygon: v.array(v.array(v.number())), // Array of [lat, lng] points
+    representative: v.string(),
+    isActive: v.boolean(),
+    addressIds: v.optional(v.array(v.string()))
+  },
+  handler: async (ctx, args) => {
+    // 1. Create the site with polygon data
+    const siteId = await ctx.db.insert("site", {
+      orgID: args.orgID,
+      name: args.name,
+      isActive: args.isActive,
+      polygon: args.polygon,
+      representative: args.representative,
+    });
+    
+    // 2. If we have addresses to include, create a street for this site
+    if (args.addressIds && args.addressIds.length > 0) {
+      const streetId = await ctx.db.insert("street", {
+        siteID: siteId,
+        name: `${args.name} Street`,
+      });
+      
+      // 3. For each address, get details and create a house record
+      for (const addressId of args.addressIds) {
+        // Find the address by original ID
+        const address = await ctx.db
+          .query("address")
+          .filter(q => q.eq(q.field("id"), addressId))
+          .first();
+        
+        if (address) {
+          // Create a house record for this address
+          await ctx.db.insert("house", {
+            streetID: streetId,
+            siteID: siteId,
+            streetNumber: address.number || "",
+            streetName: address.street,
+            // Optional: Add more details from address
+            latitude: address.coordinates[1].toString(),
+            longitude: address.coordinates[0].toString(),
+          });
+        }
+      }
+    }
+    
+    return { siteId };
+  },
+});
+
+// Get sites with polygon data
+export const getSitesWithPolygons = query({
+  args: { orgID: v.id("organization") },
+  handler: async (ctx, { orgID }) => {
+    return await ctx.db
+      .query("site")
+      .withIndex("orgID", (q) => q.eq("orgID", orgID))
+      .filter(q => q.neq(q.field("polygon"), undefined))
+      .collect();
+  },
+});
+
+// Get a single site with its polygon and addresses
+export const getSiteWithAddresses = query({
+  args: { siteId: v.id("site") },
+  handler: async (ctx, { siteId }) => {
+    // Get the site
+    const site = await ctx.db.get(siteId);
+    if (!site) return null;
+    
+    // Get the streets for this site
+    const streets = await ctx.db
+      .query("street")
+      .withIndex("siteID", (q) => q.eq("siteID", siteId))
+      .collect();
+    
+    // Get houses for each street
+    const houses = [];
+    for (const street of streets) {
+      const streetHouses = await ctx.db
+        .query("house")
+        .withIndex("streetID", (q) => q.eq("streetID", street._id))
+        .collect();
+      
+      houses.push(...streetHouses);
+    }
+    
+    // Return site with related data
+    return {
+      ...site,
+      streets,
+      houses,
+    };
+  },
+});
+
+// Delete a site and all related data
+export const deleteSite = mutation({
+  args: { siteId: v.id("site") },
+  handler: async (ctx, { siteId }) => {
+    // Get streets for this site
+    const streets = await ctx.db
+      .query("street")
+      .withIndex("siteID", (q) => q.eq("siteID", siteId))
+      .collect();
+    
+    // Delete houses for each street
+    for (const street of streets) {
+      const houses = await ctx.db
+        .query("house")
+        .withIndex("streetID", (q) => q.eq("streetID", street._id))
+        .collect();
+      
+      // Delete each house
+      for (const house of houses) {
+        await ctx.db.delete(house._id);
+      }
+      
+      // Delete the street
+      await ctx.db.delete(street._id);
+    }
+    
+    // Delete the site
+    await ctx.db.delete(siteId);
+    
+    return { success: true };
+  },
+});

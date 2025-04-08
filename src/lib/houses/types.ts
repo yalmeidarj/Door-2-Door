@@ -53,7 +53,7 @@ export const FormSchema = z.object({
   agentId: z.string(),
   // externalNotes: z.string().optional(),
   type: z.union([z.string(), z.literal(""), z.null()]).optional(),
-  statusAttempt: z.string(),
+  statusAttempt: z.string().optional(),
 
   name: z
     .union([
@@ -81,7 +81,7 @@ export const FormSchema = z.object({
         .trim()
         .min(10, "Phone number must be at least 10 digits long")
         .max(10, "Phone number must not be longer than 10 digits"),
-        // .regex(/^[0-10()+\s-]+$/, "Phone number must be numeric"),
+      // .regex(/^[0-10()+\s-]+$/, "Phone number must be numeric"),
       z.literal(""),
     ])
     .optional(),
@@ -103,7 +103,7 @@ export const ConsentYesSchema = z
       invalid_type_error:
         " Type must be provided if status attempt is Consent Final Yes",
     }),
-    statusAttempt: z.string(),
+    statusAttempt: z.string().optional(),
 
     name: z
       .union([
@@ -132,7 +132,7 @@ export const ConsentYesSchema = z
           .trim()
           .min(10, "Phone number must be at least 10 digits long")
           .max(10, "Phone number must not be longer than 10 digits"),
-          // .regex(/^[0-10()+\s-]+$/, "Phone number must be numeric"),
+        // .regex(/^[0-10()+\s-]+$/, "Phone number must be numeric"),
         z.literal(""),
       ])
       .optional(),
