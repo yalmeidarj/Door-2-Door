@@ -91,64 +91,6 @@ export const updateUser = mutation({
   },
 });
 
-const triggers = new Triggers<DataModel>();
-
-triggers.register("houseEditLog", async (ctx, change) => {
-  if (change.newDoc) {
-    // Check if status is not 'consent final'
-    if (
-      change.newDoc.statusAttempt !== "Consent Final Yes" &&
-      change.newDoc.statusAttempt !== "Consent Final No"
-    ) {
-      const userId = change.newDoc.agentId;
-
-      // Fetch the *active* shiftLogger document related to the current user
-      const shiftLogger = await ctx.db
-        .query("shiftLogger")
-        .withIndex("by_user_isFinished_creationTime", (q) =>
-          q.eq("userID", userId as Id<"users">).eq("isFinished", false)
-        )
-        .order("desc")
-        .first();
-
-      if (shiftLogger) {
-        // Check if it's the first house of the shift
-        const isFirstHouse =
-          (shiftLogger.updatedHouses || 0) +
-            (shiftLogger.updatedHousesFinal || 0) +
-            (shiftLogger.updatedHousesFinalNo || 0) >
-          0;
-        if (isFirstHouse) {
-          // Get the last house edit log for the agent
-          const lastEdit = await ctx.db
-            .query("houseEditLog")
-            .withIndex("agentId", (q) => q.eq("agentId", userId))
-            .order("desc")
-            .first();
-
-          if (lastEdit) {
-            const shiftMaxInactiveTime = (await ctx.db.get(userId as Id<"users">))
-              ?.shiftMaxInactiveTime;
-
-            if (shiftMaxInactiveTime) {
-              const timeDifference = Date.now() - lastEdit._creationTime;
-
-              // Compare time difference with shiftMaxInactiveTime and log if needed
-              if (timeDifference > shiftMaxInactiveTime) {
-                console.log(
-                  "User Inactive Time Exceeded",
-                  timeDifference,
-                  shiftMaxInactiveTime
-                );
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-});
-
 export const removeUserFromOrg = mutation({
   args: {
     userId: v.id("users"),

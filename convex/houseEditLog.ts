@@ -19,9 +19,93 @@ export const internalMutation = customMutation(
   customCtx(triggers.wrapDB)
 );
 
+// triggers.register("houseEditLog", async (ctx, change) => {
+//   if (change.newDoc) {
+//     console.log("houseEditLog trigger activated");
+//     const userId = change.newDoc.agentId;
+//     const shiftLogger = await ctx.db
+//       .query("shiftLogger")
+//       .withIndex("by_user_isFinished_creationTime", (q) =>
+//         q.eq("userID", userId as Id<"users">).eq("isFinished", false)
+//       )
+//       .order("desc")
+//       .first();
+
+//     if (shiftLogger) {
+//       console.log("Found shiftLogger: ", shiftLogger);
+//       const isFirstHouse =
+//         (shiftLogger.updatedHouses ?? 0) +
+//           (shiftLogger.updatedHousesFinal ?? 0) +
+//           (shiftLogger.updatedHousesFinalNo ?? 0) ===
+//         0;
+//       console.log("isFirstHouse", isFirstHouse);
+//       if (!isFirstHouse) {
+//         const lastEdit = await ctx.db
+//           .query("houseEditLog")
+//           .withIndex("agentId", (q) => q.eq("agentId", userId))
+//           .order("desc")
+//           .first();
+
+//         if (lastEdit) {
+//           console.log("Found lastEdit: ", lastEdit);
+//           const userInfo = await ctx.db.get(userId as Id<"users">);
+//           if (userInfo) {
+//             const statusFull = change.newDoc.statusAttempt || "";
+//             const statusParts = statusFull.split("| |");
+//             const actualStatus =
+//               statusParts.length > 1
+//                 ? statusParts[statusParts.length - 1].trim()
+//                 : statusFull.trim();
+
+//             let inactivityTime = 0;
+//             if (
+//               actualStatus === "Consent Final Yes" ||
+//               actualStatus === "Consent Final No"
+//             ) {
+//               inactivityTime = userInfo.shiftMaxInactiveTimeFinal || 0;
+//             } else {
+//               inactivityTime = userInfo.shiftMaxInactiveTime || 0;
+//             }
+
+//             if (inactivityTime) {
+//               // Convert inactivityTime from minutes to milliseconds
+//               const inactivityTimeMs = inactivityTime * 60 * 1000;
+
+//               const currentTime = Date.now();
+//               const timeDifference = shiftLogger.lastActivity
+//                 ? currentTime - shiftLogger.lastActivity
+//                 : change.newDoc._creationTime - lastEdit._creationTime;
+
+//               console.log("timeDifference (ms): ", timeDifference);
+//               console.log("inactivityTime (ms): ", inactivityTimeMs);
+
+//               if (timeDifference > inactivityTimeMs) {
+//                 // Using minimal patches to avoid size issues
+//                 await ctx.db.patch(shiftLogger._id, {
+//                   isFinished: true,
+//                   lastActivity: currentTime,
+//                   finishedDate: currentTime,
+//                 });
+
+//                 await ctx.db.patch(userId as Id<"users">, {
+//                   inactivityBlocked: true,
+//                 });
+//               } else {
+//                 // Use a minimal patch to avoid size issues
+//                 await ctx.db.patch(shiftLogger._id, {
+//                   lastActivity: currentTime,
+//                 });
+//               }
+//             }
+//           }
+//         }
+//       }
+//     }
+//   }
+// });
+
 triggers.register("houseEditLog", async (ctx, change) => {
   if (change.newDoc) {
-    console.log("houseEditLog trigger activated");
     const userId = change.newDoc.agentId;
     const shiftLogger = await ctx.db
       .query("shiftLogger")
@@ -32,7 +116,6 @@ triggers.register("houseEditLog", async (ctx, change) => {
       .first();
 
     if (shiftLogger) {
-      console.log("Found shiftLogger: ", shiftLogger);
       const isFirstHouse =
         (shiftLogger.updatedHouses ?? 0) +
           (shiftLogger.updatedHousesFinal ?? 0) +
@@ -49,35 +132,112 @@ triggers.register("houseEditLog", async (ctx, change) => {
         if (lastEdit) {
           console.log("Found lastEdit: ", lastEdit);
           const userInfo = await ctx.db.get(userId as Id<"users">);
-
           if (userInfo) {
-            const inactivityTime =
-              change.newDoc.statusAttempt === "Consent Final Yes" ||
-              change.newDoc.statusAttempt === "Consent Final No"
-                ? userInfo.shiftMaxInactiveTimeFinal
-                : userInfo.shiftMaxInactiveTime;
+            const statusFull = change.newDoc.statusAttempt || "";
+            const statusParts = statusFull.split("| |");
+            const actualStatus =
+              statusParts.length > 1
+                ? statusParts[statusParts.length - 1].trim()
+                : statusFull.trim();
+            
+            let inactivityTime = 0;
+            if (actualStatus === "Consent Final Yes" || actualStatus === "Consent Final No") {
+              inactivityTime = userInfo.shiftMaxInactiveTimeFinal || 0;
+            } else {
+              inactivityTime = userInfo.shiftMaxInactiveTime || 0;
+            }
 
             if (inactivityTime) {
-              const timeDifference =
-                shiftLogger.lastActivity ??
-                change.newDoc._creationTime - lastEdit._creationTime;
-              console.log("timeDifference: ", timeDifference);
-              console.log("inactivityTime: ", inactivityTime);
+              // Convert inactivityTime from minutes to milliseconds
+              const inactivityTimeMs = inactivityTime * 60 * 1000;
+              
+              const currentTime = Date.now();
+              
+              // Get the activity tracker for this shift
+              const activityTracker = await ctx.db
+                .query("activityTracker")
+                .withIndex("by_shiftLogger", (q) => q.eq("shiftLoggerId", shiftLogger._id))
+                .first();
+              
+              let timeDifference;
+              if (activityTracker) {
+                // Use the activity from the tracker
+                timeDifference = currentTime - activityTracker.lastActivity;
+              } else {
+                // Fall back to calculating from edit logs
+                timeDifference = change.newDoc._creationTime - lastEdit._creationTime;
+              }
+              
+              console.log("timeDifference (ms): ", timeDifference);
+              console.log("inactivityTime (ms): ", inactivityTimeMs);
 
-              if (timeDifference > inactivityTime) {
-                await ctx.db.patch(shiftLogger._id, {
-                  isFinished: true,
-                  lastActivity: Date.now(),
-                  finishedDate: Date.now(),
-                });
 
-                await ctx.db.patch(userId as Id<"users">, {
-                  inactivityBlocked: true,
+              if (activityTracker) {
+                await ctx.db.patch(activityTracker._id, {
+                  lastActivity: currentTime,
                 });
               } else {
-                await ctx.db.patch(shiftLogger._id, {
-                  lastActivity: Date.now(),
+                await ctx.db.insert("activityTracker", {
+                  shiftLoggerId: shiftLogger._id,
+                  userId: userId as Id<"users">,
+                  lastActivity: currentTime,
+                  isBlocked: false,
                 });
+              }
+              try {
+                if (timeDifference > inactivityTimeMs) {
+                  // Mark the shift as finished
+                  await ctx.db.patch(shiftLogger._id, {
+                    isFinished: true,
+                    finishedDate: Date.now(),
+                  });
+
+                  // Mark the user as blocked
+                  await ctx.db.patch(userId as Id<"users">, {
+                    inactivityBlocked: true,
+                  });
+                }
+              } catch (error) {
+                  console.error("Error updating activity:", error);
+                }
+
+
+                try{
+                  
+                  // Update the activity tracker or create it if it doesn't exist
+                  if (activityTracker) {
+                    await ctx.db.patch(activityTracker._id, {
+                      lastActivity: currentTime,
+                      isBlocked: true,
+                    });
+                  } else  {
+                    await ctx.db.insert("activityTracker", {
+                      shiftLoggerId: shiftLogger._id,
+                      userId: userId as Id<"users">,
+                      lastActivity: currentTime,
+                      isBlocked: true,
+                    });
+                  }
+                } catch (error) {
+                  console.error("Error trying to update activity:", error);
+              }
+
+              try {                
+              // Just update the activity time
+                  if (activityTracker) {
+                    await ctx.db.patch(activityTracker._id, {
+                      lastActivity: currentTime,
+                    });
+                  } else {
+                    await ctx.db.insert("activityTracker", {
+                      shiftLoggerId: shiftLogger._id,
+                      userId: userId as Id<"users">,
+                      lastActivity: currentTime,
+                      isBlocked: false,
+                    });
+                  }
+                } catch (error) {
+                console.error("Error trying to update activity:", error);
               }
             }
           }

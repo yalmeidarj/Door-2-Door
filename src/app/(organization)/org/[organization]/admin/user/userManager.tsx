@@ -168,14 +168,14 @@ export default function UserManager() {
                                     <Label
                                         htmlFor="AttemptTime"
                                         className="text-xs text-center"
-                                    >Attempt</Label>
+                                    >Max Inacivity attempts</Label>
                                     <Input
                                         value={editingUser[user._id]?.shiftMaxInactiveTime ?? formatInactiveTime(user.shiftMaxInactiveTime)}
                                         onChange={(e) => handleEdit(user._id, 'shiftMaxInactiveTime', e.target.value)}
                                         type="number"
                                         min="0"
                                         max="1440"
-                                        placeholder="Attempt"
+                                            placeholder="Time"
                                             className="max-w-[60px] w-full "
                                     />
                                         </div>
@@ -184,7 +184,7 @@ export default function UserManager() {
                                         htmlFor="ConsentTime"
                                         className="text-xs text-center"
 
-                                    >Consent</Label>
+                                        >Max Inactivity Consent</Label>
                                     <Input
                                         value={editingUser[user._id]?.shiftMaxInactiveTimeFinal ?? formatInactiveTime(user.shiftMaxInactiveTimeFinal)}
                                         onChange={(e) => handleEdit(user._id, 'shiftMaxInactiveTimeFinal', e.target.value)}

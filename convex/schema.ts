@@ -233,4 +233,14 @@ export default defineSchema({
     ),
     status: v.string(), // 'active', 'completed', 'exceeded'
   }).index("shiftId", ["shiftId"]),
+  // Table for tracking activity without bloating the shiftLogger document
+  activityTracker: defineTable({
+    shiftLoggerId: v.id("shiftLogger"),
+    userId: v.id("users"),
+    lastActivity: v.number(),
+    isBlocked: v.optional(v.boolean()),
+  })
+    .index("by_shiftLogger", ["shiftLoggerId"])
+    .index("by_user", ["userId"])
+    .index("by_user_active", ["userId", "isBlocked"]),
 });

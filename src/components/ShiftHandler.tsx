@@ -57,13 +57,6 @@ function ClockIn({ clockInProps }: { clockInProps: ClockInProps }) {
     const orgName = pathName.split("/")[2].replace("%20", " ").replace("-", " ");
 
     const org = useQuery(api.organization.getOrgByName, { name: orgName });
-    console.log("org ID: ", org?._id)
-
-    // if (user?.inactivityBlocked) {
-    //     return (
-    //         <BlockedAgent />            
-    //     )
-    // }
 
     if (!org) {
         return (
