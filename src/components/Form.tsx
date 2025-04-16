@@ -96,8 +96,9 @@ export default function Form({ userId, houseId, info, shiftId, house }: FormProp
             name: name.trim() !== "" ? name.trim() : house?.name || "",
             phone: phone.replace(/\D/g, "") !== "" ? phone.replace(/\D/g, "") : house?.phone || "",
             email: email.trim() !== "" ? email.trim() : house?.email || "",
+            notes: newNotes.trim() !== "" ? newNotes.trim() : house?.notes || "", // Add notes to fieldValues
         };
-
+        
 
         // Filter out empty values and create final object
         const newObject = Object.entries(fieldValues).reduce<typeof baseObject>((acc, [key, value]) => {
