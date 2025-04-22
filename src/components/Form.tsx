@@ -96,9 +96,13 @@ export default function Form({ userId, houseId, info, shiftId, house }: FormProp
             name: name.trim() !== "" ? name.trim() : house?.name || "",
             phone: phone.replace(/\D/g, "") !== "" ? phone.replace(/\D/g, "") : house?.phone || "",
             email: email.trim() !== "" ? email.trim() : house?.email || "",
-            notes: newNotes.trim() !== "" ? newNotes.trim() : house?.notes || "", // Add notes to fieldValues
+            // Only include notes if newNotes is not empty
         };
-        
+
+        // Only add notes to fieldValues if something was entered
+        if (newNotes.trim() !== "") {
+            (fieldValues as any).notes = newNotes.trim();
+        }
 
         // Filter out empty values and create final object
         const newObject = Object.entries(fieldValues).reduce<typeof baseObject>((acc, [key, value]) => {
@@ -138,7 +142,6 @@ export default function Form({ userId, houseId, info, shiftId, house }: FormProp
                     toast.success("House Updated Successfully");
                     let shift = null
                     if (selectedStatus === "Consent Final No") {
-
                         shift = await incrementUpdatedHousesFinalNo({
                             id: shiftId as Id<"shiftLogger">
                         })
