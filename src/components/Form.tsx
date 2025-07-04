@@ -36,7 +36,7 @@ type FormProps = {
 };
 
 export default function Form({ userId, houseId, info, shiftId, house }: FormProps) {
-    const constructionTypes = ["Easy", "Moderate", "Hard"];
+    const constructionTypes = ["Easy", "Moderate", "Hard", "Aerial"];
     const createNewEditByHouseId = useMutation(api.houseEditLog.createNewEditByHouseId)
     const updateShift = useMutation(api.shiftLogger.incrementShiftCounter)
     const incrementUpdatedHouses = useMutation(api.shiftLogger.incrementUpdatedHouses)
@@ -223,10 +223,10 @@ export default function Form({ userId, houseId, info, shiftId, house }: FormProp
                                 value={typeValue}
                                 onValueChange={(val) => setTypeValue(val)}
                             >
-                                <div className="flex flex-row items-center mx-3 sm-w-full justify-between">
+                                <div className="flex flex-row items-center w-full justify-between">
                                     {constructionTypes.map((option) => (
-                                        <div key={option} className="flex flex-col  items-center">
-                                            <Label htmlFor={option}>{option.slice(0, 4)}</Label>
+                                        <div key={option} className="flex flex-col gap-2 items-center justify-between w-full ">
+                                            <Label className="" htmlFor={option}>{option.slice(0, 6)}</Label>
                                             <RadioGroupItem value={option} id={option} />
                                         </div>
                                     ))}
